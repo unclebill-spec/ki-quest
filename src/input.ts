@@ -19,6 +19,9 @@ export class Input {
   private prev = new Set<Btn>();
   private now = new Set<Btn>();
   private keys = new Set<string>();
+  /** Keys pressed since the last poll, so a tap shorter than a frame still registers. */
+  private fresh = new Set<string>();
+  private freshBtn = new Set<Btn>();
   private touchBtns = new Set<Btn>();
   private padBtns = new Set<Btn>();
   private lastTap: Record<string, number> = {};
@@ -38,7 +41,7 @@ export class Input {
         this.lastTap[e.code] = t;
       }
       if (KEYMAP[e.code] || DIRKEYS[e.code]) e.preventDefault();
-      this.keys.add(e.code);
+      this.keys.add(e.code); this.fresh.add(e.code);
     });
     addEventListener("keyup", (e) => {
       this.keys.delete(e.code);
@@ -57,7 +60,7 @@ export class Input {
       this.use("touch");
       for (const t of Array.from(e.changedTouches)) {
         const el = (t.target as HTMLElement).closest?.("[data-b]") as HTMLElement | null;
-        if (el) { this.touchBtns.add(el.dataset.b as Btn); el.classList.add("on"); continue; }
+        if (el) { this.touchBtns.add(el.dataset.b as Btn); this.freshBtn.add(el.dataset.b as Btn); el.classList.add("on"); continue; }
         if (this.stick.id < 0 && t.clientX < innerWidth * 0.45) {
           Object.assign(this.stick, { id: t.identifier, ox: t.clientX, oy: t.clientY, x: 0, y: 0, run: false });
           base.style.display = "block"; base.style.left = t.clientX + "px"; base.style.top = t.clientY + "px";
@@ -105,6 +108,9 @@ export class Input {
     this.prev = this.now;
     this.now = new Set<Btn>();
     for (const k of this.keys) if (KEYMAP[k]) this.now.add(KEYMAP[k]);
+    for (const k of this.fresh) if (KEYMAP[k]) this.now.add(KEYMAP[k]);
+    this.freshBtn.forEach((b) => this.now.add(b));
+    this.fresh.clear(); this.freshBtn.clear();
     this.touchBtns.forEach((b) => this.now.add(b));
     this.padBtns.forEach((b) => this.now.add(b));
     this.held = this.now;

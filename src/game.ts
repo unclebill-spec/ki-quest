@@ -173,7 +173,7 @@ export class Game {
       const crit = Math.random() < (sw.step === 3 ? 0.25 : 0.12);
       let d = this.meleeDmg * (sw.step === 3 ? 1.4 : 1) * (0.9 + Math.random() * 0.2);
       if (crit) d *= 1.8;
-      const kb = crit ? 300 : sw.step === 3 ? 140 : 60;
+      const kb = crit ? 300 : sw.step === 3 ? 120 : 25;
       this.damageFoe(e, d, p.fx * kb, p.fy * kb, crit);
       this.tf = Math.min(100, this.tf + 1.5);
     }

@@ -5,7 +5,7 @@ import { lightSprite, flickerStep, rgbCss, RGB } from "./vendor/light";
 import { buildAtlas, ATLAS_CELL, maskSize } from "./vendor/particles";
 
 export const W = 384, H = 216;
-const AMBIENT: RGB = [0.2, 0.17, 0.3];
+const AMBIENT: RGB = [0.36, 0.32, 0.48];
 let light: HTMLCanvasElement, lctx: CanvasRenderingContext2D, atlas: HTMLCanvasElement | null = null;
 
 function glow(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
@@ -53,10 +53,10 @@ function hero(c: CanvasRenderingContext2D, g: Game, x: number, y: number) {
   r(8, 5, 8, 8, "#e2ad84"); r(10, 12, 4, 1, "#c48d66");
   if (!back) { if (side) r(13, 8, 2, 2, "#101018"); else { r(9, 8, 2, 2, "#101018"); r(13, 8, 2, 2, "#101018"); } }
   // spiky hair (dark teal) — original silhouette: swept back, three spikes
-  c.fillStyle = "#1d3b48";
+  c.fillStyle = "#2f7a90";
   c.beginPath(); c.moveTo(L + 7, T + 8); c.lineTo(L + 5, T + 1); c.lineTo(L + 10, T + 4); c.lineTo(L + 12, T - 1); c.lineTo(L + 14, T + 4);
   c.lineTo(L + 19, T + 1); c.lineTo(L + 17, T + 8); c.lineTo(L + 16, T + 5); c.lineTo(L + 8, T + 5); c.closePath(); c.fill();
-  if (back) r(8, 5, 8, 6, "#1d3b48");
+  if (back) r(8, 5, 8, 6, "#2f7a90");
   c.restore();
 }
 
@@ -108,7 +108,7 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   lctx.globalCompositeOperation = "lighter";
   for (const l of a.lamps) addLight(l.x - cx, l.y - cy, 80, l.c, flickerStep(g.frame, l.seed));
   addLight(padX, padY, 48, [0.35, 0.85, 0.95], flickerStep(g.frame, 9));
-  addLight(p.x - cx, p.y - cy - 14, 48, g.shield ? [0.4, 0.8, 1] : [0.5, 0.48, 0.6], 0);
+  addLight(p.x - cx, p.y - cy - 14, 48, g.shield ? [0.4, 0.8, 1] : [0.7, 0.66, 0.8], 0);
   for (const s of g.shots) addLight(s.x - cx, s.y - cy, 32, s.foe ? [0.8, 0.3, 0.9] : [0.4, 0.85, 1], 0);
   for (const e of g.enemies) if (!e.dead && e.kind === "wisp" && e.state === "tele") addLight(e.x - cx, e.y - cy - 16, 32, [0.8, 0.3, 0.9], 0);
   c.globalCompositeOperation = "multiply"; c.drawImage(light, 0, 0); c.globalCompositeOperation = "source-over";
