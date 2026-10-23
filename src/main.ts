@@ -1,0 +1,64 @@
+import "./style.css";
+import { Input } from "./input";
+import { Game } from "./game";
+import { render, W, H, MENU_ROWS } from "./draw";
+import { installer } from "./vendor/install";
+import { enterFullscreen, canFullscreen } from "./vendor/screen";
+import { readSave } from "./save";
+
+const canvas = document.getElementById("game") as HTMLCanvasElement;
+const ctx = canvas.getContext("2d")!;
+const stage = document.getElementById("stage")!;
+const input = new Input(stage);
+const game = new Game(input);
+
+// Landscape layout: keep 16:9, integer scale when it fits, fractional on small phones.
+function fit() {
+  const s = Math.min(innerWidth / W, innerHeight / H);
+  const k = s >= 2 ? Math.floor(s) : s;
+  canvas.style.width = W * k + "px"; canvas.style.height = H * k + "px";
+}
+addEventListener("resize", fit); fit();
+
+// Title, Install (Gravewake installer copy) and fullscreen
+const title = document.getElementById("title")!, startBtn = document.getElementById("startBtn") as HTMLButtonElement;
+const installBtn = document.getElementById("installBtn") as HTMLButtonElement, fsBtn = document.getElementById("fsBtn") as HTMLButtonElement;
+if (readSave()) startBtn.textContent = "Continue";
+const inst = installer();
+const syncInstall = () => { const s = inst?.state(); installBtn.hidden = !(s === "ready" || s === "ios"); };
+inst?.subscribe(syncInstall); syncInstall();
+installBtn.onclick = async () => { if (inst?.state() === "ios") { document.getElementById("iosTip")!.hidden = false; } else await inst?.install(); syncInstall(); };
+fsBtn.hidden = !canFullscreen(); fsBtn.onclick = () => void enterFullscreen();
+const begin = () => { title.hidden = true; game.start(true); };
+startBtn.onclick = begin;
+startBtn.focus();
+
+// Tap a status row on the canvas
+canvas.addEventListener("pointerdown", (e) => {
+  if (game.mode !== "pause") return;
+  const r = canvas.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * W, y = ((e.clientY - r.top) / r.height) * H;
+  const R = MENU_ROWS, i = Math.floor((y - R.y) / R.h);
+  if (x >= R.x && x <= R.x + R.w && i >= 0 && i < 4) game.menuPick(i);
+});
+
+addEventListener("pagehide", () => game.autosave());
+document.addEventListener("visibilitychange", () => { if (document.hidden) { game.autosave(); if (game.mode === "play") game.mode = "pause"; } });
+
+let last = performance.now(), acc = 0;
+const DT = 1 / 60;
+function loop(now: number) {
+  acc += Math.min(0.1, (now - last) / 1000); last = now;
+  while (acc >= DT) {
+    game.step(DT); acc -= DT;
+    if (game.mode === "title" && (input.pressed("melee") || input.pressed("pause")) && !title.hidden) begin();
+  }
+  if (game.mode !== "title") render(ctx, game);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+declare global { interface Window { __ki: unknown } }
+window.__ki = {
+  game, input,
+  state: () => ({ mode: game.mode, hp: game.hp, ep: game.ep, lvl: game.lvl, exp: game.exp, pts: game.pts, str: game.str, x: game.p.x, y: game.p.y, shots: game.shots.length, alive: game.enemies.filter((e) => !e.dead).length, ...game.stats }),
+};

@@ -1,0 +1,25 @@
+html,body{margin:0;height:100%;background:#07060b;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;font-family:system-ui,sans-serif;color:#e8e2ff}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+canvas{image-rendering:pixelated;background:#000}
+body.nocursor{cursor:none}
+#touch{position:absolute;inset:0;pointer-events:none;display:none}
+body.touch #touch{display:block}
+#stickBase{position:absolute;width:110px;height:110px;border-radius:50%;border:2px solid #fff3;background:#fff1;display:none;transform:translate(-50%,-50%)}
+#stickKnob{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:#b9a8ff66}
+#btns{position:absolute;right:max(18px,env(safe-area-inset-right));bottom:18px;width:200px;height:170px}
+.tb{position:absolute;pointer-events:auto;border-radius:50%;border:2px solid #fff5;background:#2a2244aa;color:#fff;font-weight:700;font-size:18px;width:64px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tb small{font-size:9px;opacity:.7}.tb.on{background:#7a5cffcc}
+.tb.big{width:78px;height:78px;right:0;bottom:30px}
+.tb[data-b=blast]{right:88px;bottom:0}
+.tb.sm{width:50px;height:50px;font-size:14px}
+.tb[data-b=cycle]{right:120px;bottom:100px}.tb[data-b=block]{right:20px;bottom:120px}
+.icon{position:absolute;top:10px;pointer-events:auto;width:40px;height:34px;border-radius:8px;border:1px solid #fff4;background:#1a1528aa;color:#fff;font-weight:700}
+#pauseIcon{right:max(12px,env(safe-area-inset-right))}#mapIcon{right:calc(max(12px,env(safe-area-inset-right)) + 48px)}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(#1d1636,#07060bf2);gap:10px;text-align:center}
+.overlay[hidden]{display:none}
+h1{margin:0;font-size:clamp(32px,9vw,72px);letter-spacing:.12em;color:#cfe8ff;text-shadow:0 0 18px #6ab8ff,0 0 40px #7a5cff}
+.sub{margin:0;opacity:.7}.hint{font-size:12px;opacity:.6;max-width:90vw}
+.overlay button{font-size:18px;padding:10px 28px;border-radius:10px;border:1px solid #9d8cff;background:#2b2150;color:#fff;min-width:180px}
+.overlay button:focus{outline:2px solid #ffd76a}
+#rotate{display:none;z-index:9}
+@media (orientation:portrait) and (pointer:coarse){#rotate{display:flex}}

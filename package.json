@@ -1,0 +1,3 @@
+{ "name": "ki-quest", "private": true, "type": "module", "version": "0.1.0",
+  "scripts": { "dev": "vite --host 0.0.0.0", "build": "tsc --noEmit && vite build", "preview": "vite preview --port 4173", "typecheck": "tsc --noEmit", "smoke": "node tests/smoke.mjs" },
+  "devDependencies": { "typescript": "^5.7.0", "vite": "^6.0.0" } }

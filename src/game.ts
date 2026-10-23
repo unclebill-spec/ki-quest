@@ -1,0 +1,299 @@
+/** Ki Quest simulation: hero, combat, enemies, EXP/levels, save pad. No drawing here. */
+import { Input } from "./input";
+import { Area, buildArea, moveBody, solidAt } from "./world";
+import { ParticlePool, CH_COMBAT, K_SPARK, K_RING, K_DUST, C_GOLD, C_WHITE, C_RED, C_DUST } from "./vendor/particles";
+import { SaveRecord, readSave, writeSave } from "./save";
+
+export type Mode = "title" | "play" | "pause" | "map";
+export interface Enemy {
+  kind: "brute" | "wisp"; x: number; y: number; vx: number; vy: number; hp: number; max: number;
+  state: "idle" | "chase" | "tele" | "act" | "recover"; t: number; ax: number; ay: number;
+  flash: number; dead: boolean; respawn: number; hx: number; hy: number; hitBy: number; wander: number;
+}
+export interface Shot { x: number; y: number; vx: number; vy: number; life: number; foe: boolean; dmg: number }
+export interface Num { x: number; y: number; txt: string; col: string; t: number; big: boolean }
+
+export const EP_BLAST = 8, EP_SHIELD_PER_S = 22;
+export const expNext = (l: number) => Math.round(18 * Math.pow(l, 1.4));
+const DIRS8 = Array.from({ length: 8 }, (_, i) => [Math.cos((i * Math.PI) / 4), Math.sin((i * Math.PI) / 4)]);
+
+export class Game {
+  mode: Mode = "title";
+  area: Area = buildArea();
+  time = 0; frame = 0;
+  p = { x: 0, y: 0, fx: 0, fy: 1, dir8: 2, moving: false, running: false, walk: 0, inv: 0, kx: 0, ky: 0 };
+  lvl = 1; exp = 0; pts = 0; str = 3; pow = 3; end = 3; hp = 0; ep = 0; tf = 0;
+  swing = { step: 0, t: 0, queued: false, hitId: 0, chainT: 0, chainStep: 0 };
+  blastCd = 0; blocking = false; shield = false;
+  enemies: Enemy[] = []; shots: Shot[] = []; nums: Num[] = [];
+  toast = ""; toastT = 0; banner = ""; bannerT = 0; levelT = 0;
+  menuSel = 0; onPad = false; shake = 0;
+  parts = new ParticlePool();
+  stats = { crits: 0, normals: 0, blasts: 0, kills: 0, saves: 0, levelUps: 0, shieldBlocks: 0, hurt: 0 };
+  private hitSerial = 1;
+
+  constructor(public input: Input) { this.reset(); }
+
+  get maxHp() { return 60 + this.end * 8; }
+  get maxEp() { return 40 + this.pow * 4; }
+  get meleeDmg() { return 3 + this.str * 1.5; }
+  get blastDmg() { return 6 + this.pow * 2.5; }
+  get defense() { return Math.min(0.6, this.end * 0.03); }
+
+  reset() {
+    Object.assign(this.p, { x: this.area.start.x, y: this.area.start.y });
+    this.hp = this.maxHp; this.ep = this.maxEp;
+    this.enemies = this.area.spawns.map((s) => this.makeEnemy(s.kind, s.x, s.y));
+  }
+  makeEnemy(kind: Enemy["kind"], x: number, y: number): Enemy {
+    const max = kind === "brute" ? 30 : 18;
+    return { kind, x, y, vx: 0, vy: 0, hp: max, max, state: "idle", t: 0, ax: 0, ay: 0, flash: 0, dead: false, respawn: 0, hx: x, hy: y, hitBy: 0, wander: Math.random() * 6 };
+  }
+  record(): SaveRecord {
+    return { v: 1, at: Date.now(), area: this.area.name, x: this.p.x, y: this.p.y, lvl: this.lvl, exp: this.exp, pts: this.pts, str: this.str, pow: this.pow, end: this.end, hp: this.hp, ep: this.ep, tf: this.tf };
+  }
+  load(r: SaveRecord) {
+    Object.assign(this, { lvl: r.lvl, exp: r.exp, pts: r.pts, str: r.str, pow: r.pow, end: r.end, tf: r.tf });
+    this.hp = Math.min(this.maxHp, r.hp); this.ep = Math.min(this.maxEp, r.ep);
+    if (!solidAt(this.area, r.x, r.y)) { this.p.x = r.x; this.p.y = r.y; }
+  }
+  start(cont: boolean) {
+    const s = cont ? readSave() : null;
+    this.reset();
+    if (s) this.load(s);
+    this.mode = "play"; this.banner = this.area.name; this.bannerT = 3;
+  }
+  autosave() { if (this.mode !== "title") writeSave(this.record(), true); }
+  say(s: string, t = 1.6) { this.toast = s; this.toastT = t; }
+  num(x: number, y: number, v: number, col: string, big = false) { this.nums.push({ x, y, txt: String(Math.round(v)), col, t: 0.9, big }); }
+
+  step(dt: number) {
+    const inp = this.input;
+    inp.poll();
+    this.time += dt; this.frame++;
+    if (this.mode === "title") return;
+    if (inp.pressed("pause")) { this.mode = this.mode === "pause" ? "play" : "pause"; this.menuSel = 0; return; }
+    if (inp.pressed("map")) { this.mode = this.mode === "map" ? "play" : "map"; return; }
+    if (this.mode === "pause") return this.menu();
+    if (this.mode === "map") { if (inp.pressed("melee") || inp.pressed("blast")) this.mode = "play"; return; }
+    this.toastT -= dt; this.bannerT -= dt; this.levelT -= dt; this.shake = Math.max(0, this.shake - dt * 20);
+    this.hero(dt);
+    this.foes(dt);
+    this.projectiles(dt);
+    for (const n of this.nums) { n.t -= dt; n.y -= dt * 22; }
+    this.nums = this.nums.filter((n) => n.t > 0);
+    this.parts.update(dt);
+    this.tf = Math.min(100, this.tf + dt * 0.6);
+  }
+
+  private menuLast = 0;
+  menu() {
+    const inp = this.input;
+    const rows = 4;
+    const v = inp.my > 0.5 ? 1 : inp.my < -0.5 ? -1 : 0;
+    if (inp.pressed("down") || (v === 1 && this.menuLast !== 1)) this.menuSel = (this.menuSel + 1) % rows;
+    if (inp.pressed("up") || (v === -1 && this.menuLast !== -1)) this.menuSel = (this.menuSel + rows - 1) % rows;
+    this.menuLast = v;
+    if (inp.pressed("melee") || inp.pressed("confirm")) this.menuPick(this.menuSel);
+    if (inp.pressed("blast")) this.mode = "play";
+  }
+  menuPick(i: number) {
+    this.menuSel = i;
+    if (i === 3) { this.mode = "play"; return; }
+    if (this.pts <= 0) { this.say("No points to spend"); return; }
+    const k = (["str", "pow", "end"] as const)[i];
+    const hpWas = this.maxHp, epWas = this.maxEp;
+    this[k]++; this.pts--;
+    this.hp += this.maxHp - hpWas; this.ep += this.maxEp - epWas;
+  }
+
+  hero(dt: number) {
+    const inp = this.input, p = this.p;
+    p.inv = Math.max(0, p.inv - dt);
+    this.blastCd = Math.max(0, this.blastCd - dt);
+    this.blocking = inp.down("block");
+    this.shield = this.blocking && inp.down("blast") && this.ep > 0;
+    if (this.shield) this.ep = Math.max(0, this.ep - EP_SHIELD_PER_S * dt);
+    else if (!this.blocking) this.ep = Math.min(this.maxEp, this.ep + 5 * dt);
+    if (inp.pressed("cycle")) this.say("Technique: Ki Blast (more techniques in chunk 2)");
+    // melee combo
+    const sw = this.swing;
+    if (sw.step) {
+      sw.t += dt;
+      if (sw.t > 0.07 && sw.t < 0.16 && sw.hitId === 0) { sw.hitId = this.hitSerial++; this.meleeHit(); }
+      if (inp.pressed("melee") && sw.t > 0.1 && sw.step < 3) sw.queued = true;
+      if (sw.t >= (sw.step === 3 ? 0.32 : 0.24)) {
+        if (sw.queued) { sw.step++; sw.t = 0; sw.queued = false; sw.hitId = 0; }
+        else { sw.chainT = sw.step < 3 ? 0.22 : 0; sw.chainStep = sw.step; sw.step = 0; }
+      }
+    } else if (!this.blocking && inp.pressed("melee")) {
+      const next = sw.chainT > 0 && sw.chainStep < 3 ? sw.chainStep + 1 : 1;
+      Object.assign(sw, { step: next, t: 0, queued: false, hitId: 0 });
+    }
+    sw.chainT = Math.max(0, sw.chainT - dt);
+    // blast
+    if (!this.blocking && inp.pressed("blast") && this.blastCd <= 0) {
+      if (this.ep >= EP_BLAST) {
+        this.ep -= EP_BLAST; this.blastCd = 0.28; this.stats.blasts++;
+        this.shots.push({ x: p.x + p.fx * 10, y: p.y - 14 + p.fy * 8, vx: p.fx * 230, vy: p.fy * 230, life: 1.2, foe: false, dmg: this.blastDmg });
+      } else this.say("Not enough EP", 0.8);
+    }
+    // movement (8-dir, double-tap run)
+    let mx = inp.mx, my = inp.my;
+    const m = Math.hypot(mx, my);
+    p.moving = m > 0.1;
+    p.running = inp.running && !this.blocking;
+    if (p.moving) {
+      const a = Math.atan2(my, mx);
+      p.dir8 = ((Math.round(a / (Math.PI / 4)) % 8) + 8) % 8;
+      if (!sw.step) { p.fx = DIRS8[p.dir8][0]; p.fy = DIRS8[p.dir8][1]; }
+    }
+    let sp = p.running ? 125 : 72;
+    if (this.blocking) sp *= 0.3;
+    if (sw.step) sp *= 0.25;
+    p.walk += dt * (p.moving ? (p.running ? 14 : 9) : 0);
+    if (p.running && p.moving && this.frame % 6 === 0) this.parts.emit(CH_COMBAT, K_DUST, p.x, p.y, -mx * 20, -8, 0.3, C_DUST);
+    moveBody(this.area, p, (mx * sp + p.kx) * dt, (my * sp + p.ky) * dt);
+    p.kx *= Math.pow(0.002, dt); p.ky *= Math.pow(0.002, dt);
+    // save pad
+    const on = Math.hypot(p.x - this.area.pad.x, p.y - this.area.pad.y) < 12;
+    if (on && !this.onPad) {
+      this.hp = this.maxHp; this.ep = this.maxEp;
+      if (writeSave(this.record())) { this.stats.saves++; this.say("Saved · HP and EP restored"); }
+      else this.say("Save failed (storage blocked)");
+    }
+    this.onPad = on;
+  }
+
+  meleeHit() {
+    const p = this.p, sw = this.swing;
+    const hx = p.x + p.fx * 14, hy = p.y - 10 + p.fy * 10;
+    for (const e of this.enemies) {
+      if (e.dead || Math.hypot(e.x - hx, e.y - 8 - hy) > 18) continue;
+      const crit = Math.random() < (sw.step === 3 ? 0.25 : 0.12);
+      let d = this.meleeDmg * (sw.step === 3 ? 1.4 : 1) * (0.9 + Math.random() * 0.2);
+      if (crit) d *= 1.8;
+      const kb = crit ? 300 : sw.step === 3 ? 140 : 60;
+      this.damageFoe(e, d, p.fx * kb, p.fy * kb, crit);
+      this.tf = Math.min(100, this.tf + 1.5);
+    }
+  }
+  damageFoe(e: Enemy, d: number, kx: number, ky: number, crit: boolean) {
+    e.hp -= d; e.vx += kx; e.vy += ky; e.flash = 0.12;
+    if (crit) { this.stats.crits++; this.shake = 3; } else this.stats.normals++;
+    this.num(e.x, e.y - 22, d, crit ? "#ffe14a" : "#ff4a4a", crit);
+    const a = Math.atan2(ky, kx);
+    for (let i = 0; i < (crit ? 8 : 4); i++) {
+      const b = a + (Math.random() - 0.5) * 1.6, s = 50 + Math.random() * 60;
+      this.parts.emit(CH_COMBAT, K_SPARK, e.x, e.y - 10, Math.cos(b) * s, Math.sin(b) * s - 20, 0.25, crit ? C_GOLD : C_WHITE, 200, 2);
+    }
+    if (e.state === "tele" && crit) e.state = "recover", e.t = 0.4;
+    if (e.hp <= 0) this.kill(e);
+  }
+  kill(e: Enemy) {
+    e.dead = true; e.respawn = 25; this.stats.kills++;
+    const gain = e.kind === "brute" ? 6 : 8;
+    this.exp += gain;
+    this.nums.push({ x: e.x, y: e.y - 30, txt: `+${gain} EXP`, col: "#9fe8ff", t: 1.1, big: false });
+    this.parts.emit(CH_COMBAT, K_RING, e.x, e.y - 8, 0, -6, 0.35, C_WHITE);
+    for (let i = 0; i < 8; i++) this.parts.emit(CH_COMBAT, K_SPARK, e.x, e.y - 8, Math.cos(i) * 70, Math.sin(i) * 70, 0.4, C_GOLD, 120, 1);
+    while (this.exp >= expNext(this.lvl)) {
+      this.exp -= expNext(this.lvl); this.lvl++; this.pts += 3; this.levelT = 2.5; this.stats.levelUps++;
+      this.hp = this.maxHp; this.ep = this.maxEp;
+      this.say(`Level ${this.lvl}! +3 points (Esc / Start / II to spend)`, 3);
+    }
+  }
+  hurtHero(d: number, fromX: number, fromY: number) {
+    const p = this.p;
+    if (p.inv > 0) return;
+    const a = Math.atan2(p.y - fromY, p.x - fromX);
+    if (this.shield) { this.stats.shieldBlocks++; this.num(p.x, p.y - 34, 0, "#9fe8ff"); p.inv = 0.2; return; }
+    if (this.blocking) d *= 0.3;
+    d *= 1 - this.defense;
+    this.hp -= d; p.inv = 0.6; this.stats.hurt++; this.shake = 2;
+    p.kx = Math.cos(a) * (this.blocking ? 60 : 160); p.ky = Math.sin(a) * (this.blocking ? 60 : 160);
+    this.num(p.x, p.y - 34, d, "#ff9a9a");
+    if (this.hp <= 0) {
+      this.hp = this.maxHp; this.ep = this.maxEp; p.x = this.area.start.x; p.y = this.area.start.y; p.kx = p.ky = 0;
+      this.say("Knocked out! Back at the save pad.", 2.5);
+    }
+  }
+
+  foes(dt: number) {
+    const p = this.p;
+    for (const e of this.enemies) {
+      if (e.dead) {
+        e.respawn -= dt;
+        if (e.respawn <= 0 && Math.hypot(e.hx - p.x, e.hy - p.y) > 220) Object.assign(e, this.makeEnemy(e.kind, e.hx, e.hy));
+        continue;
+      }
+      e.flash = Math.max(0, e.flash - dt);
+      const dx = p.x - e.x, dy = p.y - e.y, dist = Math.hypot(dx, dy) || 1, ux = dx / dist, uy = dy / dist;
+      let wx = 0, wy = 0;
+      e.t -= dt;
+      if (e.kind === "brute") {
+        if (e.state === "idle") {
+          e.wander += dt; wx = Math.cos(e.wander * 0.7) * 14; wy = Math.sin(e.wander * 0.5) * 14;
+          if (dist < 120) e.state = "chase";
+        } else if (e.state === "chase") {
+          wx = ux * 42; wy = uy * 42;
+          if (dist > 200) e.state = "idle";
+          if (dist < 30) { e.state = "tele"; e.t = 0.5; e.ax = ux; e.ay = uy; }
+        } else if (e.state === "tele") {
+          if (e.t <= 0) { e.state = "act"; e.t = 0.22; }
+        } else if (e.state === "act") {
+          wx = e.ax * 210; wy = e.ay * 210;
+          if (Math.hypot(p.x - e.x, p.y - e.y) < 14) this.hurtHero(8, e.x, e.y);
+          if (e.t <= 0) { e.state = "recover"; e.t = 0.6; }
+        } else if (e.t <= 0) e.state = "chase";
+      } else {
+        if (e.state === "idle") {
+          e.wander += dt; wx = Math.cos(e.wander) * 18; wy = Math.sin(e.wander * 1.3) * 18;
+          if (dist < 150) e.state = "chase";
+        } else if (e.state === "chase") {
+          const want = dist < 80 ? -1 : dist > 110 ? 1 : 0;
+          wx = ux * 36 * want - uy * 20; wy = uy * 36 * want + ux * 20;
+          if (dist > 230) e.state = "idle";
+          if (e.t <= -1.4 && dist < 150) { e.state = "tele"; e.t = 0.7; }
+        } else if (e.state === "tele") {
+          if (e.t <= 0) {
+            this.shots.push({ x: e.x, y: e.y - 14, vx: ux * 95, vy: uy * 95, life: 2.4, foe: true, dmg: 6 });
+            e.state = "recover"; e.t = 0.5;
+          }
+        } else if (e.t <= 0) { e.state = "chase"; e.t = 0; }
+      }
+      moveBody(this.area, e, (wx + e.vx) * dt, (wy + e.vy) * dt, 6);
+      e.vx *= Math.pow(0.004, dt); e.vy *= Math.pow(0.004, dt);
+    }
+    // keep foes from stacking
+    for (let i = 0; i < this.enemies.length; i++) for (let j = i + 1; j < this.enemies.length; j++) {
+      const a = this.enemies[i], b = this.enemies[j];
+      if (a.dead || b.dead) continue;
+      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+      if (d > 0 && d < 16) { const k = (16 - d) / 2 / d; moveBody(this.area, a, -dx * k, -dy * k, 6); moveBody(this.area, b, dx * k, dy * k, 6); }
+    }
+  }
+
+  projectiles(dt: number) {
+    const p = this.p;
+    for (const s of this.shots) {
+      s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt;
+      if (solidAt(this.area, s.x, s.y + 10)) { s.life = 0; this.parts.emit(CH_COMBAT, K_RING, s.x, s.y, 0, 0, 0.2, s.foe ? C_RED : C_WHITE); continue; }
+      if (s.foe) {
+        const d = Math.hypot(s.x - p.x, s.y - (p.y - 14));
+        if (this.shield && d < 22) { s.life = 0; this.stats.shieldBlocks++; this.parts.emit(CH_COMBAT, K_RING, s.x, s.y, 0, 0, 0.25, C_WHITE); continue; }
+        if (d < 10) { s.life = 0; this.hurtHero(s.dmg, s.x - s.vx, s.y - s.vy); }
+      } else {
+        for (const e of this.enemies) if (!e.dead && Math.hypot(e.x - s.x, e.y - 10 - s.y) < 12) {
+          s.life = 0;
+          const crit = Math.random() < 0.1;
+          const n = Math.hypot(s.vx, s.vy) || 1;
+          this.damageFoe(e, s.dmg * (crit ? 1.8 : 1), (s.vx / n) * (crit ? 260 : 110), (s.vy / n) * (crit ? 260 : 110), crit);
+          this.parts.emit(CH_COMBAT, K_RING, s.x, s.y, 0, 0, 0.25, C_WHITE);
+          break;
+        }
+      }
+    }
+    this.shots = this.shots.filter((s) => s.life > 0);
+  }
+}
