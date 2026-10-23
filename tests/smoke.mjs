@@ -12,7 +12,7 @@ const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
   const errs = []; page.on("pageerror", (e) => errs.push(String(e))); page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
-  await page.goto("http://localhost:4173/");
+  await page.goto("http://localhost:4173/ki-quest/");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.click("#startBtn");
@@ -73,7 +73,7 @@ try {
   s = await S(); ok("continue restores level", label === "Continue" && s.lvl === lv.l, `lvl=${s.lvl}`);
   // touch UI present on a touch device context
   const tctx = await browser.newContext({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
-  const tp = await tctx.newPage(); await tp.goto("http://localhost:4173/"); await tp.tap("#startBtn");
+  const tp = await tctx.newPage(); await tp.goto("http://localhost:4173/ki-quest/"); await tp.tap("#startBtn");
   await tp.touchscreen.tap(700, 300); const touchOn = await tp.evaluate(() => document.body.classList.contains("touch") && getComputedStyle(document.getElementById("touch")).display !== "none");
   ok("touch controls appear on touch", touchOn); await tctx.close();
   // screenshot scene: hero mid-fight with a blast in flight
