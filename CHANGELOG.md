@@ -1,4 +1,8 @@
 # Changelog
+## 0.1.1 — 2026-10-23
+- Published to GitHub Pages: https://unclebill-spec.github.io/ki-quest/ (base `/ki-quest/`).
+- Added tests/live.mjs live check and docs/live.png.
+
 ## 0.1.0 · 2026-10-23 · Stage 1 chunk 1 (grey-box)
 - Scaffold (TS + Vite + canvas), PWA manifest, Install button, offline SW, fullscreen, landscape fit, rotate notice.
 - Copied Gravewake light layer, particle pool, stick/pad helpers, installer, SW plugin.

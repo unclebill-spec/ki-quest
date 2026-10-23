@@ -1,4 +1,8 @@
 # Ki Quest (working title)
+
+**Play:** https://unclebill-spec.github.io/ki-quest/ · Repo: https://github.com/unclebill-spec/ki-quest
+
+![Live](docs/live.png)
 Original top-down GBA-style action RPG (fists, ki blasts, glowing ruins). Original characters, names and world.
 Stage 1 · chunk 1: grey-box playable in one area, **Emberfall Hollow**.
 

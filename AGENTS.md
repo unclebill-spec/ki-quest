@@ -9,3 +9,10 @@
 - Look: gloom-and-glow. World is multiplied by Gravewake's banded light layer; ki, lamps, eyes, shield are additive ("lighter") after it.
 - Test: `npm run build && npm run smoke` (Playwright from /workspace/tools/game/node). Test hook: `window.__ki`.
 - Keep disk small; delete temp files. Log changes in CHANGELOG.md; commit in chunks.
+
+## Deploy (GitHub Pages, gh-pages branch at /)
+1. `npm run build` (Vite base is `/ki-quest/`), then `node tests/smoke.mjs`.
+2. Secret scan: `gitleaks git .`, `gitleaks dir .`, `/workspace/hd2d-suite/tools/checks/extra_secret_patterns.sh`.
+3. Copy `dist/` to a temp dir, add `.nojekyll`, `git init`, commit, force-push to `gh-pages` of unclebill-spec/ki-quest; delete the temp dir.
+4. `node tests/live.mjs` checks the live URL: no console errors, SW offline reload, writes docs/live.png.
+Publishing needs Bill's approval.
