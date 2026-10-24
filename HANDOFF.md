@@ -39,3 +39,15 @@
 - **Boss arena slot for Master Builder:** a round open chamber, zone "Quarry Heart", exported as `QUARRY_ARENA = { tx: 38, ty: 16, r: 7 }` from src/areas/maps.ts. No boss is wired there yet.
 - Brann quest: talking to him the first time sets metBrann and brannQ (+60 EXP) and unseals the Kilnreach quarry lift `Y` (Quarry Road east). Picking up the orb sets flags.heart. Handing it in sets **flags.brann** (+150 EXP, +2 pts). Companion join is Master Builder's: hook on flags.brann the same way as Mirela/oath.
 - tests/world.mjs is now 29/29. Screenshots: docs/bill/kilnreach.png, quarry.png, quarry-arena.png.
+
+## W8 (executor, 11:20 PM): brighter quarry, post-boss beat, area 4 Drowned Vesper
+- **For Master Builder:** when the quarry boss dies, set story flag **`quarryBossDown = true`** (`window.__ki.story.flags.quarryBossDown = true; story.save()`, or from game via the bound story). The story layer handles everything after that:
+  - a one-time Brann scene in the quarry (flag quarryBeat, +120 EXP, first Malachar name-drop);
+  - new Brann lines;
+  - it wakes the drowned-sun slab `Y` at the arena's east edge (38+6,16), which flies you to area 4.
+  - Keep the boss arena clear of (44,16).
+- Quarry lighting: lava tiles now cast light (ember and tide themes), plus a soft fill light in emberquarry.
+- Area 4 `drowned` "Drowned Vesper" (theme `tide`, maps.ts DROWNED): a sunken sun-city of canal blocks and bridges. Its centre is Tidewarden Court, with Neri Calloway (n), Old Calder (x) and a spring. Houses draw as stone domes and trees as coral pillars. 10 spawns. Fits staging world.md, where area 4 is a drowned city.
+  - Quest: the sun-sigil orb on Sigil Quay sets flags.sigil. Showing it to Neri sets flags.sigilDone (+200 EXP, +2 pts) and gives the Sunwarden-guard reveal.
+  - Flight map: the last ??? spot is now Drowned Vesper.
+- tests/world.mjs is 33/33 and simulates the boss flag. Screenshots: docs/bill/quarry-after-boss.png, drowned.png, map-area4.png.

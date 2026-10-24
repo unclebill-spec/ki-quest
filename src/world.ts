@@ -1,5 +1,5 @@
 /** Areas: ASCII maps (src/areas/maps.ts) -> tiles, lamps, props, NPCs, spawns, gates and updraft stones. */
-import { LANTERNMOSS, HUSHWATER, KILNREACH, EMBERQUARRY } from "./areas/maps";
+import { LANTERNMOSS, HUSHWATER, KILNREACH, EMBERQUARRY, DROWNED } from "./areas/maps";
 export const TILE = 16;
 export const MW = 48, MH = 34;
 export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3, T_WATER = 4, T_PATH = 5, T_BOARD = 6, T_WARD = 7, T_HIDDEN = 8;
@@ -11,7 +11,7 @@ export interface Travel { x: number; y: number; to: string; label: string }
 export interface Orb { i: number; x: number; y: number }
 export interface Ward { tx: number; ty: number; lvl: number }
 export interface Area {
-  id: string; name: string; music: string; theme: "moss" | "marsh" | "ember";
+  id: string; name: string; music: string; theme: "moss" | "marsh" | "ember" | "tide";
   tiles: Uint8Array; lamps: Lamp[]; pad: { x: number; y: number }; start: { x: number; y: number }; spawns: Spawn[];
   props: Prop[]; npcs: Npc[]; orbs: Orb[]; springs: { x: number; y: number }[]; travel: Travel[]; wards: Ward[];
   zones: { name: string; x0: number; y0: number; x1: number; y1: number }[];
@@ -31,9 +31,15 @@ export const AREA_DEFS: Record<string, Def> = {
     zones: [{ name: "Hushwater Landing", x0: 1, y0: 1, x1: 5, y1: 6 }, { name: "Hushwater Town", x0: 16, y0: 5, x1: 33, y1: 13 },
       { name: "Lantern Graveyard", x0: 34, y0: 1, x1: 46, y1: 9 }, { name: "Sunken Meadow", x0: 0, y0: 14, x1: 47, y1: 33 }, { name: "Hushwater Fen", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },
+  drowned: {
+    id: "drowned", name: "Drowned Vesper", music: "area1-theme", theme: "tide", rows: DROWNED, lamp: [0.4, 0.95, 0.85],
+    to: "kilnreach", toLabel: "Kilnreach", wardLvl: 0,
+    zones: [{ name: "Tidewarden Court", x0: 15, y0: 13, x1: 31, y1: 22 }, { name: "Sunken Landing", x0: 1, y0: 1, x1: 11, y1: 9 },
+      { name: "Sigil Quay", x0: 36, y0: 24, x1: 46, y1: 32 }, { name: "Drowned Vesper", x0: 0, y0: 0, x1: 47, y1: 33 }],
+  },
   emberquarry: {
     id: "emberquarry", name: "Emberheart Quarry", music: "area1-theme", theme: "ember", rows: EMBERQUARRY, lamp: [1, 0.4, 0.2],
-    to: "kilnreach", toLabel: "Kilnreach", wardLvl: 0,
+    to: "kilnreach", toLabel: "Kilnreach", to2: "drowned", to2Label: "Drowned Vesper", wardLvl: 0,
     zones: [{ name: "Quarry Heart", x0: 31, y0: 9, x1: 46, y1: 23 }, { name: "Smith's Lift", x0: 1, y0: 2, x1: 8, y1: 6 }, { name: "Heart-Ember Seam", x0: 28, y0: 3, x1: 36, y1: 9 },
       { name: "Cinder Galleries", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },

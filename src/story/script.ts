@@ -43,9 +43,18 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
     r: { name: "Orrin Cask", coat: "#3a3a2a", hair: "#806040", skin: "#c89870", trim: "#ffb060", tall: -2, lines: () =>
       ["Ferry's closed. Bell's gone. Fog's thick. It's a whole thing.", "Fen keeps a bell for the fog. Lose it and the boats go in circles. Ask him about it."] },
   },
+  drowned: {
+    n: { name: "Neri Calloway", coat: "#1e4a52", hair: "#d0e8e0", skin: "#b88a70", trim: "#7affe0", lines: (f) =>
+      f.sigilDone ? ["This sigil belonged to the Sunwarden's own guard. The man who kept the sun lit.", "If a Sunwarden is draining the Wellsprings... then he isn't keeping the light anymore. He's hoarding it."]
+        : f.sigil ? ["Let me see it. Hold it to the light. Oh."]
+        : ["You came down the slab from the mountain? Nobody's used it since the tide rose.", "Neri Calloway. I keep the records of Vesper, what the sea left of them.", "There's a sun-sigil on Sigil Quay, south-east. The shades won't let me near it. Bring it and I'll tell you what it means."] },
+    x: { name: "Old Calder", coat: "#3a4a48", hair: "#a0a0a0", skin: "#c8a080", trim: "#c8b060", tall: -2, lines: () =>
+      ["The water rose the night the sun went out. Three hundred years, and my feet are still wet.", "The canals glow because the Wellspring is down there somewhere, drowned. Still breathing."] },
+  },
   kilnreach: {
     k: { name: "Brann Okoro", coat: "#5a3428", hair: "#1a1210", skin: "#8a5a3a", trim: "#ff7a2a", tall: 2, lines: (f) =>
-      f.brann ? ["That's my heart-ember, still warm. I owe you a mountain.", "Down in the Quarry Heart, something big is drinking. When you go, my hammer goes with you."]
+      f.quarryBossDown ? ["You felt it too? The mountain's heartbeat is steady again.", "That thing down there wore a sun on its chest, a dead one. Same sun I saw carved on the old slab in the arena wall.", "The slab is awake now. It points to Vesper, the city the sea took. Let's go see who carved it."]
+      : f.brann ? ["That's my heart-ember, still warm. I owe you a mountain.", "Down in the Quarry Heart, something big is drinking. When you go, my hammer goes with you."]
       : f.heart ? ["You found it! Hand it here. Carefully."]
       : f.metBrann ? ["Still looking? The seam is past the galleries, north and east from the lift. It glows like a coal.", "The mountain's heartbeat's heartbeat is skipping. Something below the quarry is drinking the embers, same as your spring.", "When you go down there, I'm coming. My hammer's been bored for weeks."]
         : ["You flew in on the updraft? Ha. Nobody uses that slab anymore.", "Brann Okoro, quarry-smith. Where I come from the stone has a heartbeat, and I keep it warm with mine.", "You're the lamp-lighter? Then we're after the same thief. Something is draining things: your water, my fire.", "I dropped my Heart-Ember in the quarry when the shades came. It's the core that keeps my forge, and me, warm. Here's the lift seal. Bring it back?"] },

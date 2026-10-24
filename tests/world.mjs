@@ -104,6 +104,24 @@ try {
   await E(() => { window.__ki.story.enter("kilnreach"); window.__ki.story.box = null; }); await p.waitForTimeout(300);
   await talk("k"); if (!(await E(() => window.__ki.story.flags.brann))) await talk("k");
   ok("brann flag set", await E(() => window.__ki.story.flags.brann === true));
+  await E(() => { window.__ki.story.enter("emberquarry"); window.__ki.story.box = null; }); await p.waitForTimeout(300);
+  await E(() => { const t = window.__ki.game.area.travel.find((t) => t.to === "drowned"); window.__ki.game.p.x = t.x; window.__ki.game.p.y = t.y; }); await p.waitForTimeout(300);
+  ok("drowned slab sealed before boss", await E(() => /Deal with it/.test(window.__ki.story.box?.lines?.join(" ") ?? "")));
+  await E(() => { window.__ki.story.box = null; const g = window.__ki.game; g.p.x = 36 * 16; g.p.y = 16 * 16; window.__ki.story.flags.quarryBossDown = true; }); await p.waitForTimeout(400);
+  ok("post-boss story beat", await E(() => window.__ki.story.box?.who === "Brann Okoro" && window.__ki.story.flags.quarryBeat === true));
+  await p.screenshot({ path: "docs/bill/quarry-after-boss.png" });
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await E(() => { const t = window.__ki.game.area.travel.find((t) => t.to === "drowned"); window.__ki.game.p.x = t.x; window.__ki.game.p.y = t.y; window.__ki.story.flags.stoneT = false; }); await p.waitForTimeout(300);
+  for (let i = 0; i < 6 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
+  await p.waitForFunction(() => window.__ki.game.area.id === "drowned" && window.__ki.story.fly <= 0, null, { timeout: 8000 }).catch(() => {}); await p.waitForTimeout(400);
+  ok("flies to Drowned Vesper (area 4)", await E(() => window.__ki.game.area.id === "drowned" && window.__ki.game.area.theme === "tide"));
+  await E(() => { window.__ki.story.box = null; }); await talk("n"); if (!(await E(() => window.__ki.story.flags.metNeri))) await talk("n");
+  await E(() => { const g = window.__ki.game, o = g.area.orbs[0]; g.p.x = o.x; g.p.y = o.y + 6; }); await p.waitForTimeout(300);
+  await talk("n"); if (!(await E(() => window.__ki.story.flags.sigilDone))) await talk("n");
+  ok("sun-sigil quest done", await E(() => window.__ki.story.flags.sigil === true && window.__ki.story.flags.sigilDone === true));
+  await E(() => { const g = window.__ki.game; g.p.x = 23 * 16; g.p.y = 18 * 16; }); await p.waitForTimeout(500);
+  await p.screenshot({ path: "docs/bill/drowned.png" });
+  await p.keyboard.press("KeyM"); await p.waitForTimeout(300); await p.screenshot({ path: "docs/bill/map-area4.png" }); await p.keyboard.press("KeyM");
   await E(() => { window.__ki.story.enter("lanternmoss"); }); await p.waitForTimeout(200);
   await E(() => { const g = window.__ki.game; g.p.x = 36 * 16; g.p.y = 18 * 16; }); await p.waitForTimeout(1200);
   ok("grotto banner", await E(() => window.__ki.game.area.props.filter((q) => q.kind === "crystal").length >= 6));
