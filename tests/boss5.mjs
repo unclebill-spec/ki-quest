@@ -41,10 +41,10 @@ try {
   // phases 2..4: shockwave + short shield each, new moves
   const ph = await E(() => { const g = window.__ki.game, M = globalThis.__kiMB, B = g.mb.boss5, m = M.morvantOf(g), out = [];
     for (const [want, frac, need] of [[2, 0.7, ["orbit"]], [3, 0.45, ["nova", "beam2"]], [4, 0.2, ["eclipse", "nova"]]]) {
-      const s0 = M.morvantLog.shocks, sh0 = M.morvantLog.shots; B.lockT = 0; m.hurt = 0; g.damageFoe(m, m.hp - m.max * frac, 0, 0, false); for (let i = 0; i < 40 && B.phase < want; i++) { g.p.inv = 1; g.step(1 / 60); }
+      const s0 = M.morvantLog.shocks, sh0 = M.morvantLog.shots; B.lockT = 0; m.hurt = 0; for (let i = 0; i < 40 && B.phase < want; i++) { if (i % 10 === 0 && m.hp > m.max * frac) { B.lockT = 0; m.hurt = 0; g.damageFoe(m, m.hp - m.max * frac, 0, 0, false); } g.p.inv = 1; g.step(1 / 60); }
       const phase = B.phase, shocks = M.morvantLog.shocks - s0, lock = B.lockT > 0, h0 = m.hp; m.hurt = 0; g.damageFoe(m, 30, 0, 0, false); const shielded = m.hp === h0;
       const seen = new Set(); let safeOk = true, safeN = 0, umbra = 0;
-      let tail = 90; for (let i = 0; i < 60 * 40 && tail > 0; i++) { if (need.every((n) => seen.has(n))) tail--; g.p.inv = 1; g.hp = g.maxHp; m.hp = Math.min(m.hp, m.max * frac); const was = m.state; g.step(1 / 60);
+      let tail = 90; for (let i = 0; i < 60 * 40 && tail > 0; i++) { if (need.every((n) => seen.has(n))) tail--; g.p.inv = 1; g.hp = g.maxHp; m.hp = Math.max(m.max * (frac - 0.04), Math.min(m.hp, m.max * frac)); const was = m.state; g.step(1 / 60);
         if (m.state === "tele" && was !== "tele") { seen.add(m.move);
           if (m.move === "eclipse") { const safe = g.mb.hazards.find((h) => h.safe); if (!safe) safeOk = false; else { safeN++; const dmg = g.mb.hazards.filter((h) => h.eclipse && !h.safe && h.max > 0); umbra = dmg.length; if (dmg.some((h) => Math.hypot(safe.x - h.x, (safe.y - h.y) * 1.6) < h.r)) safeOk = false; } } } }
       out.push({ want, phase, shocks, lock, shielded, seen: [...seen].sort().join(), shots: M.morvantLog.shots - sh0, safeOk, safeN, umbra }); }

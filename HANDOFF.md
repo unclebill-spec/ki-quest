@@ -99,4 +99,4 @@
 - Code: src/game/enemies/morvant.ts (ARENA5, MOVES5, TELE5, morvantLog; `__kiMB.startMorvant`). Wiring in types/state/ai/game/companion/draw.
 - Trigger: story.cageDone && !morvantDown, hero within r-16 of (32,5). Boss y clamped so he stays framed (ring is at map top edge; camera clamped at 0).
 - Hazards with `safe` are dmg 0 markers (updateHazards skips them).
-- Test: `KI_PORT=4487 node tests/boss5.mjs` → docs/boss5-p4.png. boss3 had one flaky failure in a full sweep (passed 4/4 reruns).
+- Test: `KI_PORT=4487 node tests/boss5.mjs` → docs/boss5-p4.png. Phase loop retries damage until the phase flips and floors hp so allies cannot kill him mid-test (8/8 clean).
