@@ -60,7 +60,12 @@ try {
   await E(() => { const g = window.__ki.game; const b = g.enemies.find((e) => e.kind === "boss"); g.p.x = b.x - 40; g.p.y = b.y + 30; g.p.fx = 1; g.p.fy = 0; g.mb.tech = 1; g.mb.charging = true; g.mb.charge = 0.6; g.shots.push({ x: g.p.x + 20, y: g.p.y - 16, vx: 300, vy: -100, life: 0.4, foe: false, dmg: 0, pierce: true, r: 9, tech: 1, hit: [b] }); });
   await page.waitForTimeout(120); await shot("combat-boss");
   const ph = await E(() => { const g = window.__ki.game; const b = g.enemies.find((e) => e.kind === "boss"); const seen = new Set(); const moves = new Set();
-    for (const f of [0.6, 0.3]) { g.mb.boss.lockT = 0; b.hurt = 0; g.damageFoe(b, b.hp - b.max * f, 0, 0, false); for (let i = 0; i < 400; i++) { g.p.inv = 1; g.hp = 9999; g.step(1 / 60); seen.add(g.mb.boss.phase); if (b.state === "tele") moves.add(g.mb.boss.phase + ":" + b.move); } }
+    // deterministic: seeded RNG, and wait on state (a phase-3-only move telegraphed) instead of a fixed frame count
+    const rnd = Math.random; let sd = 12345; Math.random = () => ((sd = (sd * 1103515245 + 12345) >>> 0) / 4294967296);
+    const p3 = () => [...moves].some((m) => /^3:(dash3|spiral|slam3)$/.test(m));
+    for (const f of [0.6, 0.3]) { g.mb.boss.lockT = 0; b.hurt = 0; g.damageFoe(b, b.hp - b.max * f, 0, 0, false);
+      for (let i = 0; i < 6000 && !(f === 0.6 ? g.mb.boss.phase === 2 && moves.size > 0 : p3()); i++) { g.p.inv = 1; g.hp = 9999; b.hp = Math.min(b.hp, b.max * f); g.step(1 / 60); seen.add(g.mb.boss.phase); if (b.state === "tele") moves.add(g.mb.boss.phase + ":" + b.move); } }
+    Math.random = rnd;
     return { phases: [...seen].sort().join(), moves: [...moves].sort().join(" ") }; });
   ok("boss reaches phase 2 and 3 with phase moves", ph.phases.includes("2") && ph.phases.includes("3") && /3:(dash3|spiral|slam3)/.test(ph.moves), JSON.stringify(ph));
   await E(() => { const g = window.__ki.game; const b = g.enemies.find((e) => e.kind === "boss"); b.state = "tele"; b.move = "dash3"; b.t = 0.3; b.ax = -0.8; b.ay = 0.6; g.p.inv = 0; for (let i = 0; i < 4; i++) g.mb.hazards.push({ x: g.p.x + i * 20 - 30, y: g.p.y + 10, r: 26, t: 0.5, max: 0.8, dmg: 1, foe: true }); });

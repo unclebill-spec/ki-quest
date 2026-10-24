@@ -1,4 +1,4 @@
-// Mirela companion checks: node tests/companion.mjs (after vite build). KI_PORT to change port. Writes docs/companion-fight.png.
+// Companion checks (Mirela + Brann): node tests/companion.mjs (after vite build). KI_PORT to change port. Writes docs/companion-fight.png.
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
 const require = createRequire("/workspace/tools/game/node/");
@@ -78,13 +78,49 @@ try {
     for (let k = 0; k < 16; k++) { const key = keys[k % 4]; I.key(key, true); for (let i = 0; i < 70; i++) { g.p.inv = 1; g.hp = 1e5; g.step(1 / 60); if (solid(a.x, a.y)) inWall++; if (Math.hypot(a.x - g.p.x, a.y - g.p.y) > 120) far++; } I.key(key, false); }
     return { inWall, far, tps: a.teleports }; });
   ok("no stuck bodies on a long walk", st.inWall === 0 && st.far < 20, JSON.stringify(st));
+  // ---- Brann: second companion (story flag brann), tank with taunt; both together never overlap ----
+  const bj = await E(() => { const g = window.__ki.game, s = window.__ki.story, b = g.mb.allies[1]; const before = b.joined; s.flags.oath = true; s.flags.brann = true; s.save();
+    g.enemies.forEach((e) => { e.dead = true; e.respawn = 999; }); g.p.x = g.area.start.x; g.p.y = g.area.start.y; for (let i = 0; i < 40; i++) g.step(1 / 60);
+    return { before, joined: b.joined, id: b.id, max: b.max, mirMax: g.mb.allies[0].max, d: Math.round(Math.hypot(b.x - g.p.x, b.y - g.p.y)) }; });
+  ok("Brann joins on the brann flag, tankier than Mirela", !bj.before && bj.joined && bj.id === "brann" && bj.max > bj.mirMax && bj.d < 40, JSON.stringify(bj));
+  const ov = await E(() => { const g = window.__ki.game, I = window.__ki.input, [m, b] = g.mb.allies; let minD = 1e9, stack = 0; const keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
+    for (let k = 0; k < 8; k++) { I.key(keys[k % 4], true); for (let i = 0; i < 60; i++) { g.p.inv = 1; g.step(1 / 60); const d = Math.hypot(m.x - b.x, m.y - b.y); if (i > 20) { minD = Math.min(minD, d); if (d < 8) stack++; } } I.key(keys[k % 4], false); }
+    for (let i = 0; i < 120; i++) g.step(1 / 60); const rest = Math.hypot(m.x - b.x, m.y - b.y);
+    // forced overlap resolves
+    b.x = m.x; b.y = m.y; for (let i = 0; i < 10; i++) g.step(1 / 60);
+    return { minD: Math.round(minD), stack, rest: Math.round(rest), after: Math.round(Math.hypot(m.x - b.x, m.y - b.y)) }; });
+  ok("Mirela and Brann never stack (walk, rest, forced overlap)", ov.stack === 0 && ov.rest >= 12 && ov.after >= 11, JSON.stringify(ov));
+  const bdoor = await E(() => { const g = window.__ki.game, A = g.area; const gaps = []; g.enemies.forEach((e) => { e.dead = true; e.respawn = 999; });
+    for (let ty = 1; ty < 33; ty++) for (let tx = 1; tx < 47; tx++) { const s = (x, y) => [1, 4].includes(A.tiles[y * 48 + x]); if (!s(tx, ty) && ((s(tx - 1, ty) && s(tx + 1, ty)) || (s(tx, ty - 1) && s(tx, ty + 1)))) gaps.push([tx, ty]); }
+    let bad = 0, n = 0;
+    for (const [tx, ty] of gaps.slice(0, 12)) { g.p.x = tx * 16 + 8; g.p.y = ty * 16 + 8 + 24; if (g.p.y > 33 * 16 || [1, 4].includes(A.tiles[Math.floor(g.p.y / 16) * 48 + tx])) continue; g.p.fx = 0; g.p.fy = 1; n++;
+      for (let i = 0; i < 150; i++) g.step(1 / 60); for (const a of g.mb.allies) if (Math.floor(a.x / 16) === tx && Math.floor(a.y / 16) === ty) bad++; }
+    return { tried: n, bad }; });
+  ok("neither companion rests in a doorway", bdoor.bad === 0, JSON.stringify(bdoor));
+  const bf = await E(() => { const g = window.__ki.game, [m, b] = g.mb.allies; g.p.x = g.area.start.x; g.p.y = g.area.start.y; g.hp = 1e5; m.x = g.p.x - 14; m.y = g.p.y + 10; b.x = g.p.x + 10; b.y = g.p.y - 10; m.hp = m.max; b.hp = b.max; b.tauntCd = 0;
+    const foes = [["brute", 46, -6], ["brute", 40, 26], ["wisp", 60, -30]].map(([k, dx, dy]) => { const e = g.makeEnemy(k, g.p.x + dx, g.p.y + dy); e.hp = e.max = 500; g.enemies.push(e); return e; });
+    const h0 = b.hits, mh0 = m.hits, t0 = b.taunts; let tauntedAt = 0, aimOk = 0;
+    for (let i = 0; i < 60 * 10; i++) { g.p.inv = 1; g.hp = 1e5; m.hp = Math.max(m.hp, m.max * 0.5); b.hp = Math.max(b.hp, b.max * 0.5); g.step(1 / 60);
+      for (const e of foes) if (e.taunt > 0) { tauntedAt++; if (Math.hypot(e.x - b.x, e.y - b.y) < Math.hypot(e.x - g.p.x, e.y - g.p.y) + 4) aimOk++; } }
+    const before = foes.reduce((s, e) => s + (500 - e.hp), 0);
+    return { bHits: b.hits - h0, mHits: m.hits - mh0, taunts: b.taunts - t0, tauntedAt, aimOk, perHit: +(g.mb.allies[1].hits ? (2.5 + g.lvl * 0.5) * 1.45 : 0).toFixed(1), heroMelee: +g.meleeDmg.toFixed(1), dealt: Math.round(before) }; });
+  ok("Brann melees and taunts foes onto himself; both fight", bf.bHits >= 3 && bf.mHits >= 3 && bf.taunts >= 1 && bf.tauntedAt > 0 && bf.aimOk / bf.tauntedAt > 0.6, JSON.stringify(bf));
+  ok("Brann damage stays modest (below the hero's melee)", bf.perHit < bf.heroMelee, JSON.stringify(bf));
+  await E(() => { const g = window.__ki.game, [m, b] = g.mb.allies; g.shots = g.shots.filter((s) => !s.foe); const e = g.enemies.filter((e) => !e.dead && e.max === 500); e.forEach((f, i) => { f.x = g.p.x + 34 + i * 4; f.y = g.p.y - 12 + i * 14; f.state = "chase"; });
+    m.x = g.p.x + 14; m.y = g.p.y + 14; b.x = g.p.x + 20; b.y = g.p.y - 8; g.p.fx = 1; g.p.fy = 0; g.step(1 / 60); m.atk = 0.18; m.atkStep = 2; b.atk = 0.2; b.atkStep = 3; m.fx = b.fx = 1; m.fy = b.fy = 0; });
+  await page.waitForTimeout(150); await page.screenshot({ path: "docs/companions-fight.png" });
+  const vis = await E(() => { const g = window.__ki.game; return g.mb.allies.map((a) => ({ id: a.id, dx: Math.round(a.x - g.p.x), dy: Math.round(a.y - g.p.y), j: a.joined, ko: a.ko })); });
+  ok("both companions on screen beside the hero for the fight shot", vis.every((a) => a.j && !a.ko && Math.abs(a.dx) < 150 && Math.abs(a.dy) < 90), JSON.stringify(vis));
+  const bsv = await E(() => { const g = window.__ki.game; g.p.x = g.area.pad.x; g.p.y = g.area.pad.y; g.onPad = false; for (let i = 0; i < 5; i++) g.step(1 / 60); const rec = JSON.parse(localStorage.getItem("kiquest-save-v1"));
+    const s = window.__ki.story; s.flags.brann = false; s.save(); g.start(true); return { field: rec.brann, joined: g.mb.allies[1].joined }; });
+  ok("save persists Brann (optional field)", bsv.field === true && bsv.joined, JSON.stringify(bsv));
   // fps at 4x throttle with her fighting
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   await E(() => { const g = window.__ki.game; g.p.x = g.area.start.x; g.p.y = g.area.start.y; for (let i = 0; i < 6; i++) { const e = g.makeEnemy(i % 2 ? "wisp" : "brute", g.p.x + 40 + i * 8, g.p.y - 20 + i * 8); e.hp = e.max = 1e4; g.enemies.push(e); } });
-  const fps = await E(() => new Promise((res) => { const g = window.__ki.game; let n = 0; const t0 = performance.now(); const tick = () => { n++; g.hp = 1e5; g.p.inv = 1; g.mb.ally.hp = 70; if (performance.now() - t0 < 3000) requestAnimationFrame(tick); else res({ fps: n / 3, st: g.mb.ally.state }); }; requestAnimationFrame(tick); }));
+  const fps = await E(() => new Promise((res) => { const g = window.__ki.game; let n = 0; const t0 = performance.now(); const tick = () => { n++; g.hp = 1e5; g.p.inv = 1; for (const a of g.mb.allies) a.hp = a.max; if (performance.now() - t0 < 3000) requestAnimationFrame(tick); else res({ fps: n / 3, st: g.mb.ally.state }); }; requestAnimationFrame(tick); }));
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
-  ok("fps with CPU 4x throttle (Mirela fighting) >= 45", fps.fps >= 45, JSON.stringify(fps));
+  ok("fps with CPU 4x throttle (Mirela + Brann fighting) >= 45", fps.fps >= 45, JSON.stringify(fps));
   ok("no page errors", errs.length === 0, errs.join(" | "));
 } finally { await browser.close(); srv.kill(); }
 for (const r of results) console.log(r.join("  "));
