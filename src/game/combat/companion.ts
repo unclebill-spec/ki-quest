@@ -3,30 +3,34 @@
  * - Mirela: joins after the Lantern Oath (story flag `oath`, or `mirela` in the save). Quick melee + ki bolts, teal sash.
  * - Brann Okoro: joins on story flag `brann` (or `brann` in the save). Tank/bruiser: more HP, takes less damage, slower heavier
  *   swings, and taunts nearby foes onto himself every few seconds (ai.ts aims taunted foes at him). Amber sash.
- * Both follow a few steps behind the hero on opposite sides (never in a doorway, never stacked on each other), teleport beside
+ * - Sable: joins on story flag `sableJoin` (after the Red Cage, cageDone). Ranged/support caster: holds ~70 px back from foes,
+ *   fires violet ki bolts often, weak melee, and every few seconds pulses a ward-heal on the hero and nearby companions
+ *   when anyone is hurt. Violet sash. Rests centred further behind the hero than the other two.
+ * All follow a few steps behind the hero on opposite sides (never in a doorway, never stacked on each other), teleport beside
  * the hero when far or stuck, retreat when low, step back from boss telegraphs, are knocked out at 0 HP and revive once the
  * fight is over or on a save pad. Damage stays modest. Owner: Master Builder.
  */
 import type { Game } from "../../game";
 import type { Enemy } from "../enemies/types";
 import { moveBody, solidAt, TILE } from "../../world";
-import { CH_COMBAT, K_SPARK, K_RING, C_CYAN, C_WHITE, C_GOLD } from "../../vendor/particles";
+import { CH_COMBAT, K_SPARK, K_RING, C_CYAN, C_WHITE, C_GOLD, C_VIOLET } from "../../vendor/particles";
 
-export type AllyId = "mirela" | "brann";
+export type AllyId = "mirela" | "brann" | "sable";
 export interface Ally {
   id: AllyId; name: string; joined: boolean; tauntCd: number; taunts: number; x: number; y: number; fx: number; fy: number; hp: number; max: number; ko: boolean;
   state: "follow" | "fight" | "retreat" | "dodge"; atk: number; atkT: number; atkStep: number; boltCd: number; inv: number;
   walk: number; moving: boolean; stuckT: number; lx: number; ly: number; calmT: number; kx: number; ky: number;
-  hits: number; bolts: number; teleports: number; kos: number;
+  hits: number; bolts: number; teleports: number; kos: number; heals: number; healCd: number;
 }
 export const LEASH = 100, ALLY_MAX = 70, ALLY_RANGE = 120, ALLY_SPEED = 78;
 const STORY_KEY = "kiquest.story.v1", SAVE_KEYS = ["kiquest-save-v1", "kiquest-autosave-v1"];
 /** Per-companion role. flag = story flag that makes them join; the save field has the same name as the id. */
-export const ROLES: Record<AllyId, { name: string; flag: string; max: number; speed: number; atkCd: number; melee: number; reach: number; armor: number; bolt: boolean; taunt: boolean; side: number; sash: string; sashD: string }> = {
+export const ROLES: Record<AllyId, { name: string; flag: string; max: number; speed: number; atkCd: number; melee: number; reach: number; armor: number; bolt: boolean; taunt: boolean; side: number; sash: string; sashD: string; back?: number; caster?: boolean; heal?: boolean }> = {
   mirela: { name: "Mirela", flag: "oath", max: ALLY_MAX, speed: ALLY_SPEED, atkCd: 0.85, melee: 1, reach: 22, armor: 1, bolt: true, taunt: false, side: 1, sash: "#3ee0c8", sashD: "#1f8a7a" },
   brann: { name: "Brann", flag: "brann", max: 130, speed: 66, atkCd: 1.35, melee: 1.45, reach: 24, armor: 0.6, bolt: false, taunt: true, side: -1, sash: "#ffb02a", sashD: "#a8621a" },
+  sable: { name: "Sable", flag: "sableJoin", max: 80, speed: 74, atkCd: 1.1, melee: 0.7, reach: 20, armor: 0.9, bolt: true, taunt: false, side: 0, sash: "#c070ff", sashD: "#7a3ab8", back: 36, caster: true, heal: true },
 };
-export const TAUNT_R = 64, TAUNT_T = 3, TAUNT_CD = 7;
+export const TAUNT_R = 64, TAUNT_T = 3, TAUNT_CD = 7, HEAL_CD = 8, HEAL_HERO = 10, HEAL_ALLY = 8, CASTER_RANGE = 70;
 
 /** True if the join flag is set or any save says they joined (old saves without the field: false). */
 export function readJoined(id: AllyId = "mirela") {
@@ -39,7 +43,7 @@ export function readJoined(id: AllyId = "mirela") {
 export function makeAlly(id: AllyId = "mirela", joined = readJoined(id)): Ally {
   const R = ROLES[id];
   return { id, name: R.name, joined, tauntCd: 3, taunts: 0, x: -999, y: -999, fx: 0, fy: 1, hp: R.max, max: R.max, ko: false, state: "follow", atk: 0, atkT: 0, atkStep: 0, boltCd: 2,
-    inv: 0, walk: 0, moving: false, stuckT: 0, lx: 0, ly: 0, calmT: 0, kx: 0, ky: 0, hits: 0, bolts: 0, teleports: 0, kos: 0 };
+    inv: 0, walk: 0, moving: false, stuckT: 0, lx: 0, ly: 0, calmT: 0, kx: 0, ky: 0, hits: 0, bolts: 0, teleports: 0, kos: 0, heals: 0, healCd: 4 };
 }
 /** Modest damage: well under the hero's (hero melee 3 + str*1.5, bolt 6 + pow*2.5). */
 export const allyMelee = (g: Game, a?: Ally) => (2.5 + g.lvl * 0.5) * (a ? ROLES[a.id].melee : 1);
@@ -63,7 +67,8 @@ function warp(g: Game, a: Ally) {
 }
 function nearestFoe(g: Game, a: Ally, r: number) {
   let best: Enemy | null = null, bd = r;
-  for (const e of g.enemies) { if (e.dead || Math.hypot(e.x - g.p.x, e.y - g.p.y) > LEASH) continue; const d = Math.hypot(e.x - a.x, e.y - a.y); if (d < bd) { bd = d; best = e; } }
+  const shielded = g.enemies.some((f) => f.kind === "pylon" && !f.dead);
+  for (const e of g.enemies) { if (e.dead || (shielded && (e.kind === "vey" || e.kind === "nell")) || Math.hypot(e.x - g.p.x, e.y - g.p.y) > LEASH) continue; const d = Math.hypot(e.x - a.x, e.y - a.y); if (d < bd) { bd = d; best = e; } }
   return best;
 }
 export function hurtAlly(g: Game, d: number, fx: number, fy: number, a: Ally = g.mb.ally) {
@@ -73,8 +78,8 @@ export function hurtAlly(g: Game, d: number, fx: number, fy: number, a: Ally = g
   if (a.hp <= 0) { a.hp = 0; a.ko = true; a.kos++; a.calmT = 0; a.atk = 0; g.say(`${a.name} is down!`, 1.5); }
 }
 
-export const anyBossActive = (g: Game) => g.mb.boss.active || g.mb.boss2.active || g.mb.boss3.active;
-const isBoss = (e: Enemy) => e.kind === "boss" || e.kind === "slag" || e.kind === "aurel";
+export const anyBossActive = (g: Game) => g.mb.boss.active || g.mb.boss2.active || g.mb.boss3.active || g.mb.boss4.active;
+const isBoss = (e: Enemy) => e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell";
 
 export function updateAllies(g: Game, dt: number) { for (const a of g.mb.allies) updateAlly(g, a, dt); separate(g); }
 /** Companions never stack: push apart pairs closer than 14 px. */
@@ -104,11 +109,23 @@ function updateAlly(g: Game, a: Ally, dt: number) {
   for (const s of g.shots) if (s.foe && s.life > 0 && Math.hypot(s.x - a.x, s.y - (a.y - 14)) < 9) { s.life = 0; hurtAlly(g, s.dmg * 0.8, s.x - s.vx, s.y - s.vy, a); }
   for (const e of g.enemies) if (!e.dead && e.kind === "brute" && e.state === "act" && Math.hypot(e.x - a.x, e.y - a.y) < 14) hurtAlly(g, 6, e.x, e.y, a);
   if (a.ko) return;
-  const boss = g.enemies.find((e) => !e.dead && isBoss(e));
+  const boss = g.enemies.find((e) => !e.dead && isBoss(e) && e.state === "tele") ?? g.enemies.find((e) => !e.dead && isBoss(e));
+  // support: ward-heal pulse when the hero or a companion is hurt
+  if (R.heal) {
+    a.healCd -= dt;
+    const hurt = g.hp < g.maxHp * 0.75 || g.mb.allies.some((o) => o.joined && !o.ko && o.hp < o.max * 0.75);
+    if (a.healCd <= 0 && hurt) {
+      a.healCd = HEAL_CD; a.heals++; a.atk = 0.3; a.atkStep = 4;
+      if (Math.hypot(p.x - a.x, p.y - a.y) < 110) g.hp = Math.min(g.maxHp, g.hp + HEAL_HERO);
+      for (const o of g.mb.allies) if (o.joined && !o.ko && Math.hypot(o.x - a.x, o.y - a.y) < 110) o.hp = Math.min(o.max, o.hp + HEAL_ALLY);
+      g.parts.emit(CH_COMBAT, K_RING, a.x, a.y - 14, 0, 0, 0.5, C_VIOLET); g.parts.emit(CH_COMBAT, K_RING, p.x, p.y - 14, 0, 0, 0.4, C_VIOLET);
+      g.nums.push({ x: p.x, y: p.y - 40, txt: "WARD +" + HEAL_HERO, col: "#c070ff", t: 0.9, big: false });
+    }
+  }
   const foe = nearestFoe(g, a, ALLY_RANGE);
   // rest spots: behind the hero, Mirela on one side and Brann on the other
-  const sd = R.side;
-  let tx = p.x - p.fx * 22 + p.fy * 12 * sd, ty = p.y - p.fy * 16 - p.fx * 8 * sd, sp = R.speed;
+  const sd = R.side, bk = R.back ?? 22;
+  let tx = p.x - p.fx * bk + p.fy * 12 * sd, ty = p.y - p.fy * (bk - 6) - p.fx * 8 * sd, sp = R.speed;
   if (boss && boss.state === "tele") {
     a.state = "dodge"; const d = Math.hypot(a.x - boss.x, a.y - boss.y) || 1;
     tx = boss.x + ((a.x - boss.x) / d) * 110; ty = boss.y + ((a.y - boss.y) / d) * 110; sp = 110;
@@ -124,11 +141,12 @@ function updateAlly(g: Game, a: Ally, dt: number) {
       let n = 0; for (const e of g.enemies) if (!e.dead && !isBoss(e) && Math.hypot(e.x - a.x, e.y - a.y) < TAUNT_R) { e.taunt = TAUNT_T; e.tauntBy = a.id; n++; }
       if (n) { a.tauntCd = TAUNT_CD; a.taunts++; g.parts.emit(CH_COMBAT, K_RING, a.x, a.y - 16, 0, 0, 0.45, C_GOLD); g.nums.push({ x: a.x, y: a.y - 40, txt: "TAUNT!", col: "#ffb02a", t: 0.9, big: false }); }
     }
-    if (R.bolt && a.boltCd <= 0 && d > 40 && Math.random() < 0.04) {
-      a.boltCd = 3.5 + Math.random() * 2; a.bolts++; a.atk = 0.3; a.atkStep = 4;
-      g.shots.push({ x: a.x + a.fx * 8, y: a.y - 14, vx: a.fx * 200, vy: a.fy * 200, life: 0.8, foe: false, dmg: allyBolt(g), tech: 0 });
+    if (R.bolt && a.boltCd <= 0 && (R.caster ? d > 28 : d > 40 && Math.random() < 0.04)) {
+      a.boltCd = R.caster ? 1.5 + Math.random() * 0.6 : 3.5 + Math.random() * 2; a.bolts++; a.atk = 0.3; a.atkStep = 4;
+      g.shots.push({ x: a.x + a.fx * 8, y: a.y - 14, vx: a.fx * 200, vy: a.fy * 200, life: R.caster ? 0.9 : 0.8, foe: false, dmg: allyBolt(g) * (R.caster ? 0.8 : 1), tech: 0 });
     }
-    tx = foe.x - (dx / d) * 16; ty = foe.y - (dy / d) * 4;
+    if (R.caster) { tx = foe.x - (dx / d) * CASTER_RANGE; ty = foe.y - (dy / d) * CASTER_RANGE; if (isDoorway(g, tx, ty) || !free(g, tx, ty)) { tx = a.x; ty = a.y; } }
+    else { tx = foe.x - (dx / d) * 16; ty = foe.y - (dy / d) * 4; }
     if (d < R.reach && a.atkT <= 0) {
       a.atkT = R.atkCd; a.atk = 0.28; a.atkStep = a.atkStep % 3 + 1; a.hits++;
       const crit = Math.random() < 0.08;

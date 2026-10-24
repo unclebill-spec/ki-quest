@@ -8,11 +8,12 @@ import { ARENA, arenaCenter } from "../enemies/boss";
 import { ARENA2, arena2Center } from "../enemies/slagheart";
 import { ARENA3, arena3Center } from "../enemies/aurel";
 import { ROLES } from "./companion";
+import { ARENA4, arena4Center, pylonsOf, twinsOf } from "../enemies/twins";
 
 export let HERO_SHEET = "rook";
 export function setHero(n: string) { HERO_SHEET = n; }
-const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel" };
-export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); sheet("brann"); Object.values(FOE_SHEET).forEach(sheet); }
+const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "" };
+export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); sheet("brann"); sheet("sable"); Object.values(FOE_SHEET).filter(Boolean).forEach(sheet); }
 
 function glow(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
   const g = c.createRadialGradient(x, y, 0, x, y, r);
@@ -41,6 +42,15 @@ export function heroPal(g: Game, col: string) {
 
 /** Foe via sheet or grey-box. Returns true if drawn here. */
 export function drawFoeMB(c: CanvasRenderingContext2D, g: Game, e: Enemy, x: number, y: number) {
+  if (e.kind === "pylon") {
+    // cage pylon: iron spike with a red heart-crystal (sits on the C crystal prop)
+    const fl = e.flash > 0, k = e.hp / e.max;
+    c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, 8, 2.5, 0, 0, 7); c.fill();
+    c.fillStyle = fl ? "#fff" : "#2a2230"; c.fillRect(x - 4, y - 30, 8, 30); c.fillStyle = fl ? "#fff" : "#4a3a52"; c.fillRect(x - 6, y - 4, 12, 4); c.fillRect(x - 2, y - 36, 4, 6);
+    c.fillStyle = fl ? "#fff" : (g.frame >> 3) & 1 ? "#ff4a5a" : "#c02848"; c.fillRect(x - 3, y - 24, 6, 9);
+    c.fillStyle = "#000a"; c.fillRect(x - 8, y - 42, 16, 3); c.fillStyle = "#ff5a6a"; c.fillRect(x - 7, y - 41, Math.round(14 * k), 1);
+    return true;
+  }
   const s = sheet(FOE_SHEET[e.kind]), f = facingOf(g.p.x - e.x, g.p.y - e.y), fl = e.flash > 0;
   let anim = "walk", i = g.time * 7;
   if (e.hurt > 0) { anim = "hurt"; i = 0; }
@@ -61,12 +71,18 @@ export function drawFoeMB(c: CanvasRenderingContext2D, g: Game, e: Enemy, x: num
     else if (e.state === "tele" || e.state === "act") { anim = A[e.move] ?? "lunge"; const n = anim === "lunge" || anim === "sweep" ? 3 : 2; i = e.state === "tele" ? 0 : Math.min(n - 1, 1 + (g.time * 8) % (n - 1)); }
     else if (e.state === "recover") { anim = "stand"; i = 0; }
     else i = g.time * 5;
+  } else if (e.kind === "vey" || e.kind === "nell") {
+    const A: Record<string, string> = { chain: "slam", cross: "dash", orbs: "orb", swap: "cast", rage: "rage" };
+    if (g.mb.boss4.lockT > 0) { anim = "hurt"; i = 0; }
+    else if (e.state === "tele" || e.state === "act") { anim = A[e.move] ?? "slam"; const n = anim === "slam" || anim === "dash" ? 3 : 2; i = e.state === "tele" ? 0 : Math.min(n - 1, 1 + (g.time * 8) % (n - 1)); }
+    else if (e.state === "recover") { anim = "stand"; i = 0; }
+    else i = g.time * (g.mb.boss4.phase >= 3 ? 7 : 5);
   } else if (e.kind === "warden" && e.guard && e.state !== "tele") { anim = "block"; i = e.state === "chase" ? 0 : 1; }
   else if (e.state === "tele") { anim = "attack"; i = 0; }
   else if (e.state === "act") { anim = "attack"; i = 1 + (g.time * 10) % 2; }
   else if (e.state === "recover" || e.state === "idle" && e.kind !== "wisp") { anim = e.state === "idle" ? "walk" : "stand"; }
   const bob = e.kind === "wisp" ? Math.sin(g.time * 4 + e.hx) * 2 : 0;
-  c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" ? 18 : 8, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" ? 5 : 2.5, 0, 0, 7); c.fill();
+  c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" ? 18 : 8, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" ? 5 : 2.5, 0, 0, 7); c.fill();
   if (drawSprite(c, s, anim, f, i, x, y, { flash: fl, lift: -bob })) return true;
   if (e.kind === "warden") {
     c.fillStyle = fl ? "#fff" : "#4a4e5e"; c.fillRect(x - 10, y - 24, 20, 23); c.fillStyle = fl ? "#fff" : "#6a7088"; c.fillRect(x - 7, y - 28, 14, 6);
@@ -90,8 +106,16 @@ export function drawGround(c: CanvasRenderingContext2D, g: Game, cx: number, cy:
   if (b2.active) { const a = arena2Center(); c.strokeStyle = `rgba(255,${b2.phase === 3 ? 60 : 150},40,.65)`; c.lineWidth = 2; c.setLineDash([6, 4]); c.lineDashOffset = -g.time * 20; c.beginPath(); c.ellipse(a.x - cx, a.y - cy, ARENA2.r + 8, ARENA2.r + 8, 0, 0, 7); c.stroke(); c.setLineDash([]); }
   const b3 = g.mb.boss3;
   if (b3.active) { const a = arena3Center(); c.strokeStyle = b3.phase >= 4 ? "rgba(200,110,255,.7)" : "rgba(80,240,255,.6)"; c.lineWidth = 2; c.setLineDash([6, 4]); c.lineDashOffset = -g.time * 20; c.beginPath(); c.ellipse(a.x - cx, a.y - cy, ARENA3.r + 8, ARENA3.r + 8, 0, 0, 7); c.stroke(); c.setLineDash([]); }
+  const b4 = g.mb.boss4;
+  if (b4.active) {
+    const a = arena4Center(), shield = pylonsOf(g).length > 0;
+    c.strokeStyle = b4.phase >= 3 ? "rgba(255,40,70,.8)" : "rgba(255,70,110,.6)"; c.lineWidth = 2; c.setLineDash([6, 4]); c.lineDashOffset = -g.time * 20; c.beginPath(); c.ellipse(a.x - cx, a.y - cy, ARENA4.r + 8, ARENA4.r + 8, 0, 0, 7); c.stroke(); c.setLineDash([]);
+    // shield links: each live pylon feeds both twins
+    if (shield) { c.strokeStyle = (g.frame >> 2) & 1 ? "rgba(255,90,120,.55)" : "rgba(200,110,255,.55)"; c.lineWidth = 1; for (const p of pylonsOf(g)) for (const t of twinsOf(g)) { c.beginPath(); c.moveTo(p.x - cx, p.y - cy - 20); c.lineTo(t.x - cx, t.y - cy - 24); c.stroke(); } }
+  }
   for (const h of g.mb.hazards) {
     if (h.max <= 0) continue;
+    if (h.cage) { const k = 1 - h.t / h.max, X = h.x - cx, Y = h.y - cy; c.fillStyle = `rgba(255,40,90,${0.13 + k * 0.27})`; c.beginPath(); c.ellipse(X, Y, h.r, h.r / 1.6, 0, 0, 7); c.fill(); c.strokeStyle = (g.frame >> 2) & 1 ? "#ff8aa0" : "#c070ff"; c.lineWidth = 1; c.beginPath(); c.ellipse(X, Y, h.r * k, (h.r * k) / 1.6, 0, 0, 7); c.stroke(); continue; }
     const k = 1 - h.t / h.max, X = h.x - cx, Y = h.y - cy;
     c.fillStyle = h.tide ? `rgba(40,200,255,${0.14 + k * 0.28})` : `rgba(255,60,40,${0.12 + k * 0.25})`; c.beginPath(); c.ellipse(X, Y, h.r, h.r / 1.6, 0, 0, 7); c.fill();
     c.strokeStyle = h.tide ? ((g.frame >> 2) & 1 ? "#b8fff8" : "#c070ff") : (g.frame >> 2) & 1 ? "#ffef6a" : "#ff5a3a"; c.lineWidth = 1; c.beginPath(); c.ellipse(X, Y, h.r * k, (h.r * k) / 1.6, 0, 0, 7); c.stroke();
@@ -104,6 +128,8 @@ export function addLights(g: Game, cx: number, cy: number, add: (x: number, y: n
   for (const o of g.mb.orbs) add(o.x - cx, o.y - cy, 16, [1, 0.85, 0.4]);
   for (const e of g.enemies) if (!e.dead && e.kind === "boss") add(e.x - cx, e.y - cy - 24, 56, g.mb.boss.phase === 3 ? [1, 0.3, 0.3] : [0.7, 0.4, 1]);
   for (const e of g.enemies) if (!e.dead && e.kind === "aurel") add(e.x - cx, e.y - cy - 24, 60, g.mb.boss3.phase >= 4 ? [0.8, 0.45, 1] : [0.35, 0.9, 1]);
+  for (const e of g.enemies) if (!e.dead && (e.kind === "vey" || e.kind === "nell")) add(e.x - cx, e.y - cy - 24, 56, e.kind === "vey" ? [1, 0.3, 0.35] : [0.75, 0.4, 1]);
+  for (const e of g.enemies) if (!e.dead && e.kind === "pylon") add(e.x - cx, e.y - cy - 20, 30, [1, 0.25, 0.35]);
   for (const e of g.enemies) if (!e.dead && e.kind === "slag") add(e.x - cx, e.y - cy - 22, 64, [1, 0.5 - g.mb.boss2.phase * 0.08, 0.2]);
 }
 
@@ -124,6 +150,13 @@ export function drawAdditive(c: CanvasRenderingContext2D, g: Game, cx: number, c
     glow(c, e.x - cx + 8, e.y - cy - 24, e.state === "tele" ? 7 : 4, m.boss3.phase >= 3 ? "rgba(200,110,255,.8)" : "rgba(90,230,255,.7)"); // rapier
     if (m.boss3.lockT > 0) glow(c, e.x - cx, e.y - cy - 24, 44, "rgba(80,220,255,.35)");
   }
+  for (const e of g.enemies) if (!e.dead && (e.kind === "vey" || e.kind === "nell")) {
+    const col = e.kind === "vey" ? "rgba(255,60,80,.85)" : "rgba(200,110,255,.85)";
+    glow(c, e.x - cx, e.y - cy - 46, e.state === "tele" ? 9 + Math.sin(g.time * 30) * 2 : 5, col); // hood slit
+    if (m.boss4.phase >= 3) glow(c, e.x - cx, e.y - cy - 24, 30 + Math.sin(g.time * 16) * 4, "rgba(255,40,60,.35)");
+    if (pylonsOf(g).length > 0 || m.boss4.lockT > 0) glow(c, e.x - cx, e.y - cy - 24, 40, "rgba(200,110,255,.3)");
+  }
+  for (const e of g.enemies) if (!e.dead && e.kind === "pylon") glow(c, e.x - cx, e.y - cy - 20, 10 + Math.sin(g.time * 8) * 2, "rgba(255,60,90,.8)");
   for (const e of g.enemies) if (!e.dead && e.kind === "slag") {
     const hot = e.state === "tele" ? 1 : 0.6;
     glow(c, e.x - cx, e.y - cy - 30, 14 + hot * 6 + Math.sin(g.time * 12) * 2, m.boss2.phase === 3 ? "rgba(255,70,30,.85)" : "rgba(255,150,50,.75)");
@@ -159,6 +192,13 @@ export function drawTelegraphs(c: CanvasRenderingContext2D, g: Game, cx: number,
     if (e.move.startsWith("lunge")) { c.strokeStyle = "rgba(120,250,255,.9)"; c.lineWidth = 2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(X, Y - 10); c.lineTo(X + e.ax * 110, Y - 10 + e.ay * 110); c.stroke(); c.setLineDash([]); }
     if (e.move === "summon") { c.strokeStyle = "rgba(190,110,255,.85)"; c.lineWidth = 1; for (let i = 0; i < 3; i++) { const a = (i / 3) * 6.28 + g.time; c.beginPath(); c.arc(X + Math.cos(a) * 34, Y + Math.sin(a) * 24, 6 + Math.sin(g.time * 20) * 2, 0, 7); c.stroke(); } }
   }
+  for (const e of g.enemies) if (!e.dead && (e.kind === "vey" || e.kind === "nell") && e.state === "tele") {
+    const X = Math.round(e.x - cx), Y = Math.round(e.y - cy);
+    c.fillStyle = (g.frame >> 2) & 1 ? "#ff8aa0" : e.kind === "vey" ? "#ff3a4a" : "#c070ff"; c.fillRect(X - 2, Y - 78, 4, 9); c.fillRect(X - 2, Y - 67, 4, 3);
+    if (e.move === "cross" || e.move === "chain") { c.strokeStyle = e.kind === "vey" ? "rgba(255,70,90,.9)" : "rgba(200,110,255,.9)"; c.lineWidth = 2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(X, Y - 6); c.lineTo(X + e.ax * 120, Y - 6 + e.ay * 120); c.stroke(); c.setLineDash([]); }
+    if (e.move === "orbs") { const a = Math.atan2(e.ay, e.ax); c.strokeStyle = "rgba(200,110,255,.6)"; c.beginPath(); c.moveTo(X, Y - 16); c.arc(X, Y - 16, 50, a - 0.5, a + 0.5); c.closePath(); c.stroke(); }
+    if (e.move === "swap" || e.move === "rage") { c.strokeStyle = "rgba(255,90,140,.8)"; c.lineWidth = 1; c.beginPath(); c.arc(X, Y - 22, 10 + (1 - Math.min(1, e.t)) * 30, 0, 7); c.stroke(); }
+  }
   for (const e of g.enemies) if (!e.dead && e.kind === "warden" && e.state === "tele") {
     const X = Math.round(e.x - cx), Y = Math.round(e.y - cy);
     c.fillStyle = (g.frame >> 2) & 1 ? "#ffef6a" : "#ff5a3a"; c.fillRect(X - 1, Y - 40, 3, 7); c.fillRect(X - 1, Y - 31, 3, 2);
@@ -180,6 +220,16 @@ export function drawHudMB(c: CanvasRenderingContext2D, g: Game, W: number) {
   c.fillStyle = "#000"; c.fillRect(3, 29, 24, 5); c.fillStyle = "#1a1424"; c.fillRect(4, 30, 22, 3);
   c.fillStyle = m.tfOn ? (g.frame & 4 ? "#7ff0ff" : "#d070ff") : full ? (g.frame & 8 ? "#ff7aff" : "#c060ff") : "#9050d0"; c.fillRect(4, 30, Math.round(22 * g.tf / 100), 3);
   c.font = "6px monospace"; c.fillStyle = m.tfOn ? "#7ff0ff" : "#c9b"; c.fillText(m.tfOn ? `AWAKE ${Math.ceil(m.tfT)}` : full ? "TF RDY" : "PWR", 4, 40);
+  // twin boss bars (two halves + pylon count)
+  const tw = g.mb.boss4.active ? (["vey", "nell"] as const).map((k) => g.enemies.find((e) => e.kind === k)) : [];
+  if (tw.length) {
+    const st = g.mb.boss4, w = 200, x = W / 2 - w / 2, y = 202, py = pylonsOf(g).length;
+    c.fillStyle = "#000c"; c.fillRect(x - 2, y - 9, w + 4, 15);
+    c.font = "bold 6px monospace"; c.textAlign = "center"; c.fillStyle = "#ffd0dc";
+    c.fillText(`Cageward Twins · PHASE ${st.phase}${py ? ` · SHIELDED ${py}/3 PYLONS` : st.phase >= 3 ? " · ENRAGED" : ""}`, W / 2, y - 2);
+    tw.forEach((e, k) => { const bx = x + k * (w / 2 + 2), bw = w / 2 - 2; c.fillStyle = "#2a1020"; c.fillRect(bx, y, bw, 4); if (e && !e.dead) { c.fillStyle = py ? "#8a6a9a" : k ? "#c070ff" : "#ff3a5a"; c.fillRect(bx, y, Math.round(bw * Math.max(0, e.hp / e.max)), 4); } });
+    return;
+  }
   // boss bar
   const b = g.enemies.find((e) => (e.kind === "boss" || e.kind === "slag" || e.kind === "aurel") && !e.dead);
   if (b) {
