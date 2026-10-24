@@ -87,3 +87,5 @@
 - Spring rule: `place()` drops hazards overlapping the 26 px spring radius (`aurelLog.dropped`), steering + clamp keep his body off (`aurelLog.minBossD`). Hazards carry `tide: true` (drawn cyan/violet).
 - Defeat sets `story.flags.tideBossDown` (gates Sable/Archive) and saves `boss3`. Test hooks merged into `globalThis.__kiMB`: startAurel, aurelLog, ARENA3, MOVES3, springOf, SPRING_R.
 - Note: walking to the Undertide spring now starts the fight; tests that fake tideBossDown must stand boss3 down (see world.mjs).
+
+## W11c — pulled Count Aurel (313f198). Added tests/aurel-story.mjs: real fight, Aurel killed through damage, sets tideBossDown, then the Archive and Malachar reveal plays (5/5). Next from MB: Twins (set cageDone), Sable (sableJoin), Morvant (morvantDown), Malachar (malacharDown).
