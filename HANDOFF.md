@@ -13,3 +13,5 @@
 
 - Executor W2 (done, live): Lost Lanterns — 6 `*` glow orbs in Lanternmoss (story flags orb_*/orbs/orbsDone), Pip gives +120 EXP, cyan dots on Lens map. Next: hidden spring, Hushwater quests, Wellspring Grotto arena layout.
 - 2026-10-23 23:00 Master Builder: combat 0.3.0 on main (techniques, power meter/transform, rusher/shooter/tank, Warden Rune boss + arena, sprites). Test: `node tests/combat.mjs`. Hooks marked `// MB hook`. Boss arena is tile (38,17) in lanternmoss (`ARENA` in src/game/enemies/boss.ts) — move it when the Wellspring Grotto layout lands.
+- 2026-10-23 23:00 Master Builder: combat 0.3.0 on main (techniques, power meter/transform, rusher/shooter/tank, Ashmaw boss + arena, sprites). Test: `node tests/combat.mjs`. Hooks marked `// MB hook`. Boss arena is tile (38,17) in lanternmoss (`ARENA` in src/game/enemies/boss.ts) — move it when the Wellspring Grotto layout lands.
+- Executor W3 (done, live): hidden spring — `K` spring behind `V` false water (SW corner Lanternmoss); first visit +3 stat points (flag spring), always full heal; Joss hints it.

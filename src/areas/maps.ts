@@ -1,7 +1,7 @@
 /**
  * Area maps, 48x34 ASCII (rows padded/clipped; border forced to wall).
  * #wall .floor ,moss =plaza :path ~water(solid) b boardwalk  T mushroom tree  G grave  H mushroom house (3x2, top-left)
- * * glow orb (Lost Lanterns)  L lamp  S hearthstone(save)  @ start  U updraft stone  W sealed ward (gate)  g golem/brute  w wisp  a-z (other) NPC ids per area
+ * * glow orb (Lost Lanterns)  K hidden spring  V false water (walkable)  L lamp  S hearthstone(save)  @ start  U updraft stone  W sealed ward (gate)  g golem/brute  w wisp  a-z (other) NPC ids per area
  */
 export const LANTERNMOSS = [
   "################################################",
@@ -36,7 +36,7 @@ export const LANTERNMOSS = [
   "#~~~~~b...T......w.....T.....,,,...T....,,.....#",
   "#~~~~bb.......................*,.........L.....#",
   "#~~~~b...T..........T...........T..............#",
-  "#~~~~..........................................#",
+  "#.KVV..........................................#",
   "################################################",
 ];
 /** Hushwater: a violet-lit marsh town of boardwalks, a graveyard on the hill and Mirela's lantern-keeper lodge. */

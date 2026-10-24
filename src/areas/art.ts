@@ -1,7 +1,7 @@
 /** World art for areas: tile palettes, props (mushroom houses, cap trees, graves), NPCs, wards, updraft stones, and the story overlay. */
 import type { Game } from "../game";
 import type { Story } from "../story";
-import { TILE, T_WALL, T_MOSS, T_PLAZA, T_WATER, T_PATH, T_BOARD, T_WARD, wardOpen } from "../world";
+import { TILE, T_WALL, T_MOSS, T_PLAZA, T_WATER, T_PATH, T_BOARD, T_WARD, T_HIDDEN, wardOpen } from "../world";
 import { NPCS, INTRO } from "../story/script";
 
 type C2 = CanvasRenderingContext2D;
@@ -11,6 +11,7 @@ const PAL = {
 };
 
 export function tile(c: C2, theme: "moss" | "marsh", v: number, X: number, Y: number, tx: number, ty: number, time: number) {
+  if (v === T_HIDDEN) v = T_WATER;
   const P = PAL[theme], ch = (tx + ty) & 1;
   if (v === T_WALL) { c.fillStyle = P.wall[0]; c.fillRect(X, Y, TILE, TILE); c.fillStyle = P.wall[1]; c.fillRect(X, Y, TILE, 4); c.fillStyle = P.wall[2]; c.fillRect(X, Y + 13, TILE, 3); }
   else if (v === T_PLAZA) { c.fillStyle = ch ? "#5a5260" : "#544c5a"; c.fillRect(X, Y, TILE, TILE); c.fillStyle = "#463f4c"; c.fillRect(X, Y, TILE, 1); c.fillRect(X, Y, 1, TILE); }
@@ -95,6 +96,7 @@ export function worldLights(g: Game, cx: number, cy: number, add: (x: number, y:
   for (const p of g.area.props) if (p.kind === "house") add(p.x - cx, p.y - cy - 12, 56, [0.35, 0.55, 1], 0);
   for (const s of g.area.travel) add(s.x - cx, s.y - cy, 52, [0.7, 0.9, 1], 0);
   for (const n of g.area.npcs) add(n.x - cx, n.y - cy - 12, 30, [0.8, 0.75, 0.7], 0);
+  for (const s of g.area.springs) add(s.x - cx, s.y - cy, 60, [0.5, 1, 0.8], 0);
   for (const o of g.area.orbs) if (!st?.flags[`orb_${g.area.id}_${o.i}`]) add(o.x - cx, o.y - cy - 10, 36, [0.45, 0.85, 1], 0);
 }
 /** Additive glows after the light layer. */
@@ -102,6 +104,10 @@ export function worldGlow(c: C2, g: Game, cx: number, cy: number, glow: (c: C2, 
   for (const p of g.area.props) {
     if (p.kind === "house") { glow(c, p.x - cx, p.y - cy - 16, 22, "rgba(80,140,255,.35)"); glow(c, p.x - cx - 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); glow(c, p.x - cx + 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); }
     else if (p.kind === "tree") glow(c, p.x - cx, p.y - cy - 17, 10, g.area.theme === "marsh" ? "rgba(170,110,255,.45)" : "rgba(90,220,240,.4)");
+  }
+  for (const s of g.area.springs) {
+    const X = s.x - cx, Y = s.y - cy, k = 0.6 + 0.4 * Math.sin(g.time * 2.4);
+    glow(c, X, Y, 18, `rgba(110,255,200,${0.35 * k})`); glow(c, X, Y - 6 - ((g.time * 14) % 10), 3, "rgba(220,255,240,.8)");
   }
   for (const o of g.area.orbs) if (!st?.flags[`orb_${g.area.id}_${o.i}`]) {
     const X = o.x - cx + Math.sin(g.time * 1.3 + o.i) * 3, Y = o.y - cy - 10 + Math.sin(g.time * 2 + o.i * 2) * 3;
@@ -157,7 +163,7 @@ export function storyOverlay(c: C2, g: Game, s: Story, W: number, H: number) {
 /** Lens map of the current area: terrain, zone names, hearthstone, stones, NPCs, foes, hero. */
 export function areaMap(c: C2, g: Game, ox: number, oy: number, s: number) {
   const a = g.area, M = 48;
-  const col: Record<number, string> = { [T_WALL]: "#4c4560", [T_PLAZA]: "#6a6070", [T_WATER]: a.theme === "marsh" ? "#2a1e52" : "#1c2e58", [T_PATH]: "#5a4c3c", [T_BOARD]: "#7a5a3a", [T_MOSS]: "#2a3c2a", [T_WARD]: wardOpen ? "#26232e" : "#7ff0ff" };
+  const col: Record<number, string> = { [T_WALL]: "#4c4560", [T_PLAZA]: "#6a6070", [T_WATER]: a.theme === "marsh" ? "#2a1e52" : "#1c2e58", [T_PATH]: "#5a4c3c", [T_BOARD]: "#7a5a3a", [T_MOSS]: "#2a3c2a", [T_HIDDEN]: a.theme === "marsh" ? "#2a1e52" : "#1c2e58", [T_WARD]: wardOpen ? "#26232e" : "#7ff0ff" };
   for (let y = 0; y < 34; y++) for (let x = 0; x < M; x++) { c.fillStyle = col[a.tiles[y * M + x]] ?? "#26232e"; c.fillRect(ox + x * s, oy + y * s, Math.ceil(s), Math.ceil(s)); }
   for (const p of a.props) { c.fillStyle = p.kind === "house" ? "#3c64c8" : p.kind === "tree" ? "#48b0c0" : "#8a8aa0"; c.fillRect(ox + (p.x / TILE) * s - 1.5, oy + (p.y / TILE) * s - 1.5, 3, 3); }
   c.font = "6px monospace"; c.textAlign = "center"; c.fillStyle = "rgba(255,240,200,.85)";

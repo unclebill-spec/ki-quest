@@ -36,6 +36,11 @@ try {
   for (let i = 0; i < 8 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
   ok("Lost Lanterns reward", await E((e0) => window.__ki.story.flags.orbsDone === true && window.__ki.game.exp + window.__ki.game.lvl * 1000 > e0, exp0));
   await E(() => { window.__ki.game.lvl = 1; window.__ki.game.exp = 0; });
+  // hidden spring: walk west through the false water
+  await E(() => { const g = window.__ki.game; g.p.x = 5 * 16 + 8; g.p.y = 32 * 16 + 8; g.hp = 5; });
+  await p.keyboard.down("ArrowLeft"); await p.waitForTimeout(900); await p.keyboard.up("ArrowLeft");
+  ok("hidden spring found", await E(() => window.__ki.story.flags.spring === true && window.__ki.game.hp === window.__ki.game.maxHp));
+  await p.screenshot({ path: "docs/world-spring.png" });
   // sealed ward blocks at Lv 1
   await E(() => { const g = window.__ki.game, w = g.area.wards[0]; g.p.x = w.tx * 16 - 10; g.p.y = w.ty * 16 + 8; });
   await p.keyboard.down("KeyD"); await p.waitForTimeout(400); await p.keyboard.up("KeyD"); await p.waitForTimeout(100);

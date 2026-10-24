@@ -86,6 +86,11 @@ export class Story {
       this.say("Updraft stone", [`The rune slab hums. Ride the updraft to ${s.label}?`, "(Melee to fly. Step off to stay.)"], () => { this.fly = 1.8; this.flyTo = s.to; });
       return true;
     }
+    for (const s of g.area.springs) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 14) {
+      if (!this.flags.spring) { this.flags.spring = true; g.pts += 3; this.save(); g.say("Hidden Wellspring found · +3 stat points", 3); }
+      else if (g.hp < g.maxHp || g.ep < g.maxEp) g.say("The spring restores you", 1.2);
+      g.hp = g.maxHp; g.ep = g.maxEp;
+    }
     for (const o of g.area.orbs) {
       const k = `orb_${g.area.id}_${o.i}`;
       if (!this.flags[k] && Math.hypot(o.x - g.p.x, o.y + 6 - g.p.y) < 14) {

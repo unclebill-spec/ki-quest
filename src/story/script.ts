@@ -19,7 +19,7 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
     o: { name: "Odile Brask", coat: "#6a4630", hair: "#a03828", skin: "#e0a078", trim: "#ffb040", lines: () =>
       ["Mushroom-iron and stubbornness. That's all gear is.", "Bring me something worth forging and I'll make you a pair of boots you won't want to take off."] },
     j: { name: "Joss Tumble", coat: "#3c6a48", hair: "#e0c060", skin: "#f0c8a0", trim: "#f07020", tall: -3, lines: () =>
-      ["Potions! Gossip! Same price!", "Gossip's free today: the fen folk say vampires in red sashes are walking the boardwalks. Vampires! In this economy."] },
+      ["Potions! Gossip! Same price!", "Gossip's free today: the fen folk say vampires in red sashes are walking the boardwalks. Vampires! In this economy.", "Old Pip swears the southwest marsh lies about where the water ends. Bottom corner, past the boardwalk. Don't tell him I told you."] },
     p: { name: "Pip Arden", coat: "#8a3a4a", hair: "#4a3020", skin: "#e8b890", trim: "#60e0ff", tall: -7, lines: (f) =>
       f.orbsDone ? ["They're all home! They keep bumping into each other. It's very cute."]
       : (f.orbs as number) >= 6 ? ["You found ALL of them?! Hold still, I'm counting... six! Six!", "Here, take some of my glow. You earned it."]

@@ -2,7 +2,7 @@
 import { LANTERNMOSS, HUSHWATER } from "./areas/maps";
 export const TILE = 16;
 export const MW = 48, MH = 34;
-export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3, T_WATER = 4, T_PATH = 5, T_BOARD = 6, T_WARD = 7;
+export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3, T_WATER = 4, T_PATH = 5, T_BOARD = 6, T_WARD = 7, T_HIDDEN = 8;
 export interface Lamp { x: number; y: number; c: readonly [number, number, number]; seed: number }
 export interface Spawn { kind: "brute" | "wisp"; x: number; y: number }
 export interface Prop { kind: "house" | "tree" | "grave"; x: number; y: number }
@@ -13,7 +13,7 @@ export interface Ward { tx: number; ty: number; lvl: number }
 export interface Area {
   id: string; name: string; music: string; theme: "moss" | "marsh";
   tiles: Uint8Array; lamps: Lamp[]; pad: { x: number; y: number }; start: { x: number; y: number }; spawns: Spawn[];
-  props: Prop[]; npcs: Npc[]; orbs: Orb[]; travel: Travel[]; wards: Ward[];
+  props: Prop[]; npcs: Npc[]; orbs: Orb[]; springs: { x: number; y: number }[]; travel: Travel[]; wards: Ward[];
   zones: { name: string; x0: number; y0: number; x1: number; y1: number }[];
 }
 
@@ -33,13 +33,13 @@ export const AREA_DEFS: Record<string, Def> = {
   },
 };
 
-const TILECH: Record<string, number> = { "#": T_WALL, ",": T_MOSS, "=": T_PLAZA, "~": T_WATER, ":": T_PATH, b: T_BOARD, W: T_WARD };
+const TILECH: Record<string, number> = { "#": T_WALL, ",": T_MOSS, "=": T_PLAZA, "~": T_WATER, ":": T_PATH, b: T_BOARD, W: T_WARD, V: T_HIDDEN, K: T_MOSS };
 
 export function buildArea(id = "lanternmoss"): Area {
   const d = AREA_DEFS[id] ?? AREA_DEFS.lanternmoss;
   const t = new Uint8Array(MW * MH);
   const C = (n: number) => n * TILE + 8;
-  const lamps: Lamp[] = [], props: Prop[] = [], npcs: Npc[] = [], spawns: Spawn[] = [], travel: Travel[] = [], wards: Ward[] = [], orbs: Orb[] = [];
+  const lamps: Lamp[] = [], props: Prop[] = [], npcs: Npc[] = [], spawns: Spawn[] = [], travel: Travel[] = [], wards: Ward[] = [], orbs: Orb[] = [], springs: { x: number; y: number }[] = [];
   let pad = { x: C(2), y: C(2) }, start: { x: number; y: number } | null = null;
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
     let ch = (d.rows[y] ?? "")[x] ?? "#";
@@ -51,6 +51,7 @@ export function buildArea(id = "lanternmoss"): Area {
     else if (ch === "H") props.push({ kind: "house", x: C(x + 1), y: C(y + 1) });
     else if (ch === "S") { pad = { x: C(x), y: C(y) }; v = T_PLAZA; }
     else if (ch === "@") start = { x: C(x), y: C(y) };
+    else if (ch === "K") springs.push({ x: C(x), y: C(y) });
     else if (ch === "*") orbs.push({ i: orbs.length, x: C(x), y: C(y) });
     else if (ch === "U") travel.push({ x: C(x), y: C(y), to: d.to, label: d.toLabel });
     else if (ch === "W") wards.push({ tx: x, ty: y, lvl: d.wardLvl });
@@ -64,7 +65,7 @@ export function buildArea(id = "lanternmoss"): Area {
     for (let yy = ty; yy < ty + 2; yy++) for (let xx = tx; xx < tx + 3; xx++) t[yy * MW + xx] = T_WALL;
   }
   // a lamp glow on every house and plaza edge looks busy; houses carry their own cap glow (drawn in areas/art.ts)
-  return { id: d.id, name: d.name, music: d.music, theme: d.theme, tiles: t, lamps, pad, start: start ?? { x: pad.x, y: pad.y + 2 * TILE }, spawns, props, npcs, orbs, travel, wards, zones: d.zones };
+  return { id: d.id, name: d.name, music: d.music, theme: d.theme, tiles: t, lamps, pad, start: start ?? { x: pad.x, y: pad.y + 2 * TILE }, spawns, props, npcs, orbs, springs, travel, wards, zones: d.zones };
 }
 
 export function zoneAt(a: Area, px: number, py: number) {
