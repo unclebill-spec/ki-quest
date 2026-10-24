@@ -55,9 +55,9 @@ try {
   ok("fps with CPU 4x throttle (phase 3) >= 45", fps >= 45, String(fps));
   // reward: kill → +4 pts, full heal, boss2 saved and merged with boss1, survives reset
   const rw = await E(() => { const g = window.__ki.game, b = g.enemies.find((e) => e.kind === "slag" && !e.dead); const pts = g.pts; g.hp = 1; b.lockT = 0; window.__ki.game.mb.boss2.lockT = 0; b.hurt = 0; g.damageFoe(b, b.hp + 10, 0, 0, false); for (let i = 0; i < 30; i++) g.step(1 / 60);
-    const sv = JSON.parse(localStorage.getItem("kiquest-mb-v1") || "{}"); const minions = g.enemies.filter((e) => e.minion && !e.dead).length; g.reset();
-    return { dpts: g.pts - pts, full: true, sv, minions, done: g.mb.boss2.done, active: g.mb.boss2.active }; });
-  ok("Slagheart drops +4 pts, clears minions", rw.dpts >= 4 && rw.minions === 0, JSON.stringify(rw));
+    const sv = JSON.parse(localStorage.getItem("kiquest-mb-v1") || "{}"); const minions = g.enemies.filter((e) => e.minion && !e.dead).length; const qb = window.__ki.story.flags.quarryBossDown; g.reset();
+    return { dpts: g.pts - pts, qb, sv, minions, done: g.mb.boss2.done, active: g.mb.boss2.active }; });
+  ok("Slagheart drops +4 pts, clears minions, sets quarryBossDown", rw.dpts >= 4 && rw.minions === 0 && rw.qb === true, JSON.stringify(rw));
   ok("reward saved (boss1 + boss2 merged) and persists across reset", rw.sv.boss1 === true && rw.sv.boss2 === true && rw.done && !rw.active, JSON.stringify(rw));
   ok("no page errors", errs.length === 0, errs.slice(0, 3).join(" | "));
 } finally { await browser.close(); srv.kill(); }

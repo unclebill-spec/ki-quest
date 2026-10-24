@@ -129,6 +129,8 @@ function summon(g: Game, e: Enemy) {
 /** Reward: EXP orbs (onFoeKill), Heartstone: +4 stat points, full HP/EP/power meter, adds crumble; saved. */
 export function slagKilled(g: Game, e: Enemy) {
   const b = g.mb.boss2; b.active = false; b.done = true; writeBossDone("boss2");
+  // story hook: unlocks the post-quarry-boss beat + Drowned Vesper slab
+  const st = (window as unknown as { __ki?: { story?: { flags: Record<string, unknown>; save(): void } } }).__ki?.story; if (st) { st.flags.quarryBossDown = true; st.save(); }
   g.pts += 4; g.tf = 100; g.hp = g.maxHp; g.ep = g.maxEp; g.shake = 6;
   for (const m of g.enemies) if (m.minion) { m.dead = true; m.respawn = Infinity; }
   g.mb.hazards.length = 0; g.shots = g.shots.filter((s) => !s.foe);
