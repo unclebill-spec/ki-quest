@@ -100,3 +100,6 @@
 - Trigger: story.cageDone && !morvantDown, hero within r-16 of (32,5). Boss y clamped so he stays framed (ring is at map top edge; camera clamped at 0).
 - Hazards with `safe` are dmg 0 markers (updateHazards skips them).
 - Test: `KI_PORT=4487 node tests/boss5.mjs` → docs/boss5-p4.png. Phase loop retries damage until the phase flips and floors hp so allies cannot kill him mid-test (8/8 clean).
+
+## MB W11f (Master Builder): Malachar Vesh, the Last Dusk
+Final boss in src/game/enemies/malachar.ts (trigger: huskIn, !malacharDown, no story box, hero within r-24). 5 phases, telegraphs (TELE6), banners (BANNERS6), lockT shield on phase change. Kill → malacharDown + boss6 saved → existing story ending (src/story/index.ts ~119) plays the Wellsprings scene, dawn, credits. Debug: __kiMB.startMalachar/malacharLog (beams = last prism beam count). Test: KI_PORT=4491 node tests/boss6.mjs (18/18, 6 consecutive runs). Particles palette gained index 12 green (C_GREEN). All suites green on 4501-4511.

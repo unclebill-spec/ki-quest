@@ -1,7 +1,7 @@
 /** Enemy data. Kinds: brute = melee rusher, wisp = ranged shooter, warden = tank/blocker, boss = area boss. Owner: Master Builder. */
-export type FoeKind = "brute" | "wisp" | "warden" | "boss" | "slag" | "aurel" | "vey" | "nell" | "pylon" | "morvant";
+export type FoeKind = "brute" | "wisp" | "warden" | "boss" | "slag" | "aurel" | "vey" | "nell" | "pylon" | "morvant" | "malachar";
 /** Arena bosses (big body, boss bar, companions dodge their telegraphs). */
-export const isBigBoss = (k: string) => k === "boss" || k === "slag" || k === "aurel" || k === "vey" || k === "nell" || k === "morvant";
+export const isBigBoss = (k: string) => k === "boss" || k === "slag" || k === "aurel" || k === "vey" || k === "nell" || k === "morvant" || k === "malachar";
 export type FoeState = "idle" | "chase" | "tele" | "act" | "recover";
 export interface Enemy {
   kind: FoeKind; x: number; y: number; vx: number; vy: number; hp: number; max: number;
@@ -15,7 +15,7 @@ export interface Enemy {
   /** Boss-summoned add: never respawns. */ minion: boolean;
 }
 export interface Orb { x: number; y: number; vx: number; vy: number; v: number; t: number }
-export interface Hazard { x: number; y: number; r: number; t: number; max: number; dmg: number; foe: boolean; /** drawn cyan (Count Aurel tide splashes) */ tide?: boolean; /** drawn red/violet (Cageward Twins) */ cage?: boolean; /** drawn violet/gold (Morvant) */ eclipse?: boolean; /** lit safe zone, no damage */ safe?: boolean }
+export interface Hazard { x: number; y: number; r: number; t: number; max: number; dmg: number; foe: boolean; /** drawn cyan (Count Aurel tide splashes) */ tide?: boolean; /** drawn red/violet (Cageward Twins) */ cage?: boolean; /** drawn violet/gold (Morvant) */ eclipse?: boolean; /** lit safe zone, no damage */ safe?: boolean; /** Malachar: spring colour 0 red 1 violet 2 cyan 3 green */ dusk?: number }
 export interface BossState { phase: number; active: boolean; done: boolean; lockT: number; introT: number }
 
 export const FOE_INFO: Record<FoeKind, { name: string; hp: number; exp: number; heavy: number; respawn: number }> = {
@@ -26,6 +26,7 @@ export const FOE_INFO: Record<FoeKind, { name: string; hp: number; exp: number; 
   slag: { name: "Slagheart", hp: 620, exp: 140, heavy: 0.05, respawn: Infinity },
   aurel: { name: "Count Aurel", hp: 760, exp: 180, heavy: 0.05, respawn: Infinity },
   morvant: { name: "Morvant, the Eclipse Golem", hp: 900, exp: 240, heavy: 0, respawn: Infinity },
+  malachar: { name: "Malachar Vesh, the Last Dusk", hp: 1200, exp: 400, heavy: 0, respawn: Infinity },
   vey: { name: "Vey of the Cage", hp: 430, exp: 110, heavy: 0.08, respawn: Infinity },
   nell: { name: "Nell of the Cage", hp: 400, exp: 110, heavy: 0.08, respawn: Infinity },
   pylon: { name: "Cage Pylon", hp: 60, exp: 6, heavy: 0, respawn: Infinity },

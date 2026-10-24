@@ -10,10 +10,11 @@ import { ARENA3, arena3Center } from "../enemies/aurel";
 import { ROLES } from "./companion";
 import { ARENA4, arena4Center, pylonsOf, twinsOf } from "../enemies/twins";
 import { ARENA5, arena5Center } from "../enemies/morvant";
+import { ARENA6, arena6Center } from "../enemies/malachar";
 
 export let HERO_SHEET = "rook";
 export function setHero(n: string) { HERO_SHEET = n; }
-const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "", morvant: "morvant" };
+const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "", morvant: "morvant", malachar: "malachar" };
 export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); sheet("brann"); sheet("sable"); Object.values(FOE_SHEET).filter(Boolean).forEach(sheet); }
 
 function glow(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
@@ -72,6 +73,12 @@ export function drawFoeMB(c: CanvasRenderingContext2D, g: Game, e: Enemy, x: num
     else if (e.state === "tele" || e.state === "act") { anim = A[e.move] ?? "lunge"; const n = anim === "lunge" || anim === "sweep" ? 3 : 2; i = e.state === "tele" ? 0 : Math.min(n - 1, 1 + (g.time * 8) % (n - 1)); }
     else if (e.state === "recover") { anim = "stand"; i = 0; }
     else i = g.time * 5;
+  } else if (e.kind === "malachar") {
+    const A: Record<string, string> = { slash: "slash", cast: "cast", prism: "prism", rain: "rain", spiral: "cast", nova: "dusk", dusk: "dusk" };
+    if (g.mb.boss6.lockT > 0) { anim = "hurt"; i = 0; }
+    else if (e.state === "tele" || e.state === "act") { anim = A[e.move] ?? "slash"; const n = anim === "slash" || anim === "cast" ? 3 : 2; i = e.state === "tele" ? 0 : Math.min(n - 1, 1 + (g.time * 8) % (n - 1)); }
+    else if (e.state === "recover") { anim = "stand"; i = 0; }
+    else i = g.time * (g.mb.boss6.phase >= 4 ? 6 : 4);
   } else if (e.kind === "morvant") {
     const A: Record<string, string> = { slam: "slam", beam: "beam", beam2: "beam", orbit: "orbit", nova: "nova", eclipse: "eclipse" };
     if (g.mb.boss5.lockT > 0) { anim = "hurt"; i = 0; }
@@ -89,7 +96,7 @@ export function drawFoeMB(c: CanvasRenderingContext2D, g: Game, e: Enemy, x: num
   else if (e.state === "act") { anim = "attack"; i = 1 + (g.time * 10) % 2; }
   else if (e.state === "recover" || e.state === "idle" && e.kind !== "wisp") { anim = e.state === "idle" ? "walk" : "stand"; }
   const bob = e.kind === "wisp" ? Math.sin(g.time * 4 + e.hx) * 2 : 0;
-  c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" || e.kind === "morvant" ? 18 : 8, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" || e.kind === "morvant" ? 5 : 2.5, 0, 0, 7); c.fill();
+  c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" || e.kind === "morvant" || e.kind === "malachar" ? 18 : 8, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" || e.kind === "morvant" || e.kind === "malachar" ? 5 : 2.5, 0, 0, 7); c.fill();
   if (drawSprite(c, s, anim, f, i, x, y, { flash: fl, lift: -bob })) return true;
   if (e.kind === "warden") {
     c.fillStyle = fl ? "#fff" : "#4a4e5e"; c.fillRect(x - 10, y - 24, 20, 23); c.fillStyle = fl ? "#fff" : "#6a7088"; c.fillRect(x - 7, y - 28, 14, 6);
@@ -128,8 +135,24 @@ export function drawGround(c: CanvasRenderingContext2D, g: Game, cx: number, cy:
       c.fillStyle = gr; c.beginPath(); c.ellipse(AX, AY, ARENA5.r + 30, ARENA5.r + 30, 0, 0, 7); c.fill(); }
     c.strokeStyle = b5.phase >= 3 ? "rgba(255,210,90,.8)" : "rgba(200,110,255,.7)"; c.lineWidth = 2; c.setLineDash([6, 4]); c.lineDashOffset = -g.time * 20; c.beginPath(); c.ellipse(AX, AY, ARENA5.r + 8, ARENA5.r + 8, 0, 0, 7); c.stroke(); c.setLineDash([]);
   }
+  const b6 = g.mb.boss6;
+  if (b6.active) {
+    const a = arena6Center(), AX = a.x - cx, AY = a.y - cy, R = ARENA6.r;
+    if (b6.phase >= 4) { // nightfall: the heart's ring goes dark at the edges
+      const gr = c.createRadialGradient(AX, AY, 20, AX, AY, R + 40); gr.addColorStop(0, "rgba(10,0,16,0)"); gr.addColorStop(1, `rgba(8,0,18,${b6.phase >= 5 ? 0.5 : 0.4})`);
+      c.fillStyle = gr; c.beginPath(); c.ellipse(AX, AY, R + 40, R + 40, 0, 0, 7); c.fill(); }
+    // four-colour dashed ring, one quarter per stolen spring, spinning faster every phase
+    const cols = ["rgba(255,70,90,.8)", "rgba(208,112,255,.8)", "rgba(127,240,255,.8)", "rgba(122,255,154,.8)"];
+    c.lineWidth = 2; c.setLineDash([6, 4]); c.lineDashOffset = -g.time * 14 * b6.phase;
+    for (let k = 0; k < 4; k++) { const s0 = g.time * 0.3 * b6.phase + k * 1.5708; c.strokeStyle = cols[k]; c.beginPath(); c.ellipse(AX, AY, R + 8, R + 8, 0, s0, s0 + 1.5708); c.stroke(); }
+    c.setLineDash([]);
+  }
   for (const h of g.mb.hazards) {
     if (h.max <= 0) continue;
+    if (h.dusk != null) { const k = 1 - h.t / h.max, X = h.x - cx, Y = h.y - cy, RGB = ["255,60,80", "190,90,255", "90,230,255", "110,255,150"][h.dusk], HI = ["#ffb0b8", "#f0c0ff", "#d0ffff", "#d0ffe0"][h.dusk];
+      if (h.safe) { c.strokeStyle = (g.frame >> 3) & 1 ? "#fff6c0" : "#ffd24a"; c.lineWidth = 2; c.beginPath(); c.ellipse(X, Y, h.r, h.r / 1.6, 0, 0, 7); c.stroke(); c.fillStyle = "rgba(255,230,150,.18)"; c.fill(); continue; }
+      c.fillStyle = `rgba(${RGB},${0.14 + k * 0.3})`; c.beginPath(); c.ellipse(X, Y, h.r, h.r / 1.6, 0, 0, 7); c.fill();
+      c.strokeStyle = (g.frame >> 2) & 1 ? HI : "#ffffff"; c.lineWidth = 1; c.beginPath(); c.ellipse(X, Y, h.r * k, (h.r * k) / 1.6, 0, 0, 7); c.stroke(); continue; }
     if (h.eclipse) { const k = 1 - h.t / h.max, X = h.x - cx, Y = h.y - cy;
       if (h.safe) { c.strokeStyle = (g.frame >> 3) & 1 ? "#fff6c0" : "#ffd24a"; c.lineWidth = 2; c.beginPath(); c.ellipse(X, Y, h.r, h.r / 1.6, 0, 0, 7); c.stroke(); continue; }
       c.fillStyle = `rgba(120,30,200,${0.15 + k * 0.3})`; c.beginPath(); c.ellipse(X, Y, h.r, h.r / 1.6, 0, 0, 7); c.fill();
@@ -149,6 +172,7 @@ export function addLights(g: Game, cx: number, cy: number, add: (x: number, y: n
   for (const e of g.enemies) if (!e.dead && e.kind === "aurel") add(e.x - cx, e.y - cy - 24, 60, g.mb.boss3.phase >= 4 ? [0.8, 0.45, 1] : [0.35, 0.9, 1]);
   for (const e of g.enemies) if (!e.dead && (e.kind === "vey" || e.kind === "nell")) add(e.x - cx, e.y - cy - 24, 56, e.kind === "vey" ? [1, 0.3, 0.35] : [0.75, 0.4, 1]);
   for (const e of g.enemies) if (!e.dead && e.kind === "morvant") add(e.x - cx, e.y - cy - 26, 70, g.mb.boss5.phase >= 3 ? [1, 0.8, 0.35] : [0.75, 0.4, 1]);
+  for (const e of g.enemies) if (!e.dead && e.kind === "malachar") { const L6: [number, number, number][] = [[1, 0.25, 0.3], [1, 0.25, 0.3], [0.8, 0.4, 1], [0.4, 0.95, 1], [0.5, 1, 0.6], [1, 0.95, 0.8]]; add(e.x - cx, e.y - cy - 28, 80, L6[g.mb.boss6.phase] ?? L6[1]); }
   for (const e of g.enemies) if (!e.dead && e.kind === "pylon") add(e.x - cx, e.y - cy - 20, 30, [1, 0.25, 0.35]);
   for (const e of g.enemies) if (!e.dead && e.kind === "slag") add(e.x - cx, e.y - cy - 22, 64, [1, 0.5 - g.mb.boss2.phase * 0.08, 0.2]);
 }
@@ -192,6 +216,23 @@ export function drawAdditive(c: CanvasRenderingContext2D, g: Game, cx: number, c
       for (const o of e.move === "beam2" ? [0, 1.5708, 3.1416, 4.7124] : [0]) { c.beginPath(); c.moveTo(X, Y - 6); c.lineTo(X + Math.cos(a0 + o) * 128, Y - 6 + Math.sin(a0 + o) * 128); c.stroke(); } c.setLineDash([]); }
     if (e.move === "orbit") { c.strokeStyle = "rgba(200,110,255,.8)"; c.lineWidth = 1; for (let i = 0; i < 2; i++) { c.beginPath(); c.arc(X, Y - 18, 14 + i * 10 + Math.sin(g.time * 20) * 2, 0, 7); c.stroke(); } }
     if (e.move === "slam" || e.move === "nova" || e.move === "eclipse") { c.strokeStyle = "rgba(255,200,80,.85)"; c.lineWidth = 1; c.beginPath(); c.arc(X, Y - 26, 10 + (1 - Math.min(1, e.t)) * 30, 0, 7); c.stroke(); }
+  }
+  for (const e of g.enemies) if (!e.dead && e.kind === "malachar") {
+    const EX = e.x - cx, EY = e.y - cy, ph = m.boss6.phase, tele = e.state === "tele", pulse = Math.sin(g.time * (tele ? 26 : 6));
+    const NEON = ["rgba(255,60,80,.9)", "rgba(200,100,255,.9)", "rgba(110,240,255,.9)", "rgba(110,255,150,.9)"];
+    glow(c, EX, EY - 54 + Math.sin(g.time * 3) * 1.5, 9 + pulse * 2 + (tele ? 5 : 0), "rgba(255,50,70,.85)"); // crown of red spikes
+    glow(c, EX, EY - 30, 6 + (tele ? 4 : 0), "rgba(255,255,255,.5)"); // warden sigil
+    for (let k = 0; k < 4; k++) { const a = g.time * (1.4 + ph * 0.3) + k * 1.5708, r = 18 + ph * 3; glow(c, EX + Math.cos(a) * r, EY - 30 + Math.sin(a) * r * 0.5, 3.5 + (ph >= 5 ? 1.5 : 0), NEON[k]); } // the four stolen springs orbit him
+    if (ph >= 3) glow(c, EX, EY - 28, 30 + pulse * 4, ph >= 5 ? "rgba(255,240,200,.3)" : "rgba(170,60,255,.28)");
+    if (m.boss6.lockT > 0) glow(c, EX, EY - 28, 50, NEON[(g.frame >> 3) & 3].replace(".9)", ".35)"));
+    if (tele) {
+      const X = Math.round(EX), Y = Math.round(EY);
+      c.fillStyle = (g.frame >> 2) & 1 ? "#ff4a5a" : "#7ff0ff"; c.fillRect(X - 2, Y - 76, 4, 9); c.fillRect(X - 2, Y - 65, 4, 3);
+      if (e.move === "prism") { const a0 = Math.atan2(e.ay, e.ax), n = ph >= 5 ? 8 : 4; c.lineWidth = 2; c.setLineDash([4, 3]);
+        for (let k = 0; k < n; k++) { c.strokeStyle = NEON[k & 3]; c.beginPath(); c.moveTo(X, Y - 6); c.lineTo(X + Math.cos(a0 + (k / n) * 6.28) * 134, Y - 6 + Math.sin(a0 + (k / n) * 6.28) * 134); c.stroke(); } c.setLineDash([]); }
+      if (e.move === "spiral" || e.move === "cast") { c.strokeStyle = NEON[1]; c.lineWidth = 1; for (let i = 0; i < 2; i++) { c.beginPath(); c.arc(X, Y - 20, 14 + i * 10 + Math.sin(g.time * 20) * 2, 0, 7); c.stroke(); } }
+      if (e.move === "rain" || e.move === "nova" || e.move === "dusk") { c.strokeStyle = e.move === "rain" ? NEON[0] : NEON[2]; c.lineWidth = 1; c.beginPath(); c.arc(X, Y - 28, 10 + (1 - Math.min(1, e.t)) * 32, 0, 7); c.stroke(); }
+    }
   }
   for (const e of g.enemies) if (!e.dead && e.kind === "pylon") glow(c, e.x - cx, e.y - cy - 20, 10 + Math.sin(g.time * 8) * 2, "rgba(255,60,90,.8)");
   for (const e of g.enemies) if (!e.dead && e.kind === "slag") {
@@ -268,14 +309,14 @@ export function drawHudMB(c: CanvasRenderingContext2D, g: Game, W: number) {
     return;
   }
   // boss bar
-  const b = g.enemies.find((e) => (e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "morvant") && !e.dead);
+  const b = g.enemies.find((e) => (e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "morvant" || e.kind === "malachar") && !e.dead);
   if (b) {
-    const st = b.kind === "slag" ? g.mb.boss2 : b.kind === "aurel" ? g.mb.boss3 : b.kind === "morvant" ? g.mb.boss5 : g.mb.boss, hot = b.kind === "slag", tide = b.kind === "aurel", ecl = b.kind === "morvant";
+    const st = b.kind === "slag" ? g.mb.boss2 : b.kind === "aurel" ? g.mb.boss3 : b.kind === "morvant" ? g.mb.boss5 : b.kind === "malachar" ? g.mb.boss6 : g.mb.boss, fin = b.kind === "malachar", hot = b.kind === "slag", tide = b.kind === "aurel", ecl = b.kind === "morvant";
     const w = 200, x = W / 2 - w / 2, y = 202;
     c.fillStyle = "#000c"; c.fillRect(x - 2, y - 9, w + 4, 15);
-    c.font = "bold 6px monospace"; c.textAlign = "center"; c.fillStyle = ecl ? "#ffe8a0" : tide ? "#c8fff8" : hot ? "#ffe0b0" : "#ffd0e8"; c.fillText(`${FOE_INFO[b.kind].name} · PHASE ${st.phase}`, W / 2, y - 2);
-    c.fillStyle = "#2a1020"; c.fillRect(x, y, w, 4); c.fillStyle = ecl ? (st.phase >= 3 ? ((g.frame >> 3) & 1 ? "#ffd24a" : "#f0a830") : "#b060ff") : tide ? (st.phase >= 4 ? "#c070ff" : st.phase === 3 ? "#7a8aff" : "#3ee0ff") : st.phase === 3 ? "#ff3a5a" : hot ? "#ff9a2a" : "#c050ff"; c.fillRect(x, y, Math.round(w * Math.max(0, b.hp / b.max)), 4);
-    c.fillStyle = "#fff6"; for (const k of tide || ecl ? [0.25, 0.5, 0.75] : [0.33, 0.66]) c.fillRect(x + Math.round(w * k), y, 1, 4);
+    c.font = "bold 6px monospace"; c.textAlign = "center"; c.fillStyle = fin ? "#ffd0e0" : ecl ? "#ffe8a0" : tide ? "#c8fff8" : hot ? "#ffe0b0" : "#ffd0e8"; c.fillText(`${FOE_INFO[b.kind].name} · PHASE ${st.phase}`, W / 2, y - 2);
+    c.fillStyle = "#2a1020"; c.fillRect(x, y, w, 4); c.fillStyle = fin ? ["#ff3a5a", "#ff3a5a", "#c070ff", "#3ee0ff", "#5aff8a", (g.frame >> 2) & 1 ? "#ffffff" : "#ffe08a"][st.phase] : ecl ? (st.phase >= 3 ? ((g.frame >> 3) & 1 ? "#ffd24a" : "#f0a830") : "#b060ff") : tide ? (st.phase >= 4 ? "#c070ff" : st.phase === 3 ? "#7a8aff" : "#3ee0ff") : st.phase === 3 ? "#ff3a5a" : hot ? "#ff9a2a" : "#c050ff"; c.fillRect(x, y, Math.round(w * Math.max(0, b.hp / b.max)), 4);
+    c.fillStyle = "#fff6"; for (const k of fin ? [0.2, 0.4, 0.6, 0.8] : tide || ecl ? [0.25, 0.5, 0.75] : [0.33, 0.66]) c.fillRect(x + Math.round(w * k), y, 1, 4);
   }
 }
 

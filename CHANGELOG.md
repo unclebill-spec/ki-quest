@@ -1,4 +1,8 @@
 # Changelog
+## 0.3.6 — 2026-10-24 (Master Builder: Malachar Vesh, the Last Dusk)
+- Final boss Malachar in HUSK_ARENA (24,15 r8; src/game/enemies/malachar.ts): 1200 HP, 5 phases (80/60/40/20%): slash+cast fan → +prism beams → CROWN OF THORNS (rain, spirals, 7-bolt fans) → NIGHTFALL (darkening, nova, dusk flood with safe ring) → THE LAST LIGHT (8 prism beams, 6-arm spirals, gold/white sparkle storm). Phase banners, shockwave + 1.2 s shield per change, red/violet/cyan/green additive glow, 4 orbiting spring motes, 5-tick boss bar; companions dodge all telegraphs.
+- Defeat: `malacharDown` set+saved, boss6 saved, +8 pts, full heal, "THE LAST DUSK ENDS" + Sunheart toast; story then runs the Wellsprings → Malachar Vesh → Rook ending (dawn + credits).
+- 48x64 sheet (tools/art/build_malachar.py, check_sheets 32/32), docs/malachar_8x.png, docs/boss6-p5.png; tests/boss6.mjs (18 checks, 6/6 stable runs, fps 61 @4x).
 ## 0.3.5 — 2026-10-23 (Master Builder: Morvant, the Eclipse Golem)
 - New boss Morvant in the top ring (STAIR_ARENA 32,5 r4); gated on cageDone; defeat sets/saves `morvantDown` + boss5.
 - 4 phases (75/50/25%): slam+beam → +orbit spiral arms → TOTALITY (umbra darkening, nova rings with gaps, cross beams) → CORONA UNBOUND (eclipse hazard grid with a safe ring). Telegraphed moves, shield during phase shifts, violet/gold additive glow + sparkles.
