@@ -18,7 +18,7 @@ export interface Shot { x: number; y: number; vx: number; vy: number; life: numb
 export interface Num { x: number; y: number; txt: string; col: string; t: number; big: boolean }
 
 export const EP_BLAST = 8, EP_SHIELD_PER_S = 22;
-export const expNext = (l: number) => Math.round(18 * Math.pow(l, 1.4));
+export const expNext = (l: number) => Math.round(12 * Math.pow(l, 1.3));
 const DIRS8 = Array.from({ length: 8 }, (_, i) => [Math.cos((i * Math.PI) / 4), Math.sin((i * Math.PI) / 4)]);
 
 export class Game {

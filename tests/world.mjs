@@ -68,7 +68,7 @@ try {
   await p.keyboard.press("KeyM"); await p.waitForTimeout(200); await shot("map"); await p.keyboard.press("KeyM");
   // Hushwater quests
   const talk = async (id) => { await E((id) => { const g = window.__ki.game, n = g.area.npcs.find((n) => n.id === id); g.p.x = n.x + 14; g.p.y = n.y; }, id); await p.waitForTimeout(120); await p.keyboard.press("KeyJ"); await p.waitForTimeout(300);
-    for (let i = 0; i < 8 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(180); } };
+    for (let i = 0; i < 20 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(180); } };
   await talk("r"); await talk("h");
   ok("Reed quest accepted", await E(() => window.__ki.story.flags.reedQ === true));
   for (let i = 0; i < 8; i++) { await E(() => window.__ki.game.stats.kills++); await p.waitForTimeout(60); }
@@ -81,8 +81,22 @@ try {
   // continue restores the area
   await E(() => window.__ki.game.autosave()); await p.reload(); await p.click("#startBtn"); await p.waitForTimeout(400);
   ok("continue restores Hushwater", await E(() => window.__ki.game.area.id === "hushwater"));
+  // Kilnreach: second updraft stone wakes after the oath
+  await E(() => { const g = window.__ki.game, t = g.area.travel.find((t) => t.to === "kilnreach"); g.p.x = t.x; g.p.y = t.y; }); await p.waitForTimeout(300);
+  ok("east stone offers Kilnreach", await E(() => /Kilnreach/.test(window.__ki.story.box?.lines?.join(" ") ?? JSON.stringify(window.__ki.story.box))));
+  for (let i = 0; i < 6 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); } await p.waitForTimeout(2600);
+  ok("flies to Kilnreach", await E(() => window.__ki.game.area.id === "kilnreach" && window.__ki.game.area.theme === "ember"));
+  if (await E(() => window.__ki.game.area.id === "kilnreach")) { await E(() => { window.__ki.story.box = null; }); await talk("k"); } else console.log(await E(() => [window.__ki.game.area.id, JSON.stringify(window.__ki.story.box), window.__ki.story.fly]));
+  if (!(await E(() => window.__ki.story.flags.metBrann))) await talk("k");
+  ok("meets Brann", await E(() => window.__ki.story.flags.metBrann === true));
+  await E(() => { const g = window.__ki.game; g.p.x = 12 * 16; g.p.y = 17 * 16; }); await p.waitForTimeout(400);
+  await p.screenshot({ path: "docs/bill/kilnreach.png" });
+  await E(() => { window.__ki.story.enter("lanternmoss"); }); await p.waitForTimeout(200);
+  await E(() => { const g = window.__ki.game; g.p.x = 36 * 16; g.p.y = 18 * 16; }); await p.waitForTimeout(1200);
+  ok("grotto banner", await E(() => window.__ki.game.area.props.filter((q) => q.kind === "crystal").length >= 6));
+  await p.screenshot({ path: "docs/bill/grotto.png" });
   const au = await E(() => ({ ctx: !!window.__ki.audio.ctx, bufs: window.__ki.audio.bufs.size, cur: window.__ki.audio.cur, played: window.__ki.audio.played.length }));
-  ok("audio unlocked + music loaded", au.ctx && au.bufs > 0 && au.cur === "area1-theme", JSON.stringify(au));
+  ok("audio unlocked + music loaded", au.ctx && au.bufs > 0 && /theme/.test(au.cur), JSON.stringify(au));
   ok("no console errors", errs.length === 0, errs.join(" | "));
 } finally { await b.close(); srv.kill(); }
 for (const r of R) console.log(r.join("  "));

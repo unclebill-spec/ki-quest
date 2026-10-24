@@ -43,4 +43,13 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
     r: { name: "Orrin Cask", coat: "#3a3a2a", hair: "#806040", skin: "#c89870", trim: "#ffb060", tall: -2, lines: () =>
       ["Ferry's closed. Bell's gone. Fog's thick. It's a whole thing.", "Fen keeps a bell for the fog. Lose it and the boats go in circles. Ask him about it."] },
   },
+  kilnreach: {
+    k: { name: "Brann Okoro", coat: "#5a3428", hair: "#1a1210", skin: "#8a5a3a", trim: "#ff7a2a", tall: 2, lines: (f) =>
+      f.metBrann ? ["The mountain's heartbeat is skipping. Something below the quarry is drinking the embers, same as your spring.", "When you go down there, I'm coming. My hammer's been bored for weeks."]
+        : ["You flew in on the updraft? Ha. Nobody uses that slab anymore.", "Brann Okoro, quarry-smith. Where I come from the stone has a heartbeat, and I keep it warm with mine.", "You're the lamp-lighter? Then we're after the same thief. Something is draining things: your water, my fire."] },
+    q: { name: "Dace Holloway", coat: "#4a4a50", hair: "#c0a080", skin: "#d8a080", trim: "#ffb040", lines: () =>
+      ["Quarry Road's crawling with cinder-shades since the ember-veins started dimming.", "Mind the flow. Lava only looks slow."] },
+    e: { name: "Tib", coat: "#7a3a2a", hair: "#ff9a4a", skin: "#e8b890", trim: "#ffe080", tall: -7, lines: () =>
+      ["Brann says if you press your ear to the rock you can hear it breathing.", "I tried. It just made my ear hot."] },
+  },
 };

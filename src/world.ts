@@ -1,23 +1,23 @@
 /** Areas: ASCII maps (src/areas/maps.ts) -> tiles, lamps, props, NPCs, spawns, gates and updraft stones. */
-import { LANTERNMOSS, HUSHWATER } from "./areas/maps";
+import { LANTERNMOSS, HUSHWATER, KILNREACH } from "./areas/maps";
 export const TILE = 16;
 export const MW = 48, MH = 34;
 export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3, T_WATER = 4, T_PATH = 5, T_BOARD = 6, T_WARD = 7, T_HIDDEN = 8;
 export interface Lamp { x: number; y: number; c: readonly [number, number, number]; seed: number }
 export interface Spawn { kind: "brute" | "wisp"; x: number; y: number }
-export interface Prop { kind: "house" | "tree" | "grave"; x: number; y: number }
+export interface Prop { kind: "house" | "tree" | "grave" | "crystal"; x: number; y: number }
 export interface Npc { id: string; x: number; y: number }
 export interface Travel { x: number; y: number; to: string; label: string }
 export interface Orb { i: number; x: number; y: number }
 export interface Ward { tx: number; ty: number; lvl: number }
 export interface Area {
-  id: string; name: string; music: string; theme: "moss" | "marsh";
+  id: string; name: string; music: string; theme: "moss" | "marsh" | "ember";
   tiles: Uint8Array; lamps: Lamp[]; pad: { x: number; y: number }; start: { x: number; y: number }; spawns: Spawn[];
   props: Prop[]; npcs: Npc[]; orbs: Orb[]; springs: { x: number; y: number }[]; travel: Travel[]; wards: Ward[];
   zones: { name: string; x0: number; y0: number; x1: number; y1: number }[];
 }
 
-interface Def { id: string; name: string; music: string; theme: Area["theme"]; rows: string[]; lamp: Lamp["c"]; to: string; toLabel: string; wardLvl: number; zones: Area["zones"] }
+interface Def { id: string; name: string; music: string; theme: Area["theme"]; rows: string[]; lamp: Lamp["c"]; to: string; toLabel: string; to2?: string; to2Label?: string; wardLvl: number; zones: Area["zones"] }
 export const AREA_DEFS: Record<string, Def> = {
   lanternmoss: {
     id: "lanternmoss", name: "Lanternmoss Hollow", music: "area1-theme", theme: "moss", rows: LANTERNMOSS, lamp: [0.35, 0.8, 1],
@@ -27,9 +27,15 @@ export const AREA_DEFS: Record<string, Def> = {
   },
   hushwater: {
     id: "hushwater", name: "Hushwater", music: "area1-theme", theme: "marsh", rows: HUSHWATER, lamp: [0.62, 0.42, 1],
-    to: "lanternmoss", toLabel: "Lanternmoss Hollow", wardLvl: 0,
+    to: "lanternmoss", toLabel: "Lanternmoss Hollow", to2: "kilnreach", to2Label: "Kilnreach", wardLvl: 0,
     zones: [{ name: "Hushwater Landing", x0: 1, y0: 1, x1: 5, y1: 6 }, { name: "Hushwater Town", x0: 16, y0: 5, x1: 33, y1: 13 },
       { name: "Lantern Graveyard", x0: 34, y0: 1, x1: 46, y1: 9 }, { name: "Sunken Meadow", x0: 0, y0: 14, x1: 47, y1: 33 }, { name: "Hushwater Fen", x0: 0, y0: 0, x1: 47, y1: 33 }],
+  },
+  kilnreach: {
+    id: "kilnreach", name: "Kilnreach", music: "area1-theme", theme: "ember", rows: KILNREACH, lamp: [1, 0.45, 0.25],
+    to: "hushwater", toLabel: "Hushwater", wardLvl: 0,
+    zones: [{ name: "Kilnreach Forge Square", x0: 3, y0: 13, x1: 18, y1: 21 }, { name: "Cinder Landing", x0: 1, y0: 1, x1: 9, y1: 5 },
+      { name: "Emberflow", x0: 13, y0: 1, x1: 35, y1: 18 }, { name: "Quarry Road", x0: 17, y0: 22, x1: 40, y1: 26 }, { name: "Kilnreach Slopes", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },
 };
 
@@ -53,6 +59,8 @@ export function buildArea(id = "lanternmoss"): Area {
     else if (ch === "@") start = { x: C(x), y: C(y) };
     else if (ch === "K") springs.push({ x: C(x), y: C(y) });
     else if (ch === "*") orbs.push({ i: orbs.length, x: C(x), y: C(y) });
+    else if (ch === "Y" && d.to2) { travel.push({ x: C(x), y: C(y), to: d.to2, label: d.to2Label ?? d.to2 }); }
+    else if (ch === "C") { props.push({ kind: "crystal", x: C(x), y: C(y) }); v = T_WALL; }
     else if (ch === "U") travel.push({ x: C(x), y: C(y), to: d.to, label: d.toLabel });
     else if (ch === "W") wards.push({ tx: x, ty: y, lvl: d.wardLvl });
     else if (ch === "g" || ch === "w") spawns.push({ kind: ch === "g" ? "brute" : "wisp", x: C(x), y: C(y) });

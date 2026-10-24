@@ -84,6 +84,7 @@ export class Story {
     }
     for (const s of g.area.travel) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 10 && !this.flags.stoneT) {
       this.flags.stoneT = true;
+      if (s.to === "kilnreach" && !this.flags.oath) { this.say("Updraft stone", ["This slab is cold and points east, toward a red glow on the mountains.", "It won't wake for a stranger. Maybe after Mirela trusts you."]); return true; }
       this.say("Updraft stone", [`The rune slab hums. Ride the updraft to ${s.label}?`, "(Melee to fly. Step off to stay.)"], () => { this.fly = 3.2; this.flyTo = s.to; this.flyFrom = g.area.id; });
       return true;
     }
@@ -124,18 +125,20 @@ export class Story {
       if (id === "a") this.flags.metAma = true;
       if (id === "m") this.flags.metMirela = true;
       const F = this.flags;
-      if (id === "f" && F.bell && !F.bellDone) { F.bellDone = true; g.exp += 80; g.say("Ferry Bell returned · +80 EXP", 2.5); }
-      if (id === "h") { if (!F.reedQ) F.reedQ = true; else if ((F.reedN as number) >= 8 && !F.reedDone) { F.reedDone = true; g.exp += 100; g.pts += 2; g.say("Quiet the Meadow complete · +100 EXP, +2 pts", 2.5); } }
-      if (id === "m" && F.bellDone && F.reedDone && !F.oath) { F.oath = true; g.exp += 150; g.say("Lantern Oath · Mirela will join you · +150 EXP", 3); }
-      if (id === "p" && (this.flags.orbs as number) >= 6 && !this.flags.orbsDone) { this.flags.orbsDone = true; g.exp += 120; g.say("Lost Lanterns complete · +120 EXP", 2.5); }
+      if (id === "f" && F.bell && !F.bellDone) { F.bellDone = true; g.gainExp(80); g.say("Ferry Bell returned · +80 EXP", 2.5); }
+      if (id === "h") { if (!F.reedQ) F.reedQ = true; else if ((F.reedN as number) >= 8 && !F.reedDone) { F.reedDone = true; g.gainExp(100); g.pts += 2; g.say("Quiet the Meadow complete · +100 EXP, +2 pts", 2.5); } }
+      if (id === "m" && F.bellDone && F.reedDone && !F.oath) { F.oath = true; g.gainExp(150); g.say("Lantern Oath · Mirela will join you · +150 EXP", 3); }
+      if (id === "k" && !F.metBrann) { F.metBrann = true; g.gainExp(60); g.say("Met Brann Okoro · +60 EXP", 2.5); }
+      if (id === "p" && (this.flags.orbs as number) >= 6 && !this.flags.orbsDone) { this.flags.orbsDone = true; g.gainExp(120); g.say("Lost Lanterns complete · +120 EXP", 2.5); }
       this.flags["talked_" + g.area.id + id] = true; this.save();
     });
   }
   objective(): string {
     const f = this.flags, g = this.g;
+    if (g.area.id === "kilnreach") return f.metBrann ? "Kilnreach · the quarry below is next (coming soon)" : "Find the quarry-smith in Forge Square";
     if (g.area.id === "hushwater") {
       if (!f.metMirela) return "Find the graveyard keeper on the hill";
-      if (f.oath) return "Mirela is with you · return to Lanternmoss";
+      if (f.oath) return "Mirela is with you · Grotto in Lanternmoss · east stone wakes";
       const q: string[] = [];
       if (!f.bellDone) q.push(f.bell ? "Bring the bell to Fen" : "Find Fen's Ferry Bell");
       if (!f.reedDone) q.push(!f.reedQ ? "Talk to Tallis Reed" : `Quiet the Meadow ${(f.reedN as number) || 0}/8`);
