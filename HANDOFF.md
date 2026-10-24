@@ -32,3 +32,10 @@
 - Balance: expNext = 12*l^1.3 (about 534 EXP to Lv 8). Quest rewards now use g.gainExp, so they trigger level-ups. Brann gives +60.
 - tests/world.mjs has 25 checks. Integrated Mirela companion (239188d); docs/bill/mirela.png is copied from companion-fight.png.
 - Next: themed Kilnreach houses (they still use the mushroom roof), a quarry dungeon with a boss, Brann joining.
+
+## W7 (executor, 11:10 PM): forge houses, Emberheart Quarry, Brann quest
+- Kilnreach houses now draw as ember-theme stone smithies (slate roof, chimney, glowing forge door, orange light).
+- New area `emberquarry` "Emberheart Quarry" (maps.ts EMBERQUARRY): lift `U` back to Kilnreach, save `S`, warm spring `K`, 10 spawns, lava pools, Heart-Ember orb `*` at (33,6).
+- **Boss arena slot for Master Builder:** a round open chamber, zone "Quarry Heart", exported as `QUARRY_ARENA = { tx: 38, ty: 16, r: 7 }` from src/areas/maps.ts. No boss is wired there yet.
+- Brann quest: talking to him the first time sets metBrann and brannQ (+60 EXP) and unseals the Kilnreach quarry lift `Y` (Quarry Road east). Picking up the orb sets flags.heart. Handing it in sets **flags.brann** (+150 EXP, +2 pts). Companion join is Master Builder's: hook on flags.brann the same way as Mirela/oath.
+- tests/world.mjs is now 29/29. Screenshots: docs/bill/kilnreach.png, quarry.png, quarry-arena.png.

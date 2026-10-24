@@ -84,6 +84,7 @@ export class Story {
     }
     for (const s of g.area.travel) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 10 && !this.flags.stoneT) {
       this.flags.stoneT = true;
+      if (s.to === "emberquarry" && !this.flags.brannQ) { this.say("Quarry lift", ["A rune-lift down into the quarry. It's locked with a smith's seal.", "Brann in Forge Square would have the key."]); return true; }
       if (s.to === "kilnreach" && !this.flags.oath) { this.say("Updraft stone", ["This slab is cold and points east, toward a red glow on the mountains.", "It won't wake for a stranger. Maybe after Mirela trusts you."]); return true; }
       this.say("Updraft stone", [`The rune slab hums. Ride the updraft to ${s.label}?`, "(Melee to fly. Step off to stay.)"], () => { this.fly = 3.2; this.flyTo = s.to; this.flyFrom = g.area.id; });
       return true;
@@ -103,6 +104,7 @@ export class Story {
       const k = `orb_${g.area.id}_${o.i}`;
       if (!this.flags[k] && Math.hypot(o.x - g.p.x, o.y + 6 - g.p.y) < 14) {
         this.flags[k] = true;
+        if (g.area.id === "emberquarry") { this.flags.heart = true; this.save(); g.say("Found Brann's Heart-Ember · bring it to Brann", 2.5); continue; }
         if (g.area.id !== "lanternmoss") { this.flags.bell = true; this.save(); g.say("Found the Ferry Bell · bring it to Fen Marrow", 2.5); continue; }
         this.flags.orbs = ((this.flags.orbs as number) || 0) + 1; this.save();
         const st = g.stats as Record<string, number>; st.talks = (st.talks ?? 0) + 1;
@@ -128,14 +130,16 @@ export class Story {
       if (id === "f" && F.bell && !F.bellDone) { F.bellDone = true; g.gainExp(80); g.say("Ferry Bell returned · +80 EXP", 2.5); }
       if (id === "h") { if (!F.reedQ) F.reedQ = true; else if ((F.reedN as number) >= 8 && !F.reedDone) { F.reedDone = true; g.gainExp(100); g.pts += 2; g.say("Quiet the Meadow complete · +100 EXP, +2 pts", 2.5); } }
       if (id === "m" && F.bellDone && F.reedDone && !F.oath) { F.oath = true; g.gainExp(150); g.say("Lantern Oath · Mirela will join you · +150 EXP", 3); }
-      if (id === "k" && !F.metBrann) { F.metBrann = true; g.gainExp(60); g.say("Met Brann Okoro · +60 EXP", 2.5); }
+      if (id === "k" && !F.metBrann) { F.metBrann = true; F.brannQ = true; g.gainExp(60); g.say("Quest: Brann's Heart-Ember · +60 EXP", 2.5); }
+      else if (id === "k" && F.heart && !F.brann) { F.brann = true; g.gainExp(150); g.pts += 2; g.say("Heart-Ember returned · Brann will join you · +150 EXP", 3); }
       if (id === "p" && (this.flags.orbs as number) >= 6 && !this.flags.orbsDone) { this.flags.orbsDone = true; g.gainExp(120); g.say("Lost Lanterns complete · +120 EXP", 2.5); }
       this.flags["talked_" + g.area.id + id] = true; this.save();
     });
   }
   objective(): string {
     const f = this.flags, g = this.g;
-    if (g.area.id === "kilnreach") return f.metBrann ? "Kilnreach · the quarry below is next (coming soon)" : "Find the quarry-smith in Forge Square";
+    if (g.area.id === "kilnreach") return f.brann ? "Brann is with you · the Quarry Heart waits below" : f.heart ? "Bring the Heart-Ember to Brann" : f.metBrann ? "Take the quarry lift (Quarry Road east) · find the Heart-Ember" : "Find the quarry-smith in Forge Square";
+    if (g.area.id === "emberquarry") return f.heart ? (f.brann ? "The Quarry Heart: something drinks the embers" : "Return the Heart-Ember to Brann") : "Find Brann's Heart-Ember in the seam";
     if (g.area.id === "hushwater") {
       if (!f.metMirela) return "Find the graveyard keeper on the hill";
       if (f.oath) return "Mirela is with you · Grotto in Lanternmoss · east stone wakes";

@@ -42,6 +42,16 @@ export function tile(c: C2, theme: "moss" | "marsh" | "ember", v: number, X: num
   else { const p = v === T_MOSS ? P.moss : v === T_PATH ? P.path : P.floor; c.fillStyle = p[ch]; c.fillRect(X, Y, TILE, TILE); }
 }
 
+function forge(c: C2, x: number, y: number) {
+  // ember-theme house: stone smithy with slate roof, chimney and a glowing forge mouth
+  c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y + 10, 26, 6, 0, 0, 7); c.fill();
+  c.fillStyle = "#4a3a34"; c.fillRect(x - 18, y - 10, 36, 20); c.fillStyle = "#3a2c28"; for (let i = 0; i < 5; i++) for (let j = 0; j < 4; j++) c.fillRect(x - 18 + j * 9 + (i % 2) * 4, y - 9 + i * 4, 1, 3);
+  c.fillStyle = "#ff7a2a"; c.fillRect(x - 5, y, 10, 10); c.fillStyle = "#ffd070"; c.fillRect(x - 3, y + 3, 6, 7);
+  c.fillStyle = "#ffb060"; c.fillRect(x - 13, y - 4, 5, 4); c.fillRect(x + 8, y - 4, 5, 4);
+  c.fillStyle = "#2a2226"; c.beginPath(); c.moveTo(x - 24, y - 9); c.lineTo(x, y - 24); c.lineTo(x + 24, y - 9); c.fill();
+  c.fillStyle = "#3a3036"; c.beginPath(); c.moveTo(x - 20, y - 10); c.lineTo(x, y - 21); c.lineTo(x + 20, y - 10); c.fill();
+  c.fillStyle = "#5a4a44"; c.fillRect(x + 9, y - 28, 6, 14); c.fillStyle = "#ff6a2a"; c.fillRect(x + 10, y - 29, 4, 2);
+}
 function house(c: C2, x: number, y: number) {
   // 3x2 tile footprint centred at (x, y): wooden walls under a giant blue mushroom cap
   c.fillStyle = "rgba(0,0,0,.4)"; c.beginPath(); c.ellipse(x, y + 10, 26, 6, 0, 0, 7); c.fill();
@@ -104,7 +114,7 @@ export function worldSprites(c: C2, g: Game, cx: number, cy: number, list: { y: 
   for (const p of a.props) {
     const X = p.x - cx, Y = p.y - cy;
     if (X < -40 || X > 424 || Y < -40 || Y > 260) continue;
-    list.push({ y: p.y + (p.kind === "house" ? 8 : 0), d: () => p.kind === "house" ? house(c, X, Y) : p.kind === "crystal" ? crystal(c, X, Y) : p.kind === "tree" ? (a.theme === "ember" ? spire(c, X, Y) : tree(c, X, Y, marsh)) : grave(c, X, Y) });
+    list.push({ y: p.y + (p.kind === "house" ? 8 : 0), d: () => p.kind === "house" ? (a.theme === "ember" ? forge(c, X, Y) : house(c, X, Y)) : p.kind === "crystal" ? crystal(c, X, Y) : p.kind === "tree" ? (a.theme === "ember" ? spire(c, X, Y) : tree(c, X, Y, marsh)) : grave(c, X, Y) });
   }
   for (const n of a.npcs) list.push({ y: n.y, d: () => npc(c, n.id, a.id, n.x - cx, n.y - cy, g.time) });
   for (const s of a.travel) {
@@ -119,7 +129,7 @@ export function bindStory(s: Story) { st = s; }
 /** Light sources for the multiply layer. */
 export function worldLights(g: Game, cx: number, cy: number, add: (x: number, y: number, r: number, col: [number, number, number], f: number) => void) {
   for (const p of g.area.props) if (p.kind === "crystal") add(p.x - cx, p.y - cy - 8, 40, [0.45, 0.95, 1], 0);
-  for (const p of g.area.props) if (p.kind === "house") add(p.x - cx, p.y - cy - 12, 56, [0.35, 0.55, 1], 0);
+  for (const p of g.area.props) if (p.kind === "house") add(p.x - cx, p.y - cy - 12, 56, g.area.theme === "ember" ? [1, 0.5, 0.2] : [0.35, 0.55, 1], 0);
   for (const s of g.area.travel) add(s.x - cx, s.y - cy, 52, [0.7, 0.9, 1], 0);
   for (const n of g.area.npcs) add(n.x - cx, n.y - cy - 12, 30, [0.8, 0.75, 0.7], 0);
   for (const s of g.area.springs) add(s.x - cx, s.y - cy, 60, [0.5, 1, 0.8], 0);
@@ -128,7 +138,7 @@ export function worldLights(g: Game, cx: number, cy: number, add: (x: number, y:
 /** Additive glows after the light layer. */
 export function worldGlow(c: C2, g: Game, cx: number, cy: number, glow: (c: C2, x: number, y: number, r: number, col: string, a?: number) => void) {
   for (const p of g.area.props) {
-    if (p.kind === "house") { glow(c, p.x - cx, p.y - cy - 16, 22, "rgba(80,140,255,.35)"); glow(c, p.x - cx - 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); glow(c, p.x - cx + 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); }
+    if (p.kind === "house") { glow(c, p.x - cx, p.y - cy - 16, 22, g.area.theme === "ember" ? "rgba(255,120,40,.35)" : "rgba(80,140,255,.35)"); glow(c, p.x - cx - 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); glow(c, p.x - cx + 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); }
     else if (p.kind === "crystal") glow(c, p.x - cx + 2, p.y - cy - 8, 14, "rgba(120,240,255,.5)");
     else if (p.kind === "tree") glow(c, p.x - cx, p.y - cy - 17, 10, g.area.theme === "marsh" ? "rgba(170,110,255,.45)" : g.area.theme === "ember" ? "rgba(255,110,40,.4)" : "rgba(90,220,240,.4)");
   }
@@ -201,7 +211,7 @@ export function areaMap(c: C2, g: Game, ox: number, oy: number, s: number) {
 
 /** World-map flight screen: the Mirrorfen Reaches, a dotted route and the hero's glow riding the updraft. */
 const SPOTS: Record<string, { x: number; y: number; name: string }> = {
-  lanternmoss: { x: 0.28, y: 0.58, name: "Lanternmoss Hollow" }, hushwater: { x: 0.7, y: 0.38, name: "Hushwater" }, kilnreach: { x: 0.86, y: 0.72, name: "Kilnreach" },
+  lanternmoss: { x: 0.28, y: 0.58, name: "Lanternmoss Hollow" }, hushwater: { x: 0.7, y: 0.38, name: "Hushwater" }, kilnreach: { x: 0.86, y: 0.72, name: "Kilnreach" }, emberquarry: { x: 0.9, y: 0.84, name: "Emberheart Quarry" },
 };
 const LOCKED = [{ x: 0.3, y: 0.8, name: "Wellspring Grotto" }, { x: 0.52, y: 0.16, name: "???" }];
 function flightMap(c: C2, g: Game, s: Story, W: number, H: number) {

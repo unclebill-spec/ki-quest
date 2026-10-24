@@ -45,8 +45,10 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
   },
   kilnreach: {
     k: { name: "Brann Okoro", coat: "#5a3428", hair: "#1a1210", skin: "#8a5a3a", trim: "#ff7a2a", tall: 2, lines: (f) =>
-      f.metBrann ? ["The mountain's heartbeat is skipping. Something below the quarry is drinking the embers, same as your spring.", "When you go down there, I'm coming. My hammer's been bored for weeks."]
-        : ["You flew in on the updraft? Ha. Nobody uses that slab anymore.", "Brann Okoro, quarry-smith. Where I come from the stone has a heartbeat, and I keep it warm with mine.", "You're the lamp-lighter? Then we're after the same thief. Something is draining things: your water, my fire."] },
+      f.brann ? ["That's my heart-ember, still warm. I owe you a mountain.", "Down in the Quarry Heart, something big is drinking. When you go, my hammer goes with you."]
+      : f.heart ? ["You found it! Hand it here. Carefully."]
+      : f.metBrann ? ["Still looking? The seam is past the galleries, north and east from the lift. It glows like a coal.", "The mountain's heartbeat's heartbeat is skipping. Something below the quarry is drinking the embers, same as your spring.", "When you go down there, I'm coming. My hammer's been bored for weeks."]
+        : ["You flew in on the updraft? Ha. Nobody uses that slab anymore.", "Brann Okoro, quarry-smith. Where I come from the stone has a heartbeat, and I keep it warm with mine.", "You're the lamp-lighter? Then we're after the same thief. Something is draining things: your water, my fire.", "I dropped my Heart-Ember in the quarry when the shades came. It's the core that keeps my forge, and me, warm. Here's the lift seal. Bring it back?"] },
     q: { name: "Dace Holloway", coat: "#4a4a50", hair: "#c0a080", skin: "#d8a080", trim: "#ffb040", lines: () =>
       ["Quarry Road's crawling with cinder-shades since the ember-veins started dimming.", "Mind the flow. Lava only looks slow."] },
     e: { name: "Tib", coat: "#7a3a2a", hair: "#ff9a4a", skin: "#e8b890", trim: "#ffe080", tall: -7, lines: () =>
