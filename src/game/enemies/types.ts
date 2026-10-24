@@ -18,7 +18,7 @@ export const FOE_INFO: Record<FoeKind, { name: string; hp: number; exp: number; 
   brute: { name: "Scrapjaw", hp: 30, exp: 6, heavy: 1, respawn: 25 },
   wisp: { name: "Glimmer Wisp", hp: 18, exp: 8, heavy: 1.2, respawn: 25 },
   warden: { name: "Stoneward", hp: 70, exp: 14, heavy: 0.35, respawn: 35 },
-  boss: { name: "Ashmaw, Cinder Tyrant", hp: 420, exp: 80, heavy: 0.08, respawn: Infinity },
+  boss: { name: "Warden Rune", hp: 420, exp: 80, heavy: 0.08, respawn: Infinity },
 };
 
 export function makeEnemy(kind: FoeKind, x: number, y: number): Enemy {

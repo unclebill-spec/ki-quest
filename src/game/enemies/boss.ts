@@ -1,5 +1,5 @@
 /**
- * Area 1 boss: Ashmaw, Cinder Tyrant. Arena trigger east of the ridge; 3 phases by HP.
+ * Area 1 boss: Warden Rune. Arena trigger east of the ridge; 3 phases by HP.
  * P1 dash + fan volley · P2 adds ground slams + bullet ring · P3 (enraged) triple dash + spiral + slam cluster.
  * Every move has a telegraph (state "tele", e.move names it). Owner: Master Builder.
  */
