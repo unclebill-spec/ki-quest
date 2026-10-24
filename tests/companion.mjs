@@ -10,6 +10,7 @@ const results = []; const ok = (n, c, d = "") => results.push([c ? "PASS" : "FAI
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
+  await page.addInitScript(() => { let s = 0x2f6b1d; Math.random = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); });
   const errs = []; page.on("pageerror", (e) => errs.push(String(e))); page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
   await page.goto(`http://localhost:${PORT}/ki-quest/`);
   // old-format save (no mirela field) + no oath: must load fine and she must not join
@@ -110,17 +111,45 @@ try {
     m.x = g.p.x + 14; m.y = g.p.y + 14; b.x = g.p.x + 20; b.y = g.p.y - 8; g.p.fx = 1; g.p.fy = 0; g.step(1 / 60); m.atk = 0.18; m.atkStep = 2; b.atk = 0.2; b.atkStep = 3; m.fx = b.fx = 1; m.fy = b.fy = 0; });
   await page.waitForTimeout(150); await page.screenshot({ path: "docs/companions-fight.png" });
   const vis = await E(() => { const g = window.__ki.game; return g.mb.allies.map((a) => ({ id: a.id, dx: Math.round(a.x - g.p.x), dy: Math.round(a.y - g.p.y), j: a.joined, ko: a.ko })); });
-  ok("both companions on screen beside the hero for the fight shot", vis.every((a) => a.j && !a.ko && Math.abs(a.dx) < 150 && Math.abs(a.dy) < 90), JSON.stringify(vis));
+  ok("both companions on screen beside the hero for the fight shot", vis.filter((a) => a.id !== "sable").every((a) => a.j && !a.ko && Math.abs(a.dx) < 150 && Math.abs(a.dy) < 90), JSON.stringify(vis));
   const bsv = await E(() => { const g = window.__ki.game; g.p.x = g.area.pad.x; g.p.y = g.area.pad.y; g.onPad = false; for (let i = 0; i < 5; i++) g.step(1 / 60); const rec = JSON.parse(localStorage.getItem("kiquest-save-v1"));
     const s = window.__ki.story; s.flags.brann = false; s.save(); g.start(true); return { field: rec.brann, joined: g.mb.allies[1].joined }; });
   ok("save persists Brann (optional field)", bsv.field === true && bsv.joined, JSON.stringify(bsv));
+  // ---- Sable: third companion (story flag sableJoin, after the Red Cage), ranged/support caster; 4 bodies never overlap ----
+  const sj = await E(() => { const g = window.__ki.game, s = window.__ki.story, sa = g.mb.allies.find((a) => a.id === "sable"); const before = sa.joined; Object.assign(s.flags, { oath: true, brann: true, sableJoin: true }); s.save();
+    g.enemies.forEach((e) => { e.dead = true; e.respawn = 999; }); g.p.x = g.area.start.x; g.p.y = g.area.start.y; for (let i = 0; i < 70; i++) g.step(1 / 60);
+    return { before, n: g.mb.allies.filter((a) => a.joined).length, joined: sa.joined, max: sa.max, d: Math.round(Math.hypot(sa.x - g.p.x, sa.y - g.p.y)), id: g.mb.allies[2].id }; });
+  ok("Sable joins on the sableJoin flag as the third companion", !sj.before && sj.joined && sj.id === "sable" && sj.n === 3 && sj.d < 50, JSON.stringify(sj));
+  const ov3 = await E(() => { const g = window.__ki.game, I = window.__ki.input, L = g.mb.allies; let stack = 0, onHero = 0, minD = 1e9; const keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
+    const pairs = () => { let m = 1e9; for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++) m = Math.min(m, Math.hypot(L[i].x - L[j].x, L[i].y - L[j].y)); return m; };
+    for (let k = 0; k < 8; k++) { I.key(keys[k % 4], true); for (let i = 0; i < 60; i++) { g.p.inv = 1; g.step(1 / 60); if (i > 20) { const d = pairs(); minD = Math.min(minD, d); if (d < 8) stack++; for (const a of L) if (Math.hypot(a.x - g.p.x, a.y - g.p.y) < 8) onHero++; } } I.key(keys[k % 4], false); }
+    for (let i = 0; i < 120; i++) g.step(1 / 60); const rest = pairs(), restHero = Math.min(...L.map((a) => Math.hypot(a.x - g.p.x, a.y - g.p.y)));
+    L[2].x = L[0].x; L[2].y = L[0].y; L[1].x = L[0].x; L[1].y = L[0].y; for (let i = 0; i < 12; i++) g.step(1 / 60);
+    return { minD: Math.round(minD), stack, onHero, rest: Math.round(rest), restHero: Math.round(restHero), after: Math.round(pairs()) }; });
+  ok("hero + 3 companions never stack (walk, rest, forced 3-way overlap)", ov3.stack === 0 && ov3.onHero === 0 && ov3.rest >= 12 && ov3.restHero >= 10 && ov3.after >= 10, JSON.stringify(ov3));
+  const sdoor = await E(() => { const g = window.__ki.game, A = g.area; const gaps = []; g.enemies.forEach((e) => { e.dead = true; e.respawn = 999; });
+    for (let ty = 1; ty < 33; ty++) for (let tx = 1; tx < 47; tx++) { const s = (x, y) => [1, 4].includes(A.tiles[y * 48 + x]); if (!s(tx, ty) && ((s(tx - 1, ty) && s(tx + 1, ty)) || (s(tx, ty - 1) && s(tx, ty + 1)))) gaps.push([tx, ty]); }
+    let bad = 0, n = 0;
+    for (const [tx, ty] of gaps.slice(0, 12)) { g.p.x = tx * 16 + 8; g.p.y = ty * 16 + 8 + 24; if (g.p.y > 33 * 16 || [1, 4].includes(A.tiles[Math.floor(g.p.y / 16) * 48 + tx])) continue; g.p.fx = 0; g.p.fy = 1; n++;
+      for (let i = 0; i < 150; i++) g.step(1 / 60); for (const a of g.mb.allies) if (Math.floor(a.x / 16) === tx && Math.floor(a.y / 16) === ty) bad++; }
+    return { tried: n, bad }; });
+  ok("none of the 3 companions rests in a doorway", sdoor.bad === 0 && sdoor.tried > 0, JSON.stringify(sdoor));
+  const sf = await E(() => { const g = window.__ki.game, sa = g.mb.allies[2]; g.p.x = g.area.start.x; g.p.y = g.area.start.y; for (const a of g.mb.allies) { a.hp = a.max; a.x = g.p.x - 10; a.y = g.p.y + 14; } g.mb.allies[0].x -= 14; g.mb.allies[1].x += 14;
+    const foes = [["brute", 46, -6], ["wisp", 60, -30]].map(([k, dx, dy]) => { const e = g.makeEnemy(k, g.p.x + dx, g.p.y + dy); e.hp = e.max = 500; g.enemies.push(e); return e; });
+    const b0 = sa.bolts, mb0 = g.mb.allies[0].bolts, h0 = sa.heals; let dSum = 0, dn = 0, healed = 0;
+    for (let i = 0; i < 60 * 10; i++) { g.p.inv = 1; if (i === 60) g.hp = Math.round(g.maxHp * 0.5); const hp0 = g.hp; for (const a of g.mb.allies) a.hp = Math.max(a.hp, a.max * 0.5); g.step(1 / 60); if (g.hp > hp0) healed += g.hp - hp0;
+      if (sa.state === "fight") { const f = foes.filter((e) => !e.dead).sort((a, b) => Math.hypot(a.x - sa.x, a.y - sa.y) - Math.hypot(b.x - sa.x, b.y - sa.y))[0]; if (f) { dSum += Math.hypot(f.x - sa.x, f.y - sa.y); dn++; } } }
+    foes.forEach((e) => { e.dead = true; e.respawn = 999; });
+    return { bolts: sa.bolts - b0, mirBolts: g.mb.allies[0].bolts - mb0, heals: sa.heals - h0, healed, avgD: Math.round(dSum / Math.max(1, dn)), fought: dn }; });
+  ok("Sable is a ranged caster: keeps her distance and fires bolts far more than Mirela", sf.fought > 60 && sf.avgD > 40 && sf.bolts >= 3 && sf.bolts > sf.mirBolts, JSON.stringify(sf));
+  ok("Sable ward-heals the hurt hero", sf.heals >= 1 && sf.healed >= 10, JSON.stringify(sf));
   // fps at 4x throttle with her fighting
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   await E(() => { const g = window.__ki.game; g.p.x = g.area.start.x; g.p.y = g.area.start.y; for (let i = 0; i < 6; i++) { const e = g.makeEnemy(i % 2 ? "wisp" : "brute", g.p.x + 40 + i * 8, g.p.y - 20 + i * 8); e.hp = e.max = 1e4; g.enemies.push(e); } });
   const fps = await E(() => new Promise((res) => { const g = window.__ki.game; let n = 0; const t0 = performance.now(); const tick = () => { n++; g.hp = 1e5; g.p.inv = 1; for (const a of g.mb.allies) a.hp = a.max; if (performance.now() - t0 < 3000) requestAnimationFrame(tick); else res({ fps: n / 3, st: g.mb.ally.state }); }; requestAnimationFrame(tick); }));
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
-  ok("fps with CPU 4x throttle (Mirela + Brann fighting) >= 45", fps.fps >= 45, JSON.stringify(fps));
+  ok("fps with CPU 4x throttle (Mirela + Brann + Sable fighting) >= 45", fps.fps >= 45, JSON.stringify(fps));
   ok("no page errors", errs.length === 0, errs.join(" | "));
 } finally { await browser.close(); srv.kill(); }
 for (const r of results) console.log(r.join("  "));
