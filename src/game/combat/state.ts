@@ -10,6 +10,7 @@ export interface MBState {
   /** Kilnreach quarry boss, Slagheart (src/game/enemies/slagheart.ts). */ boss2: BossState;
   /** Undertide boss, Count Aurel (src/game/enemies/aurel.ts). */ boss3: BossState;
   /** Stair boss, the Cageward Twins (src/game/enemies/twins.ts). */ boss4: BossState;
+  /** Stair top-ring boss, Morvant (src/game/enemies/morvant.ts). */ boss5: BossState;
   /** Companions (src/game/combat/companion.ts): [Mirela, Brann, Sable]. ally = allies[0] (Mirela). */ allies: Ally[]; ally: Ally;
 }
 export function makeMB(): MBState {
@@ -18,7 +19,8 @@ export function makeMB(): MBState {
     boss: { phase: 0, active: false, done: readBossDone(), lockT: 0, introT: 0 },
     boss2: { phase: 0, active: false, done: readBossDone("boss2"), lockT: 0, introT: 0 },
     boss3: { phase: 0, active: false, done: readBossDone("boss3"), lockT: 0, introT: 0 },
-    boss4: { phase: 0, active: false, done: readBossDone("boss4"), lockT: 0, introT: 0 } };
+    boss4: { phase: 0, active: false, done: readBossDone("boss4"), lockT: 0, introT: 0 },
+    boss5: { phase: 0, active: false, done: readBossDone("boss5"), lockT: 0, introT: 0 } };
 }
 const SLOT = "kiquest-mb-v1"; // localStorage slot name
 /** Slot shape {boss1?: true, boss2?: true}; writes merge so each boss keeps its own flag. */

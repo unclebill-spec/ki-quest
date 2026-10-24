@@ -8,6 +8,7 @@ import { updateBoss, bossKilled } from "./boss";
 import { updateSlag, slagKilled } from "./slagheart";
 import { updateAurel, aurelKilled } from "./aurel";
 import { updateTwin, twinKilled, twinShielded, twinsLog } from "./twins";
+import { updateMorvant, morvantKilled } from "./morvant";
 import { hurtAlly } from "../combat/companion";
 
 /** Extra spawns this module adds to the area (wardens), on open floor near the given tiles. */
@@ -25,7 +26,7 @@ export function freeNear(a: Area, tx: number, ty: number) {
 
 /** Called from Game.damageFoe before applying damage. Returns adjusted damage/knockback. */
 export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, crit: boolean, pierce = false) {
-  if ((e.kind === "boss" && g.mb.boss.lockT > 0) || (e.kind === "slag" && g.mb.boss2.lockT > 0) || (e.kind === "aurel" && g.mb.boss3.lockT > 0)) return { d: 0, kx: 0, ky: 0, blocked: true };
+  if ((e.kind === "boss" && g.mb.boss.lockT > 0) || (e.kind === "slag" && g.mb.boss2.lockT > 0) || (e.kind === "aurel" && g.mb.boss3.lockT > 0) || (e.kind === "morvant" && g.mb.boss5.lockT > 0)) return { d: 0, kx: 0, ky: 0, blocked: true };
   if (twinShielded(g, e)) { twinsLog.shieldedHits++; return { d: 0, kx: 0, ky: 0, blocked: true }; }
   if (e.kind === "warden" && e.guard) {
     const n = Math.hypot(kx, ky) || 1, front = (kx / n) * e.ax + (ky / n) * e.ay < -0.2;
@@ -46,11 +47,12 @@ export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, c
 export function onFoeKill(g: Game, e: Enemy) {
   const info = FOE_INFO[e.kind];
   e.respawn = e.minion ? Infinity : info.respawn;
-  const n = e.kind === "boss" ? 10 : e.kind === "slag" || e.kind === "aurel" ? 12 : e.kind === "vey" || e.kind === "nell" ? 8 : 3, each = Math.ceil(info.exp / n);
+  const n = e.kind === "boss" ? 10 : e.kind === "slag" || e.kind === "aurel" ? 12 : e.kind === "morvant" ? 14 : e.kind === "vey" || e.kind === "nell" ? 8 : 3, each = Math.ceil(info.exp / n);
   for (let i = 0; i < n; i++) { const a = (i / n) * 6.28; g.mb.orbs.push({ x: e.x, y: e.y - 8, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60 - 30, v: each, t: 0 }); }
   if (e.kind === "boss") bossKilled(g, e);
   if (e.kind === "slag") slagKilled(g, e);
   if (e.kind === "aurel") aurelKilled(g, e);
+  if (e.kind === "morvant") morvantKilled(g, e);
   if (e.kind === "vey" || e.kind === "nell" || e.kind === "pylon") twinKilled(g, e);
 }
 
@@ -79,6 +81,7 @@ export function updateFoes(g: Game, dt: number) {
     else if (e.kind === "boss") [wx, wy] = updateBoss(g, e, dt, ux, uy, dist);
     else if (e.kind === "slag") [wx, wy] = updateSlag(g, e, dt, ux, uy, dist);
     else if (e.kind === "aurel") [wx, wy] = updateAurel(g, e, dt, ux, uy, dist);
+    else if (e.kind === "morvant") [wx, wy] = updateMorvant(g, e, dt, ux, uy, dist);
     else if (e.kind === "vey" || e.kind === "nell") [wx, wy] = updateTwin(g, e, dt, ux, uy, dist);
     else if (e.kind === "pylon") [wx, wy] = [0, 0];
     else if (e.kind === "brute") {
@@ -128,7 +131,7 @@ function updateHazards(g: Game, dt: number) {
   for (const h of g.mb.hazards) {
     h.t -= dt;
     if (h.t <= 0 && h.max > 0) {
-      h.max = 0;
+      h.max = 0; if (h.safe) continue;
       if (Math.hypot(p.x - h.x, (p.y - h.y) * 1.6) < h.r) g.hurtHero(h.dmg, h.x, h.y);
       for (const al of g.mb.allies) if (al.joined && Math.hypot(al.x - h.x, (al.y - h.y) * 1.6) < h.r) hurtAlly(g, h.dmg * 0.8, h.x, h.y, al);
       g.parts.emit(CH_COMBAT, K_RING, h.x, h.y - 2, 0, 0, 0.3, C_RED);
