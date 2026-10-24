@@ -1,4 +1,9 @@
 # Changelog
+## 0.3.5 — 2026-10-23 (Master Builder: Morvant, the Eclipse Golem)
+- New boss Morvant in the top ring (STAIR_ARENA 32,5 r4); gated on cageDone; defeat sets/saves `morvantDown` + boss5.
+- 4 phases (75/50/25%): slam+beam → +orbit spiral arms → TOTALITY (umbra darkening, nova rings with gaps, cross beams) → CORONA UNBOUND (eclipse hazard grid with a safe ring). Telegraphed moves, shield during phase shifts, violet/gold additive glow + sparkles.
+- 48x64 sheet (tools/art/build_morvant.py, check_sheets 32/32); tests/boss5.mjs (17 checks).
+
 ## 0.3.4 — 2026-10-23 (Master Builder: Cageward Twins + Sable)
 - Cageward Twins (Vey 430 HP, Nell 400 HP) + 3 shield pylons (60 HP) in the Stair Red Cage ring (ARENA4 stair tile 24,15 r88; src/game/enemies/twins.ts). P1: twins shielded while any pylon stands, alternating telegraphed chain/orb moves. P2 (pylons down, shockwave): shared kits, linked swap (trade places) and cross-dash. P3: first death enrages the survivor (x1.35 speed, spiral rage, 7-shot fan). Split boss bar with phase/shield/enrage readout; companions dodge their telegraphs and ignore shielded twins.
 - Defeat: flag `cageDone` (story then sets `sableJoin`), +6 pts, full heal, "Cage Key", saved as `boss4` in kiquest-mb-v1.
