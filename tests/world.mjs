@@ -56,8 +56,8 @@ try {
   await p.keyboard.down("KeyW"); await p.waitForTimeout(250); await p.keyboard.up("KeyW"); await p.waitForTimeout(100);
   ok("updraft prompt", await E(() => /Hushwater/.test(window.__ki.story.box?.lines[0] ?? "")));
   for (let i = 0; i < 6 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
-  await p.waitForTimeout(500); await shot("flight");
-  await p.waitForTimeout(1800);
+  await p.waitForTimeout(1500); await shot("flight");
+  await p.waitForTimeout(2200);
   ok("arrived in Hushwater", await E(() => window.__ki.game.area.id === "hushwater" && window.__ki.story.flags.area === "hushwater"));
   await shot("hushwater");
   await E(() => { const g = window.__ki.game, m = g.area.npcs.find((n) => n.id === "m"); g.p.x = m.x - 14; g.p.y = m.y; });

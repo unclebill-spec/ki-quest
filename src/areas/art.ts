@@ -164,11 +164,7 @@ export function storyOverlay(c: C2, g: Game, s: Story, W: number, H: number) {
     c.globalAlpha = 1; c.font = "7px monospace"; c.fillStyle = "#8a86a8"; c.fillText("Melee: next · Pause: skip", W / 2, H - 16);
   }
   if (s.fly > 0) {
-    const t = 1.8 - s.fly, a = t < 0.9 ? t / 0.9 : s.fly / 0.9;
-    c.fillStyle = `rgba(10,14,34,${Math.min(1, a)})`; c.fillRect(0, 0, W, H);
-    c.strokeStyle = `rgba(200,240,255,${0.5 * a})`; c.lineWidth = 1;
-    for (let i = 0; i < 18; i++) { const x = (i * 71) % W, y = (i * 37 + t * 400) % H; c.beginPath(); c.moveTo(x, y); c.lineTo(x, y - 14); c.stroke(); }
-    c.fillStyle = `rgba(255,255,255,${a})`; c.textAlign = "center"; c.fillText("Riding the updraft...", W / 2, H / 2);
+    flightMap(c, g, s, W, H);
   }
   c.restore();
 }
@@ -187,4 +183,32 @@ export function areaMap(c: C2, g: Game, ox: number, oy: number, s: number) {
   for (const n of a.npcs) { c.fillStyle = "#6aff8a"; c.fillRect(ox + (n.x / TILE) * s - 1.5, oy + (n.y / TILE) * s - 1.5, 3, 3); }
   for (const e of g.enemies) if (!e.dead) { c.fillStyle = "#ff4a4a"; c.fillRect(ox + (e.x / TILE) * s - 1, oy + (e.y / TILE) * s - 1, 2, 2); }
   c.fillStyle = g.frame & 16 ? "#fff" : "#ffd04a"; c.fillRect(ox + (g.p.x / TILE) * s - 2, oy + (g.p.y / TILE) * s - 2, 4, 4);
+}
+
+/** World-map flight screen: the Mirrorfen Reaches, a dotted route and the hero's glow riding the updraft. */
+const SPOTS: Record<string, { x: number; y: number; name: string }> = {
+  lanternmoss: { x: 0.28, y: 0.58, name: "Lanternmoss Hollow" }, hushwater: { x: 0.7, y: 0.38, name: "Hushwater" },
+};
+const LOCKED = [{ x: 0.3, y: 0.8, name: "Wellspring Grotto" }, { x: 0.86, y: 0.72, name: "???" }, { x: 0.52, y: 0.16, name: "???" }];
+function flightMap(c: C2, g: Game, s: Story, W: number, H: number) {
+  const glow = (c: C2, x: number, y: number, r: number, col: string) => { const gr = c.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, col); gr.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = gr; c.fillRect(x - r, y - r, r * 2, r * 2); };
+  const T = 3.2, t = T - s.fly, a = Math.max(0, Math.min(1, t / 0.4, s.fly / 0.4));
+  const p = Math.max(0, Math.min(1, (t - 0.5) / 2.0)), e = p * p * (3 - 2 * p);
+  c.globalAlpha = a; c.fillStyle = "#0a0e22"; c.fillRect(0, 0, W, H);
+  // parchment-dark land masses
+  c.fillStyle = "#1a2a2a"; c.beginPath(); c.ellipse(W * 0.3, H * 0.62, W * 0.2, H * 0.3, 0.2, 0, 7); c.fill();
+  c.fillStyle = "#221a38"; c.beginPath(); c.ellipse(W * 0.7, H * 0.42, W * 0.2, H * 0.28, -0.3, 0, 7); c.fill();
+  c.fillStyle = "#16202e"; c.beginPath(); c.ellipse(W * 0.52, H * 0.18, W * 0.12, H * 0.1, 0, 0, 7); c.fill(); c.beginPath(); c.ellipse(W * 0.86, H * 0.75, W * 0.1, H * 0.12, 0, 0, 7); c.fill();
+  for (let i = 0; i < 24; i++) { c.fillStyle = "rgba(160,200,255,.15)"; c.fillRect((i * 83 + t * 30) % W, (i * 41) % H, 6, 1); }
+  c.font = "7px monospace"; c.textAlign = "center"; c.textBaseline = "top";
+  for (const l of LOCKED) { c.fillStyle = "#4a4860"; c.fillRect(W * l.x - 2, H * l.y - 2, 4, 4); c.fillStyle = "#6a6888"; c.fillText(l.name, W * l.x, H * l.y + 4); }
+  const A = SPOTS[s.flyFrom] ?? SPOTS.lanternmoss, B = SPOTS[s.flyTo || g.area.id] ?? SPOTS.hushwater;
+  const ax = W * A.x, ay = H * A.y, bx = W * B.x, by = H * B.y, mx = (ax + bx) / 2, my = Math.min(ay, by) - 40;
+  c.strokeStyle = "rgba(255,233,168,.6)"; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(ax, ay); c.quadraticCurveTo(mx, my, bx, by); c.stroke(); c.setLineDash([]);
+  for (const sp of [A, B]) { c.fillStyle = "#7ff0ff"; c.fillRect(W * sp.x - 2, H * sp.y - 2, 5, 5); c.fillStyle = "#e8f8ff"; c.fillText(sp.name, W * sp.x, H * sp.y + 5); }
+  const u = 1 - e, hx = u * u * ax + 2 * u * e * mx + e * e * bx, hy = u * u * ay + 2 * u * e * my + e * e * by;
+  glow(c, hx, hy, 14, "rgba(120,230,255,.6)"); glow(c, hx, hy, 4, "#ffffff");
+  c.fillStyle = "#ffe9a8"; c.font = "8px monospace"; c.fillText("THE MIRRORFEN REACHES", W / 2, 8);
+  c.fillStyle = "#c8c4e8"; c.fillText(`Riding the updraft to ${B.name}...`, W / 2, H - 16);
+  c.globalAlpha = 1;
 }

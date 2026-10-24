@@ -22,3 +22,4 @@
 - `art.ts tile()` takes optional `tiles` (draw.ts passes `a.tiles`); without it the old flat path still runs. Walls, collision, maps unchanged.
 - `node tests/ground.mjs before|after` (KI_PORT, default 4181) -> docs/ground_<tag>_*.png + fps @4x CPU throttle (56 fps after, 57 before).
 - Executor W4: Hushwater quests (Ferry Bell for Fen, Quiet the Meadow x8 for Tallis, Lantern Oath with Mirela) + Orrin NPC; Wellspring Grotto rock ring around ARENA (38,17), entrances W and S, zone banner; ward now Lv 8.
+- Executor W5: world-map flight screen (Mirrorfen Reaches, 3.2 s, route + locked spots) in src/areas/art.ts flightMap; story.flyFrom. Shots in docs/bill/ (ground, flight, hushwater-quests, grotto). Next: Grotto interior dressing, Mirela as companion hook, area 3 stub.

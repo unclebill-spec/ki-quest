@@ -16,7 +16,7 @@ export class Story {
   lastKills = 0;
   box: Box | null = null;
   intro = -1; introT = 0;
-  fly = 0; flyTo = ""; near: string | null = null; zone = ""; zoneT = 0;
+  fly = 0; flyTo = ""; flyFrom = ""; near: string | null = null; zone = ""; zoneT = 0;
   constructor(public g: Game, public input: Input) {
     try { this.flags = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch { this.flags = {}; }
   }
@@ -55,7 +55,7 @@ export class Story {
     }
     if (this.fly > 0) {
       this.fly -= dt; inp.poll();
-      if (this.fly <= 0.9 && this.flyTo) { this.enter(this.flyTo); this.flyTo = ""; const st = g.stats as Record<string, number>; st.travels = (st.travels ?? 0) + 1; }
+      if (this.fly <= 0.6 && this.flyTo) { this.enter(this.flyTo); this.flyTo = ""; const st = g.stats as Record<string, number>; st.travels = (st.travels ?? 0) + 1; }
       return true;
     }
     if (this.box) {
@@ -84,7 +84,7 @@ export class Story {
     }
     for (const s of g.area.travel) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 10 && !this.flags.stoneT) {
       this.flags.stoneT = true;
-      this.say("Updraft stone", [`The rune slab hums. Ride the updraft to ${s.label}?`, "(Melee to fly. Step off to stay.)"], () => { this.fly = 1.8; this.flyTo = s.to; });
+      this.say("Updraft stone", [`The rune slab hums. Ride the updraft to ${s.label}?`, "(Melee to fly. Step off to stay.)"], () => { this.fly = 3.2; this.flyTo = s.to; this.flyFrom = g.area.id; });
       return true;
     }
     const kills = g.stats.kills;
