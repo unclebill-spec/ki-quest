@@ -1,4 +1,9 @@
 # Changelog
+## 0.3.4 — 2026-10-23 (Master Builder: Cageward Twins + Sable)
+- Cageward Twins (Vey 430 HP, Nell 400 HP) + 3 shield pylons (60 HP) in the Stair Red Cage ring (ARENA4 stair tile 24,15 r88; src/game/enemies/twins.ts). P1: twins shielded while any pylon stands, alternating telegraphed chain/orb moves. P2 (pylons down, shockwave): shared kits, linked swap (trade places) and cross-dash. P3: first death enrages the survivor (x1.35 speed, spiral rage, 7-shot fan). Split boss bar with phase/shield/enrage readout; companions dodge their telegraphs and ignore shielded twins.
+- Defeat: flag `cageDone` (story then sets `sableJoin`), +6 pts, full heal, "Cage Key", saved as `boss4` in kiquest-mb-v1.
+- Sable joins as 4th companion on `sableJoin`: ranged/support caster (80 HP, holds ~70 px, ki bolts, ward-heals hero 10 / allies 8 every 8 s), violet sash. Sheets public/art/chars/sable.* (24x32, check_sheets 36/36), cageward_vey/nell.* (48x64, 32/32), docs/cageward_twins_8x.png.
+- Tests: tests/boss4.mjs (16 incl. fps at 4x); companion.mjs 26 (Sable join, 4-way no-overlap, doorways, caster range, heals) and now seeds Math.random (Brann taunt-aim check was flaky on baseline too).
 ## 0.3.3 — 2026-10-23 (Master Builder: Count Aurel)
 - Count Aurel, tide general of the Undertide (arena = UNDERTIDE_ARENA tile 37,17 r6; src/game/enemies/aurel.ts): 760 HP, 4 phases (75/50/25%) with shockwave rings on each change; telegraphed tide-wave sweep (double in P3), rapier lunge chain (3, then 4 thrusts), whirlpool zones (pull 26 px/s), summoned drowned soldiers (cap 4), P4 rising-water ring. Teal/violet boss bar with 4-phase ticks, cyan tide hazards, companions dodge his telegraphs.
 - Spring keep-out: no hazard within 26 px of the central spring, Aurel clamped >= 38 px from it and steered away.

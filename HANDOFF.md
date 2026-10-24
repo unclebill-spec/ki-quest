@@ -89,3 +89,7 @@
 - Note: walking to the Undertide spring now starts the fight; tests that fake tideBossDown must stand boss3 down (see world.mjs).
 
 ## W11c — pulled Count Aurel (313f198). Added tests/aurel-story.mjs: real fight, Aurel killed through damage, sets tideBossDown, then the Archive and Malachar reveal plays (5/5). Next from MB: Twins (set cageDone), Sable (sableJoin), Morvant (morvantDown), Malachar (malacharDown).
+
+## MB W11d (Master Builder): Cageward Twins + Sable
+- Twins + 3 pylons in the Stair Red Cage (src/game/enemies/twins.ts, ARENA4 = stair 24,15 r88; pylons 21,14 / 27,14 / 24,18). Defeat sets `cageDone` + saves `boss4`; story is expected to set `sableJoin` (Sable companion in companion.ts ROLE table, caster/healer).
+- Tests: KI_PORT=… node tests/boss4.mjs / companion.mjs. Ports 4392-4396 are held by the ki-rpg/ki-rpg-mb previews: use 4480+ or tests hit the wrong build.
