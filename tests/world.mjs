@@ -3,14 +3,15 @@
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 const { chromium } = createRequire("/workspace/tools/game/node/")("playwright");
-const srv = spawn("npx", ["vite", "preview", "--port", "4174", "--strictPort"], { stdio: "ignore" });
+const PORT = String(process.env.KI_PORT || 4174);
+const srv = spawn("npx", ["vite", "preview", "--port", PORT, "--strictPort"], { stdio: "ignore" });
 await new Promise((r) => setTimeout(r, 1500));
 const R = []; const ok = (n, c, d = "") => R.push([c ? "PASS" : "FAIL", n, d]);
 const b = await chromium.launch();
 try {
   const p = await b.newPage({ viewport: { width: 1152, height: 648 } });
   const errs = []; p.on("pageerror", (e) => errs.push(String(e))); p.on("console", (m) => m.type() === "error" && errs.push(m.text()));
-  await p.goto("http://localhost:4174/ki-quest/"); await p.evaluate(() => localStorage.clear()); await p.reload();
+  await p.goto(`http://localhost:${PORT}/ki-quest/`); await p.evaluate(() => localStorage.clear()); await p.reload();
   const shot = (n) => p.screenshot({ path: `docs/world-${n}.png`, clip: { x: 0, y: 0, width: 1152, height: 648 } });
   const E = (f, a) => p.evaluate(f, a);
   await p.click("#startBtn"); await p.waitForTimeout(700);
