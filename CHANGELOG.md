@@ -1,4 +1,9 @@
 # Changelog
+## 0.3.2 — 2026-10-23 (Master Builder: Brann + Slagheart)
+- Brann joins as second companion when the Heart-Ember is handed in (story flag `brann`). Companions are now a list (`g.mb.allies`; `g.mb.ally` = Mirela alias). Brann: tank/bruiser, 130 HP, slower, heavier melee (x1.45, knockback), 40% damage reduction, taunts foes within 64 px for 3 s (7 s cd), amber sash, sheet public/art/chars/brann.*. Allies rest on opposite sides, are pushed apart (14 px), never park/pushed into doorways. Save field `brann` (optional).
+- Slagheart, Emberheart Quarry boss (arena = QUARRY_ARENA in src/areas/maps.ts; src/game/enemies/slagheart.ts): 620 HP, 3 phases with shockwave on each change; telegraphed charge, ember rain, molten crack (+ triple crack), phase-3 summon (minions capped at 4); boss bar; reward +4 pts, full heal, saved as `boss2` in kiquest-mb-v1 (merged with boss1).
+- Sprite: tools/art/build_slag_golem.py → public/art/chars/slag_golem.png/.json (48x64, check_sheets 28/28), contact sheet docs/slag_golem_8x.png.
+- Tests: tests/boss2.mjs (11), companion.mjs now 21 (Brann, no-overlap, taunt, doorways). combat 'boss phase-moves' made deterministic (seeded RNG + waits on state).
 ## 0.3.1 — 2026-10-23 (Master Builder: Mirela companion)
 - Mirela joins after the Lantern Oath: follows, fights (modest melee + occasional ki bolt), retreats when low, dodges boss telegraphs, KO + revive after fights or at save pads; teal sash. Save field `mirela` (optional, back-compatible). Test: tests/companion.mjs.
 ## 0.3.0 — 2026-10-23 (Master Builder: combat + RPG systems)

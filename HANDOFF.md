@@ -51,3 +51,8 @@
   - Quest: the sun-sigil orb on Sigil Quay sets flags.sigil. Showing it to Neri sets flags.sigilDone (+200 EXP, +2 pts) and gives the Sunwarden-guard reveal.
   - Flight map: the last ??? spot is now Drowned Vesper.
 - tests/world.mjs is 33/33 and simulates the boss flag. Screenshots: docs/bill/quarry-after-boss.png, drowned.png, map-area4.png.
+## W8 (Master Builder, Oct 23): Brann companion + Slagheart quarry boss
+- Companions: src/game/combat/companion.ts — ROLES table (mirela/brann), `g.mb.allies` list, `updateAllies` (+ separate()), taunt (Enemy.taunt/tauntBy, read in enemies/ai.ts). Joins via story flag (`oath`, `brann`).
+- Slagheart: src/game/enemies/slagheart.ts, own `g.mb.boss2` BossState; ARENA2 is derived from QUARRY_ARENA (move the arena there). Debug hook `globalThis.__kiMB = { startSlagheart, slagLog, ARENA2, MOVES2 }`.
+- Sprite generator: tools/art/build_slag_golem.py (re-run, then check_sheets.py).
+- Tests: tests/boss2.mjs (port 4394). Combat phase-moves check is seeded + state-driven (5/5 clean).
