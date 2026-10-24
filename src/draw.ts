@@ -102,6 +102,7 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   const list: { y: number; d: () => void }[] = [];
   for (const e of g.enemies) if (!e.dead) list.push({ y: e.y, d: () => { if (!MB.drawFoeMB(c, g, e, e.x - cx, e.y - cy)) foe(c, e, e.x - cx, e.y - cy, g.time); } });
   worldSprites(c, g, cx, cy, list);
+  MB.allyDraw(c, g, cx, cy, list); // MB hook: Mirela
   list.push({ y: p.y, d: () => { if (p.inv > 0 && g.frame % 6 < 3) return; if (!MB.drawHeroSprite(c, g, p.x - cx, p.y - cy)) hero(c, g, p.x - cx, p.y - cy); } });
   list.sort((m, n) => m.y - n.y).forEach((o) => o.d());
   // light layer (Gravewake light.ts): ambient + banded light sprites, multiplied over the world

@@ -9,7 +9,7 @@ import { ARENA, arenaCenter } from "../enemies/boss";
 export let HERO_SHEET = "rook";
 export function setHero(n: string) { HERO_SHEET = n; }
 const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune" };
-export function preloadSheets() { sheet(HERO_SHEET); Object.values(FOE_SHEET).forEach(sheet); }
+export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); Object.values(FOE_SHEET).forEach(sheet); }
 
 function glow(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
   const g = c.createRadialGradient(x, y, 0, x, y, r);
@@ -146,4 +146,33 @@ export function drawHudMB(c: CanvasRenderingContext2D, g: Game, W: number) {
     c.fillStyle = "#2a1020"; c.fillRect(x, y, w, 4); c.fillStyle = g.mb.boss.phase === 3 ? "#ff3a5a" : "#c050ff"; c.fillRect(x, y, Math.round(w * Math.max(0, b.hp / b.max)), 4);
     c.fillStyle = "#fff6"; for (const k of [0.33, 0.66]) c.fillRect(x + Math.round(w * k), y, 1, 4);
   }
+}
+
+/** Mirela: her own sheet, teal sash + small HP pip bar so she reads as the companion, slumped when knocked out. */
+export function allyDraw(c: CanvasRenderingContext2D, g: Game, cx: number, cy: number, list: { y: number; d: () => void }[]) {
+  const a = g.mb.ally; if (!a.joined || a.x < 0) return;
+  list.push({ y: a.y, d: () => {
+    const x = a.x - cx, y = a.y - cy, s = sheet("mirela");
+    if (a.inv > 0 && !a.ko && g.frame % 6 < 3) return;
+    c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, 8, 2.5, 0, 0, 7); c.fill();
+    let anim = "idle", i = g.time * 5;
+    if (a.ko) { anim = "hurt"; i = 1; }
+    else if (a.inv > 0.3) { anim = "hurt"; i = 0; }
+    else if (a.atk > 0) { anim = a.atkStep === 4 ? "blast" : a.atkStep === 1 ? "punch1" : a.atkStep === 2 ? "punch2" : "kick"; i = (1 - a.atk / 0.28) * 3; }
+    else if (g.mb.tfOn && !a.moving) { anim = "fly"; i = g.time * 4; }
+    else if (a.moving) { anim = "walk"; i = a.walk / 1.6; }
+    const f = facingOf(a.fx, a.fy);
+    if (a.ko) c.globalAlpha = 0.55;
+    const ok = drawSprite(c, s, anim, f, i, x, y + (a.ko ? 4 : 0), { lift: anim === "fly" ? 5 + Math.sin(g.time * 4 + 1) * 2 : 0 });
+    if (!ok) { c.fillStyle = "#6a4a8a"; c.fillRect(x - 6, y - 26, 12, 25); c.fillStyle = "#e8c8a8"; c.fillRect(x - 4, y - 32, 8, 7); }
+    // sash: teal diagonal band shoulder to hip
+    const ly = anim === "fly" ? 5 : 0, sx = f === "left" ? 1 : -1;
+    c.fillStyle = "#3ee0c8"; for (let k = 0; k < 7; k++) c.fillRect(Math.round(x + sx * (3 - k)), Math.round(y - 22 + k - ly), 2, 2);
+    c.fillStyle = "#1f8a7a"; c.fillRect(Math.round(x - sx * 4), Math.round(y - 15 - ly), 2, 4);
+    c.globalAlpha = 1;
+    // HP pip bar
+    c.fillStyle = "#000a"; c.fillRect(Math.round(x - 8), Math.round(y - 37), 16, 3);
+    c.fillStyle = a.ko ? "#555" : a.hp < a.max * 0.3 ? "#ff6a6a" : "#3ee0c8"; c.fillRect(Math.round(x - 7), Math.round(y - 36), Math.round(14 * a.hp / a.max), 1);
+    if (a.ko) { c.font = "5px monospace"; c.textAlign = "center"; c.fillStyle = "#cfe"; c.fillText("KO", x, y - 39); }
+  } });
 }

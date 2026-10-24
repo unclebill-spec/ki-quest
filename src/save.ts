@@ -7,6 +7,7 @@ export const AUTO_KEY = "kiquest-autosave-v1";
 export interface SaveRecord {
   v: 1; at: number; area: string; x: number; y: number;
   lvl: number; exp: number; pts: number; str: number; pow: number; end: number; hp: number; ep: number; tf: number;
+  /** Mirela joined (MB). Optional: older saves lack it. */ mirela?: boolean;
 }
 export function writeSave(rec: SaveRecord, auto = false) {
   try { localStorage.setItem(auto ? AUTO_KEY : SAVE_KEY, JSON.stringify(rec)); return true; } catch { return false; }

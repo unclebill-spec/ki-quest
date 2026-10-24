@@ -5,6 +5,7 @@ import { moveBody, solidAt, TILE, Area } from "../../world";
 import { CH_COMBAT, K_SPARK, K_RING, K_DUST, C_GOLD, C_CYAN, C_DUST, C_RED } from "../../vendor/particles";
 import { meterGain, TF_HIT } from "../combat/powerup";
 import { updateBoss, bossKilled } from "./boss";
+import { hurtAlly } from "../combat/companion";
 
 /** Extra spawns this module adds to the area (wardens), on open floor near the given tiles. */
 export function extraSpawns(a: Area): { kind: "warden"; x: number; y: number }[] {
@@ -115,6 +116,7 @@ function updateHazards(g: Game, dt: number) {
     if (h.t <= 0 && h.max > 0) {
       h.max = 0;
       if (Math.hypot(p.x - h.x, (p.y - h.y) * 1.6) < h.r) g.hurtHero(h.dmg, h.x, h.y);
+      const al = g.mb.ally; if (al.joined && Math.hypot(al.x - h.x, (al.y - h.y) * 1.6) < h.r) hurtAlly(g, h.dmg * 0.8, h.x, h.y);
       g.parts.emit(CH_COMBAT, K_RING, h.x, h.y - 2, 0, 0, 0.3, C_RED);
       for (let i = 0; i < 6; i++) g.parts.emit(CH_COMBAT, K_DUST, h.x + Math.cos(i) * h.r * 0.7, h.y + Math.sin(i) * h.r * 0.4, Math.cos(i) * 40, -20, 0.3, C_DUST, 60);
     }

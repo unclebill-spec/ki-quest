@@ -10,6 +10,7 @@ import { updateArena } from "./game/enemies/boss";
 import { updateTechnique } from "./game/combat/techniques";
 import { updatePowerup, tfMul, meterGain, TF_HURT } from "./game/combat/powerup";
 import { makeMB } from "./game/combat/state";
+import { updateAlly } from "./game/combat/companion";
 export type { Enemy } from "./game/enemies/types";
 
 export type Mode = "title" | "play" | "pause" | "map";
@@ -53,12 +54,13 @@ export class Game {
   }
   makeEnemy(kind: FoeKind, x: number, y: number): Enemy { return mbMakeEnemy(kind, x, y); }
   record(): SaveRecord {
-    return { v: 1, at: Date.now(), area: this.area.name, x: this.p.x, y: this.p.y, lvl: this.lvl, exp: this.exp, pts: this.pts, str: this.str, pow: this.pow, end: this.end, hp: this.hp, ep: this.ep, tf: this.tf };
+    return { v: 1, at: Date.now(), area: this.area.name, x: this.p.x, y: this.p.y, lvl: this.lvl, exp: this.exp, pts: this.pts, str: this.str, pow: this.pow, end: this.end, hp: this.hp, ep: this.ep, tf: this.tf, mirela: this.mb.ally.joined }; // MB hook: mirela
   }
   load(r: SaveRecord) {
     Object.assign(this, { lvl: r.lvl, exp: r.exp, pts: r.pts, str: r.str, pow: r.pow, end: r.end, tf: r.tf });
     this.hp = Math.min(this.maxHp, r.hp); this.ep = Math.min(this.maxEp, r.ep);
     if (!solidAt(this.area, r.x, r.y)) { this.p.x = r.x; this.p.y = r.y; }
+    if (r.mirela === true) this.mb.ally.joined = true; // MB hook: old saves lack the field
   }
   start(cont: boolean) {
     const s = cont ? readSave() : null;
@@ -83,6 +85,7 @@ export class Game {
     this.hero(dt);
     updatePowerup(this, dt); updateArena(this, dt); // MB hook
     updateFoes(this, dt);
+    updateAlly(this, dt); // MB hook: Mirela companion
     this.projectiles(dt);
     for (const n of this.nums) { n.t -= dt; n.y -= dt * 22; }
     this.nums = this.nums.filter((n) => n.t > 0);
