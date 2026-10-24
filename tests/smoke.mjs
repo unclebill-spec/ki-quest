@@ -4,15 +4,16 @@ import { spawn, execSync } from "node:child_process";
 import { mkdirSync, rmSync } from "node:fs";
 const require = createRequire("/workspace/tools/game/node/");
 const { chromium } = require("playwright");
+const PORT = Number(process.env.KI_PORT || 4173);
 const gif = process.argv.includes("--gif");
-const srv = spawn("npx", ["vite", "preview", "--port", "4173", "--strictPort"], { stdio: "ignore" });
+const srv = spawn("npx", ["vite", "preview", "--port", String(PORT), "--strictPort"], { stdio: "ignore" });
 await new Promise((r) => setTimeout(r, 1500));
 const results = []; const ok = (n, c, d = "") => { results.push([c ? "PASS" : "FAIL", n, d]); };
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
   const errs = []; page.on("pageerror", (e) => errs.push(String(e))); page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
-  await page.goto("http://localhost:4173/ki-quest/");
+  await page.goto(`http://localhost:${PORT}/ki-quest/`);
   await page.evaluate(() => { localStorage.clear(); localStorage.setItem("kiquest.story.v1", JSON.stringify({ introSeen: true })); });
   await page.reload();
   await page.click("#startBtn");
@@ -29,7 +30,7 @@ try {
   ok("diagonal facing", d8 === 1, `dir8=${d8}`);
   // place a brute next to the hero and combo it
   await page.evaluate(() => { const g = window.__ki.game; const e = g.enemies[0]; g.p.fx = 1; g.p.fy = 0; e.x = g.p.x + 14; e.y = g.p.y; e.state = "recover"; e.t = 5; e.hp = 999; e.max = 999; });
-  for (let i = 0; i < 9; i++) { await page.keyboard.press("KeyJ"); await page.waitForTimeout(90); }
+  for (let i = 0; i < 9; i++) { await page.evaluate(() => { const g = window.__ki.game, e = g.enemies[0]; e.x = g.p.x + 14; e.y = g.p.y; e.vx = e.vy = 0; }); await page.keyboard.press("KeyJ"); await page.waitForTimeout(90); }
   await page.waitForTimeout(300);
   s = await S(); ok("melee combo hits", s.normals + s.crits >= 3, `normal=${s.normals} crit=${s.crits}`);
   const step3 = await page.evaluate(() => window.__ki.game.stats); 
@@ -40,7 +41,7 @@ try {
   ok("normal hit = red number", norm === "#ff4a4a");
   // blast
   const ep0 = (await S()).ep; await page.keyboard.press("KeyK"); await page.waitForTimeout(30);
-  s = await S(); ok("ki blast spends EP and spawns shot", s.blasts === 1 && s.ep < ep0 - 7, `ep ${ep0.toFixed(1)}→${s.ep.toFixed(1)}`);
+  s = await S(); ok("ki blast spends EP and spawns shot", s.blasts === 1 && s.ep < ep0 - 5, `ep ${ep0.toFixed(1)}→${s.ep.toFixed(1)}`);
   // block + shield
   await page.keyboard.down("ShiftLeft"); await page.waitForTimeout(100);
   const blk = await page.evaluate(() => window.__ki.game.blocking);
@@ -51,10 +52,10 @@ try {
   // enemy AI telegraph
   const tele = await page.evaluate(async () => { const g = window.__ki.game; const e = g.enemies[1]; e.hp = 999; e.x = g.p.x + 25; e.y = g.p.y; e.state = "chase"; e.t = 0; for (let i = 0; i < 10; i++) { g.step(1 / 60); if (e.state === "tele") return true; } return e.state; });
   ok("brute telegraphs before lunging", tele === true, String(tele));
-  const wt = await page.evaluate(() => { const g = window.__ki.game; const e = g.enemies.find((x) => x.kind === "wisp"); e.x = g.p.x + 90; e.y = g.p.y; e.state = "chase"; e.t = -2; const n0 = g.shots.length; let saw = false; for (let i = 0; i < 70; i++) { g.step(1 / 60); if (e.state === "tele") saw = true; } return { saw, fired: g.shots.some((s) => s.foe) || g.stats.hurt > 0, n0 }; });
+  const wt = await page.evaluate(() => { const g = window.__ki.game; const e = g.enemies.find((x) => x.kind === "wisp"); e.x = g.p.x + 90; e.y = g.p.y; e.state = "chase"; e.t = -2; const n0 = g.shots.length; let saw = false; for (let i = 0; i < 70; i++) { g.step(1 / 60); if (e.state === "tele") saw = true; } return { saw, fired: g.shots.some((s) => s.foe) || g.stats.hurt > 0 || g.stats.foeShots > 0, n0 }; });
   ok("wisp telegraphs then fires", wt.saw && wt.fired, JSON.stringify(wt));
   // EXP + level up via kills
-  const lv = await page.evaluate(() => { const g = window.__ki.game; const l0 = g.lvl; for (let k = 0; k < 5; k++) { const e = g.enemies[2 + k]; e.hp = 1; g.damageFoe(e, 5, 0, 0, false); } return { l0, l: g.lvl, pts: g.pts, kills: g.stats.kills }; });
+  const lv = await page.evaluate(() => { const g = window.__ki.game; const l0 = g.lvl; for (let k = 0; k < 5; k++) { const e = g.enemies[2 + k]; e.hp = 1; g.damageFoe(e, 5, 0, 0, false); } for (let i = 0; i < 150; i++) g.step(1 / 60); return { l0, l: g.lvl, pts: g.pts, kills: g.stats.kills }; });
   ok("kills give EXP and level up gives 3 points", lv.l > lv.l0 && lv.pts === 3 * (lv.l - lv.l0), JSON.stringify(lv));
   if (gif) mkdirSync("/tmp/kiq", { recursive: true });
   // pause/status menu: spend a point on STR
@@ -73,7 +74,7 @@ try {
   s = await S(); ok("continue restores level", label === "Continue" && s.lvl === lv.l, `lvl=${s.lvl}`);
   // touch UI present on a touch device context
   const tctx = await browser.newContext({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
-  const tp = await tctx.newPage(); await tp.goto("http://localhost:4173/ki-quest/"); await tp.tap("#startBtn");
+  const tp = await tctx.newPage(); await tp.goto(`http://localhost:${PORT}/ki-quest/`); await tp.tap("#startBtn");
   await tp.touchscreen.tap(700, 300); const touchOn = await tp.evaluate(() => document.body.classList.contains("touch") && getComputedStyle(document.getElementById("touch")).display !== "none");
   ok("touch controls appear on touch", touchOn); await tctx.close();
   // screenshot scene: hero mid-fight with a blast in flight
