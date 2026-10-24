@@ -1,3 +1,4 @@
+import { CREDITS_T } from "../areas/art";
 /**
  * Story layer: intro, NPC talk, dialogue box, sealed wards, updraft-stone travel between areas, objective line.
  * Runs beside the sim: main.ts calls story.update() before game.step(); when it returns true the sim is paused.
@@ -11,17 +12,19 @@ import { INTRO, NPCS, Flags } from "./script";
 const KEY = "kiquest.story.v1";
 type Box = { who: string; lines: string[]; i: number; t: number; then?: () => void };
 
+const F0 = (f: Record<string, unknown>) => !!f.dawn;
 export class Story {
   flags: Flags = {};
   lastKills = 0;
   box: Box | null = null;
   intro = -1; introT = 0;
+  credits = 0;
   fly = 0; flyTo = ""; flyFrom = ""; near: string | null = null; zone = ""; zoneT = 0;
   constructor(public g: Game, public input: Input) {
     try { this.flags = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch { this.flags = {}; }
   }
   save() { try { localStorage.setItem(KEY, JSON.stringify(this.flags)); } catch { /* full */ } }
-  get active() { return !!this.box || this.intro >= 0 || this.fly > 0; }
+  get active() { return this.credits > 0 || !!this.box || this.intro >= 0 || this.fly > 0; }
 
   /** Called after game.start(). New game: reset story, show intro. Continue: restore area. */
   begin(cont: boolean) {
@@ -53,6 +56,7 @@ export class Story {
       }
       return true;
     }
+    if (this.credits > 0) { inp.poll(); this.credits -= dt; if ((this.ok() || inp.pressed("pause")) && this.credits < CREDITS_T - 2) this.credits = 0; if (this.credits <= 0) { this.credits = 0; g.banner = "Dawn over " + g.area.name; g.bannerT = 3; } return true; }
     if (this.fly > 0) {
       this.fly -= dt; inp.poll();
       if (this.fly <= 0.6 && this.flyTo) { this.enter(this.flyTo); this.flyTo = ""; const st = g.stats as Record<string, number>; st.travels = (st.travels ?? 0) + 1; }
@@ -84,6 +88,7 @@ export class Story {
     }
     for (const s of g.area.travel) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 10 && !this.flags.stoneT) {
       this.flags.stoneT = true;
+      if (s.to === "husk" && !this.flags.threshold) { this.say("Top-ring stone", ["This slab points straight up at the husk sun.", "Morvant still bars the way. NONE ASCEND."]); return true; }
       if (s.to === "stair" && !this.flags.malachar) { this.say("Undertide stone", ["A violet slab, colder than the sea. It points north, up.", "Whatever is up there hasn't been named yet. Find out who the guard was guarding."]); return true; }
       if (s.to === "undertide" && !this.flags.sigilDone) { this.say("Tide stair", ["A stair of wet rune-stone, going down under the canals. The seal is a sun with a missing ray.", "Neri would know how to open it."]); return true; }
       if (s.to === "drowned" && !this.flags.quarryBossDown) { this.say("Rune slab", ["A slab in the arena wall, carved with a drowned sun. It's dark.", "Whatever is drinking the Quarry Heart is still here. Deal with it first."]); return true; }
@@ -108,6 +113,14 @@ export class Story {
           "So the sea gave up my name. Good. I'm tired of hiding it.", "I held the sun for forty years. Do you know what it's like to light a world that never once looks up and thanks you?",
           "In the dark, they look up. They gather close. They need. I gave them the night, and I'll give them one last light: me.", "Sable. Come home."],
           () => { unred(); F.malachar = true; this.save(); this.say("Neri", ["(The projection fades. A red light streaks north over the sea.)", "That was Sable. North is the Stair. No one comes back from the Stair.", "The Undertide stone points north. Its cold slab would wake for you now."]); }); }))))); return true;
+    }
+    // Finale: inside the husk sun
+    if (g.area.id === "husk" && !F.huskIn && !this.box) return B("huskIn", "The Husk Sun", ["(Inside, the sun is a cathedral of cold ash. Five pedestals ring a heart that barely beats.)", "Malachar: \"You climbed all this way to watch it die with me? How kind.\"", "Malachar: \"Every Wellspring you walked past, I drank. Every lamp you lit, I let you light. Come, lamplighter. Be the last warm thing.\""], 300);
+    if (g.area.id === "husk" && F.malacharDown && !F.dawn && !this.box) {
+      F.poured = true; this.save();
+      this.say("The Wellsprings", ["(The heroes don't take the light. They give it back.)", "Rook pours the Lanternmoss spring. Mirela, the Hushwater dead's. Brann, the Quarry Heart.", "Neri's tide-light rises from the drowned Wellspring. And Sable pours back everything he drank from her."],
+        () => this.say("Malachar Vesh", ["(Left with only his own small light, he looks up at the sun, relit.)", "...It's warm. I'd forgotten it was warm.", "(He goes still. He fades into a single warm glow orb that drifts out into the dawn.)"],
+        () => { F.dawn = true; this.save(); g.gainExp(1000); this.say("Rook", ["(The first grey-gold dawn in three hundred years.)", "Lamps still need lighting. Just not all the time."], () => { this.credits = CREDITS_T; }); })); return true;
     }
     // Act III open: the Sunwarden's Stair
     if (g.area.id === "stair" && !F.stairIn && !this.box) return B("stairIn", "The Sunwarden's Stair", ["(Broken stone rings float up and up toward a vast dark sphere: the husk of the sun.)", "The murals in the waystation carry a name now: \"Malachar Vesh, the last warden.\"", "Court soldiers everywhere... but they're not looking at you. They're hunting someone."], 200);
@@ -179,6 +192,9 @@ export class Story {
   }
   objective(): string {
     const f = this.flags, g = this.g;
+    if (F0(f)) return "Dawn · free roam: days are gold, the glow nights still return";
+    if (g.area.id === "husk") return f.malacharDown ? "Give the light back" : "Defeat Malachar Vesh at the sun's heart";
+    if (g.area.id === "stair" && f.threshold) return "Ride the top-ring stone up into the husk sun";
     if (g.area.id === "stair") return f.threshold ? "The husk sun is starving. Finale: give back every spring" : f.morvantDown ? "Climb to the top ring" : f.sableJoin ? "Top ring: get past Morvant, the Eclipse Golem" : "Free Sable from the Red Cage (centre ring)";
     if (g.area.id === "drowned" && f.malachar) return "Malachar Vesh is named · the Undertide stone now points north to the Stair";
     if (g.area.id === "undertide" && f.malachar) return "Ride the Undertide stone (by the tide stair) north to the Sunwarden's Stair";

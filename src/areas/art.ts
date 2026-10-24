@@ -8,18 +8,21 @@ import { groundSet, drawGround, type GroundSet, type Kind } from "./groundgen";
 type C2 = CanvasRenderingContext2D;
 const PAL = {
   moss: { floor: ["#3d3a46", "#383542"], moss: ["#33452f", "#2f402b"], path: ["#5a4c3c", "#54473a"], wall: ["#3a3448", "#4c4560", "#231f2e"], water: ["#1c2a4a", "#22325a"] },
-  violet: { floor: ["#3a3248", "#363044"], moss: ["#2e2a44", "#2a2640"], path: ["#4a4258", "#463e54"], wall: ["#2e2838", "#4e4660", "#161220"], water: ["#0a0614", "#0c0818"] },
+  violet: { floor: ["#5c5274", "#585070"], moss: ["#4c4670", "#48426c"], path: ["#6e6488", "#6a6084"], wall: ["#3e3650", "#5e5678", "#1e1828"], water: ["#07040f", "#090512"] },
+  husk: { floor: ["#4a2a2e", "#46282c"], moss: ["#3a2230", "#36202c"], path: ["#5a3a30", "#56362e"], wall: ["#2a1418", "#4a2a26", "#140a0c"], water: ["#c06a20", "#d07a28"] },
   tide: { floor: ["#2a3a40", "#26363c"], moss: ["#1e3a3a", "#1c3636"], path: ["#3c4a4a", "#384646"], wall: ["#2a3438", "#4a5a5c", "#141c20"], water: ["#0e4a5a", "#125664"] },
   ember: { floor: ["#3a2e2a", "#362a26"], moss: ["#2e2626", "#2a2222"], path: ["#5a4232", "#54402e"], wall: ["#3a2a28", "#5a3a30", "#1e1412"], water: ["#8a2a10", "#a03a14"] },
   marsh: { floor: ["#2f3440", "#2b303b"], moss: ["#2c3a3a", "#283636"], path: ["#4a4438", "#454034"], wall: ["#2e2a3e", "#403a56", "#1c1828"], water: ["#241a44", "#2c2052"] },
 };
 
-const GPAL = { moss: { spore: "#6ad8ff", plaza: "#544c5a" }, marsh: { spore: "#b48aff", plaza: "#4c4652" }, ember: { spore: "#ff8a4a", plaza: "#6a5650" }, tide: { spore: "#7affe0", plaza: "#4e5e60" }, violet: { spore: "#c48aff", plaza: "#5a4e6a" } };
-const GSETS: Partial<Record<"moss" | "marsh" | "ember" | "tide" | "violet", GroundSet>> = {};
-const gset = (t: "moss" | "marsh" | "ember" | "tide" | "violet") => (GSETS[t] ??= groundSet({ floor: PAL[t].floor[0], moss: PAL[t].moss[0], path: PAL[t].path[0], water: PAL[t].water[0], ...GPAL[t] }, t === "moss" ? 1 : t === "marsh" ? 2 : t === "ember" ? 3 : 4));
+const GPAL = { moss: { spore: "#6ad8ff", plaza: "#544c5a" }, marsh: { spore: "#b48aff", plaza: "#4c4652" }, ember: { spore: "#ff8a4a", plaza: "#6a5650" }, tide: { spore: "#7affe0", plaza: "#4e5e60" }, violet: { spore: "#d4a0ff", plaza: "#6e6284" }, husk: { spore: "#ffb050", plaza: "#5a3236" } };
+const GSETS: Partial<Record<"moss" | "marsh" | "ember" | "tide" | "violet" | "husk", GroundSet>> = {};
+const gset = (t: "moss" | "marsh" | "ember" | "tide" | "violet" | "husk") => (GSETS[t] ??= groundSet({ floor: PAL[t].floor[0], moss: PAL[t].moss[0], path: PAL[t].path[0], water: PAL[t].water[0], ...GPAL[t] }, t === "moss" ? 1 : t === "marsh" ? 2 : t === "ember" ? 3 : 4));
+export const CREDITS_T = 52;
+const CREDITS = ["#KI QUEST", "", "an original game for Bill Weathersbee", "", "#Lamps still need lighting.", "#Just not all the time.", "", "", "#Story & World", "the World/Story team", "", "#Combat, Heroes & Bosses", "the Master Builder team", "", "#Menus, Save & Input", "the Cozy Builder team", "", "#Music & Sound", "Hearthmoor Sound (ACE-Step 1.5, sfxr)", "", "#Starring", "Rook, the lamplighter", "Mirela, keeper of the dead", "Brann Okoro, smith", "Sable Kestrel, the herald who turned", "", "#and", "Malachar Vesh, the Last Dusk", "", "", "#Thank you for playing.", "", "The glow nights still come each evening.", "Everyone gathers close, by choice now."];
 const KIND: Record<number, Kind> = { [T_FLOOR]: "floor", [T_MOSS]: "moss", [T_PATH]: "path", [T_PLAZA]: "plaza", [T_WATER]: "water", [T_HIDDEN]: "water", [T_WARD]: "floor" };
 
-export function tile(c: C2, theme: "moss" | "marsh" | "ember" | "tide" | "violet", v: number, X: number, Y: number, tx: number, ty: number, time: number, tiles?: Uint8Array) {
+export function tile(c: C2, theme: "moss" | "marsh" | "ember" | "tide" | "violet" | "husk", v: number, X: number, Y: number, tx: number, ty: number, time: number, tiles?: Uint8Array) {
   if (v === T_HIDDEN) v = T_WATER;
   const P = PAL[theme], ch = (tx + ty) & 1;
   const k = KIND[v];
@@ -126,7 +129,19 @@ function npc(c: C2, id: string, area: string, x: number, y: number, t: number) {
 }
 
 /** Push props, NPCs, stones into the y-sorted draw list (called from draw.ts). */
+/** The husk sun seen from the Stair: a vast dark sphere hanging in the void, south-east of the rings. */
+const SUN = { x: 41 * 16, y: 27 * 16, r: 64 };
+const edge = (T: Uint8Array, x: number, y: number) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => T[(y + b) * 48 + x + a] === T_WATER);
+/** Day strength after the dawn epilogue: a gentle 4-minute day/night cycle (0 = glow night, 1 = noon). */
+export const dayK = (t: number) => Math.max(0, Math.sin((t / 240) * Math.PI * 2));
 export function worldSprites(c: C2, g: Game, cx: number, cy: number, list: { y: number; d: () => void }[]) {
+  if (g.area.theme === "violet") list.push({ y: -1e9, d: () => {
+    const X = SUN.x - cx, Y = SUN.y - cy; if (X < -SUN.r - 40 || X > 460 || Y < -SUN.r - 40 || Y > 300) return;
+    const gr = c.createRadialGradient(X - 18, Y - 18, 6, X, Y, SUN.r); gr.addColorStop(0, "#2a1838"); gr.addColorStop(0.7, "#120a1c"); gr.addColorStop(1, "#06030c");
+    c.fillStyle = gr; c.beginPath(); c.arc(X, Y, SUN.r, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = "#3a2450"; c.lineWidth = 1; for (const k of [-0.5, 0, 0.45]) { c.beginPath(); c.ellipse(X, Y + k * SUN.r, SUN.r * Math.sqrt(1 - k * k), 4, 0, 0, Math.PI * 2); c.stroke(); }
+    c.fillStyle = "#5a2a1a"; for (let i = 0; i < 9; i++) { const a = i * 0.7 + 0.3, r = SUN.r * (0.2 + 0.07 * i); c.fillRect(Math.round(X + Math.cos(a) * r), Math.round(Y + Math.sin(a) * r * 0.8), 2, 1); }
+  } });
   const a = g.area, marsh = a.theme === "marsh";
   for (const p of a.props) {
     const X = p.x - cx, Y = p.y - cy;
@@ -147,9 +162,17 @@ export function bindStory(s: Story) { st = s; }
 export function worldLights(g: Game, cx: number, cy: number, add: (x: number, y: number, r: number, col: [number, number, number], f: number) => void) {
   for (const p of g.area.props) if (p.kind === "crystal") add(p.x - cx, p.y - cy - 8, 40, [0.45, 0.95, 1], 0);
   for (const p of g.area.props) if (p.kind === "house") add(p.x - cx, p.y - cy - 12, 56, g.area.theme === "ember" ? [1, 0.5, 0.2] : g.area.theme === "tide" ? [0.3, 0.9, 0.8] : [0.35, 0.55, 1], 0);
-  if (g.area.theme === "ember" || g.area.theme === "tide") { // lava / glowing canals light the scene
+  const T = g.area.tiles, X0 = Math.max(0, Math.floor(cx / 16) - 1), Y0 = Math.max(0, Math.floor(cy / 16) - 1);
+  if (g.area.theme === "violet") { // the Stair: soft violet fill, neon ring edges, the husk sun's cold rim
+    add(192, 108, 340, [0.2, 0.15, 0.28], 0);
+    for (let ty = Y0; ty < Math.min(34, Y0 + 16); ty++) for (let tx = X0; tx < Math.min(48, X0 + 27); tx++) if ((tx + ty) % 3 === 0 && T[ty * 48 + tx] !== T_WATER && T[ty * 48 + tx] !== T_WALL && edge(T, tx, ty)) add(tx * 16 + 8 - cx, ty * 16 + 8 - cy, 34, [0.32, 0.16, 0.5], 0);
+    add(SUN.x - cx, SUN.y - cy, 150, [0.22, 0.1, 0.3], 0);
+  }
+  if (g.area.theme === "husk") add(192, 108, 360, [0.3, 0.16, 0.12], 0);
+  if (st?.flags.dawn) { const k = dayK(g.time); if (k > 0.02) add(192, 108, 460, [0.9 * k, 0.8 * k, 0.55 * k], 0); }
+  if (g.area.theme === "ember" || g.area.theme === "tide" || g.area.theme === "husk") { // lava / glowing canals light the scene
     const t = g.area.tiles, x0 = Math.max(0, Math.floor(cx / 16)), y0 = Math.max(0, Math.floor(cy / 16));
-    for (let ty = y0; ty < Math.min(34, y0 + 15); ty += 2) for (let tx = x0; tx < Math.min(48, x0 + 25); tx += 2) if (t[ty * 48 + tx] === T_WATER) add(tx * 16 + 8 - cx, ty * 16 + 8 - cy, 44, g.area.theme === "ember" ? [0.55, 0.22, 0.08] : [0.1, 0.35, 0.35], 0);
+    for (let ty = y0; ty < Math.min(34, y0 + 15); ty += 2) for (let tx = x0; tx < Math.min(48, x0 + 25); tx += 2) if (t[ty * 48 + tx] === T_WATER) add(tx * 16 + 8 - cx, ty * 16 + 8 - cy, 44, g.area.theme === "ember" ? [0.55, 0.22, 0.08] : g.area.theme === "husk" ? [0.5, 0.3, 0.1] : [0.1, 0.35, 0.35], 0);
     if (g.area.id === "emberquarry") add(192, 108, 320, [0.16, 0.1, 0.07], 0);
   }
   for (const s of g.area.travel) add(s.x - cx, s.y - cy, 52, [0.7, 0.9, 1], 0);
@@ -159,6 +182,19 @@ export function worldLights(g: Game, cx: number, cy: number, add: (x: number, y:
 }
 /** Additive glows after the light layer. */
 export function worldGlow(c: C2, g: Game, cx: number, cy: number, glow: (c: C2, x: number, y: number, r: number, col: string, a?: number) => void) {
+  if (g.area.theme === "violet") { // neon rims on the floating rings + the husk sun's rim
+    const T = g.area.tiles, X0 = Math.max(0, Math.floor(cx / 16)), Y0 = Math.max(0, Math.floor(cy / 16)), k = 0.55 + 0.25 * Math.sin(g.time * 2);
+    c.fillStyle = `rgba(200,140,255,${k})`;
+    for (let ty = Y0; ty < Math.min(34, Y0 + 15); ty++) for (let tx = X0; tx < Math.min(48, X0 + 26); tx++) {
+      const v = T[ty * 48 + tx]; if (v === T_WATER || v === T_WALL) continue;
+      const X = tx * 16 - cx, Y = ty * 16 - cy, w = (x: number, y: number) => T[y * 48 + x] === T_WATER;
+      if (ty > 0 && w(tx, ty - 1)) c.fillRect(X, Y, 16, 1); if (ty < 33 && w(tx, ty + 1)) c.fillRect(X, Y + 15, 16, 2);
+      if (tx > 0 && w(tx - 1, ty)) c.fillRect(X, Y, 1, 16); if (tx < 47 && w(tx + 1, ty)) c.fillRect(X + 15, Y, 1, 16);
+    }
+    const sx = SUN.x - cx, sy = SUN.y - cy, f = 0.5 + 0.5 * Math.sin(g.time * 0.9) * Math.sin(g.time * 2.3);
+    glow(c, sx, sy, SUN.r + 26, "rgba(150,70,220,.35)"); glow(c, sx + 10, sy - 8, 14 + f * 6, `rgba(255,170,90,${0.25 + 0.3 * f})`);
+  }
+  if (g.area.theme === "husk") for (const p of g.area.props) if (p.kind === "crystal") glow(c, p.x - cx, p.y - cy - 10, 20, st?.flags.poured ? "rgba(255,220,120,.7)" : "rgba(255,120,60,.35)");
   for (const p of g.area.props) {
     if (p.kind === "house") { glow(c, p.x - cx, p.y - cy - 16, 22, g.area.theme === "ember" ? "rgba(255,120,40,.35)" : "rgba(80,140,255,.35)"); glow(c, p.x - cx - 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); glow(c, p.x - cx + 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); }
     else if (p.kind === "crystal") glow(c, p.x - cx + 2, p.y - cy - 8, 14, "rgba(120,240,255,.5)");
@@ -187,6 +223,13 @@ function wrap(c: C2, s: string, w: number) {
 /** Story overlay: objective, talk hint, dialogue box, intro, flight transition. Drawn after render(). */
 export function storyOverlay(c: C2, g: Game, s: Story, W: number, H: number) {
   c.save(); c.font = "8px monospace"; c.textBaseline = "top";
+  if (s.credits > 0) { // dawn credits roll
+    const t = CREDITS_T - s.credits, a = Math.min(1, t / 1.5);
+    const gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, `rgba(255,214,140,${a})`); gr.addColorStop(0.5, `rgba(200,150,170,${a})`); gr.addColorStop(1, `rgba(40,30,70,${a})`);
+    c.fillStyle = gr; c.fillRect(0, 0, W, H); c.textAlign = "center";
+    CREDITS.forEach((l, i) => { const y = H + 10 + i * 14 - t * 16; if (y < -12 || y > H + 12) return; c.fillStyle = l.startsWith("#") ? "#fff6dc" : "#3a2440"; c.font = l.startsWith("#") ? "bold 10px monospace" : "8px monospace"; c.fillText(l.replace(/^#/, ""), W / 2, y); });
+    c.font = "8px monospace"; c.fillStyle = "rgba(58,36,64,.8)"; c.fillText("(J / Start to skip)", W / 2, H - 10); c.restore(); return;
+  }
   if (g.mode === "play" && !s.active) {
     const o = s.objective(); c.textAlign = "right";
     c.fillStyle = "rgba(10,8,20,.55)"; c.fillRect(W - c.measureText(o).width - 8, H - 12, c.measureText(o).width + 8, 12);
@@ -233,7 +276,7 @@ export function areaMap(c: C2, g: Game, ox: number, oy: number, s: number) {
 
 /** World-map flight screen: the Mirrorfen Reaches, a dotted route and the hero's glow riding the updraft. */
 const SPOTS: Record<string, { x: number; y: number; name: string }> = {
-  lanternmoss: { x: 0.28, y: 0.58, name: "Lanternmoss Hollow" }, hushwater: { x: 0.7, y: 0.38, name: "Hushwater" }, kilnreach: { x: 0.86, y: 0.72, name: "Kilnreach" }, emberquarry: { x: 0.9, y: 0.84, name: "Emberheart Quarry" }, drowned: { x: 0.52, y: 0.16, name: "Drowned Vesper" }, undertide: { x: 0.56, y: 0.22, name: "The Undertide" }, stair: { x: 0.5, y: 0.05, name: "Sunwarden's Stair" },
+  lanternmoss: { x: 0.28, y: 0.58, name: "Lanternmoss Hollow" }, hushwater: { x: 0.7, y: 0.38, name: "Hushwater" }, kilnreach: { x: 0.86, y: 0.72, name: "Kilnreach" }, emberquarry: { x: 0.9, y: 0.84, name: "Emberheart Quarry" }, drowned: { x: 0.52, y: 0.16, name: "Drowned Vesper" }, undertide: { x: 0.56, y: 0.22, name: "The Undertide" }, stair: { x: 0.5, y: 0.05, name: "Sunwarden's Stair" }, husk: { x: 0.62, y: 0.03, name: "The Husk Sun" },
 };
 const LOCKED = [{ x: 0.3, y: 0.8, name: "Wellspring Grotto" }];
 function flightMap(c: C2, g: Game, s: Story, W: number, H: number) {

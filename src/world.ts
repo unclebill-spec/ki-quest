@@ -1,5 +1,5 @@
 /** Areas: ASCII maps (src/areas/maps.ts) -> tiles, lamps, props, NPCs, spawns, gates and updraft stones. */
-import { LANTERNMOSS, HUSHWATER, KILNREACH, EMBERQUARRY, DROWNED, UNDERTIDE, STAIR } from "./areas/maps";
+import { LANTERNMOSS, HUSHWATER, KILNREACH, EMBERQUARRY, DROWNED, UNDERTIDE, STAIR, HUSK } from "./areas/maps";
 export const TILE = 16;
 export const MW = 48, MH = 34;
 export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3, T_WATER = 4, T_PATH = 5, T_BOARD = 6, T_WARD = 7, T_HIDDEN = 8;
@@ -11,7 +11,7 @@ export interface Travel { x: number; y: number; to: string; label: string }
 export interface Orb { i: number; x: number; y: number }
 export interface Ward { tx: number; ty: number; lvl: number }
 export interface Area {
-  id: string; name: string; music: string; bossMusic?: string; theme: "moss" | "marsh" | "ember" | "tide" | "violet";
+  id: string; name: string; music: string; bossMusic?: string; theme: "moss" | "marsh" | "ember" | "tide" | "violet" | "husk";
   tiles: Uint8Array; lamps: Lamp[]; pad: { x: number; y: number }; start: { x: number; y: number }; spawns: Spawn[];
   props: Prop[]; npcs: Npc[]; orbs: Orb[]; springs: { x: number; y: number }[]; travel: Travel[]; wards: Ward[];
   zones: { name: string; x0: number; y0: number; x1: number; y1: number }[];
@@ -31,9 +31,14 @@ export const AREA_DEFS: Record<string, Def> = {
     zones: [{ name: "Hushwater Landing", x0: 1, y0: 1, x1: 5, y1: 6 }, { name: "Hushwater Town", x0: 16, y0: 5, x1: 33, y1: 13 },
       { name: "Lantern Graveyard", x0: 34, y0: 1, x1: 46, y1: 9 }, { name: "Sunken Meadow", x0: 0, y0: 14, x1: 47, y1: 33 }, { name: "Hushwater Fen", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },
+  husk: {
+    id: "husk", name: "The Husk Sun", bossMusic: "finale-theme|boss2-theme", music: "husk-theme|stair-theme|boss-theme", theme: "husk", rows: HUSK, lamp: [1, 0.55, 0.3],
+    to: "stair", toLabel: "the Sunwarden's Stair", wardLvl: 0,
+    zones: [{ name: "The Heart of the Sun", x0: 15, y0: 7, x1: 33, y1: 23 }, { name: "Husk Gate", x0: 18, y0: 24, x1: 30, y1: 32 }, { name: "Inside the Husk Sun", x0: 0, y0: 0, x1: 47, y1: 33 }],
+  },
   stair: {
     id: "stair", name: "The Sunwarden's Stair", bossMusic: "boss2-theme", music: "stair-theme|undertide-theme|drowned-vesper", theme: "violet", rows: STAIR, lamp: [0.75, 0.45, 1],
-    to: "undertide", toLabel: "The Undertide", wardLvl: 0,
+    to: "undertide", toLabel: "The Undertide", to2: "husk", to2Label: "the Husk Sun", wardLvl: 0,
     zones: [{ name: "The Husk Ring", x0: 27, y0: 1, x1: 37, y1: 9 }, { name: "The Red Cage", x0: 17, y0: 9, x1: 30, y1: 20 },
       { name: "Ruined Waystation", x0: 1, y0: 22, x1: 13, y1: 31 }, { name: "Floating Rings", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },

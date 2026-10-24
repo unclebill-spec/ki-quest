@@ -159,6 +159,23 @@ try {
   ok("threshold beat after Morvant", await E(() => window.__ki.story.flags.threshold === true));
   for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
   await p.waitForTimeout(500); await p.screenshot({ path: "docs/bill/stair-top.png" });
+  await E(() => { const g = window.__ki.game; g.p.x = 33 * 16; g.p.y = 24 * 16; }); await p.waitForTimeout(700);
+  await p.screenshot({ path: "docs/bill/stair-sun.png" });
+  await E(() => { window.__ki.story.box = null; window.__ki.story.enter("husk"); }); await p.waitForTimeout(900);
+  ok("finale: inside the husk sun", await E(() => window.__ki.game.area.id === "husk" && window.__ki.story.flags.huskIn === true));
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await E(() => { const g = window.__ki.game; g.p.x = 24 * 16; g.p.y = 21 * 16; }); await p.waitForTimeout(700);
+  await p.screenshot({ path: "docs/bill/husk-arena.png" });
+  await E(() => { window.__ki.story.flags.malacharDown = true; }); await p.waitForTimeout(400);
+  for (let i = 0; i < 40 && (await E(() => window.__ki.story.credits <= 0)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  ok("dawn + credits roll after Malachar", await E(() => window.__ki.story.flags.dawn === true && window.__ki.story.credits > 0));
+  await p.waitForTimeout(6000); await p.screenshot({ path: "docs/bill/credits.png" });
+  await p.keyboard.press("KeyJ"); await p.waitForTimeout(400);
+  ok("credits skippable", await E(() => window.__ki.story.credits === 0));
+  await E(() => { window.__ki.story.box = null; window.__ki.story.enter("lanternmoss"); window.__ki.game.time = 60; }); await p.waitForTimeout(900);
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await p.screenshot({ path: "docs/bill/dawn-day.png" });
+  ok("free-roam dawn objective", await E(() => window.__ki.story.objective().startsWith("Dawn")));
   await p.keyboard.press("KeyM"); await p.waitForTimeout(300); await p.screenshot({ path: "docs/bill/map-area4.png" }); await p.keyboard.press("KeyM");
   await E(() => { window.__ki.story.enter("lanternmoss"); }); await p.waitForTimeout(200);
   await E(() => { const g = window.__ki.game; g.p.x = 36 * 16; g.p.y = 18 * 16; }); await p.waitForTimeout(1200);

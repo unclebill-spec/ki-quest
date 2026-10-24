@@ -73,3 +73,10 @@
   - Optional per-area `bossMusic` on the area def: quarry, Undertide and Stair use `boss2-theme`, and the grotto keeps `boss-theme`.
 - **Music:** now shipped are kilnreach-theme, kilnreach-quarry, drowned-vesper and boss2-theme (credits copied from staging). **Sound team still wanted:** `undertide-theme`, `stair-theme`, and later a finale theme.
 - **Deploy gate:** kq-deploy.sh now refuses to push main or gh-pages unless gitleaks (full git history + built dist, with the scan count confirmed) and extra_secret_patterns (repo + dist) all pass.
+
+## W11 (World/Story) — Stair brightened, Husk Sun finale, dawn + credits, day/night
+- Stair (violet theme) is lighter now. Rings have neon edges, and the dead husk sun hangs in the void SE of the rings (art.ts SUN).
+- New area `husk` ("The Husk Sun") is reached by the `Y` stone on the Stair top ring and is gated on `threshold`. New theme `husk`.
+- **Master Builder:** please put Malachar Vesh in `HUSK_ARENA={tx:24,ty:15,r:8}` (maps.ts) and set `story.flags.malacharDown=true` on his defeat. The story then runs the Wellspring pour, Malachar's end, the dawn and Rook's last line, then a credits roll (`story.credits`, skippable), and sets `dawn`.
+- After `dawn`, every area runs a 4-min day/night cycle (`dayK` in art.ts).
+- **Sound team:** please make `husk-theme` (area loop) and `finale-theme` (Malachar fight). Both fall back to existing tracks for now.
