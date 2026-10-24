@@ -25,7 +25,7 @@ export function updateArena(g: Game, dt: number) {
     const e = makeEnemy("boss", c.x, c.y - 40); e.state = "recover"; e.t = 1.6; g.enemies.push(e);
     // clear small fry inside the arena so it's a duel
     for (const f of g.enemies) if (f !== e && !f.dead && Math.hypot(f.x - c.x, f.y - c.y) < ARENA.r + 20) { f.x = f.hx = c.x + (f.x < c.x ? -1 : 1) * (ARENA.r + 60); f.hy = f.y; }
-    g.banner = "ASHMAW, CINDER TYRANT"; g.bannerT = 2.5; g.shake = 4;
+    g.banner = "WARDEN RUNE, GROTTO GUARDIAN"; g.bannerT = 2.5; g.shake = 4;
   }
   if (b.active) {
     // barrier: keep the hero inside the arena
@@ -41,7 +41,7 @@ export function updateBoss(g: Game, e: Enemy, dt: number, ux: number, uy: number
   const want = e.hp / e.max <= PHASE_AT[2] ? 3 : e.hp / e.max <= PHASE_AT[1] ? 2 : 1;
   if (want > b.phase) {
     b.phase = want; b.lockT = 1.2; e.state = "recover"; e.t = 1.3; e.move = "";
-    g.banner = want === 3 ? "ASHMAW IS ENRAGED" : "ASHMAW: PHASE 2"; g.bannerT = 1.8; g.shake = 5;
+    g.banner = want === 3 ? "WARDEN RUNE IS ENRAGED" : "WARDEN RUNE: PHASE 2"; g.bannerT = 1.8; g.shake = 5;
     g.mb.hazards.push({ x: e.x, y: e.y, r: 46, t: 0.6, max: 0.6, dmg: 8, foe: true });
     for (let i = 0; i < 10; i++) g.parts.emit(CH_COMBAT, K_SPARK, e.x, e.y - 20, Math.cos(i * 0.63) * 120, Math.sin(i * 0.63) * 120, 0.5, C_RED, 0, 2);
     return [0, 0];
@@ -93,7 +93,7 @@ export function bossKilled(g: Game, e: Enemy) {
   const b = g.mb.boss; b.active = false; b.done = true; writeBossDone();
   g.pts += 3; g.tf = 100; g.hp = g.maxHp; g.ep = g.maxEp; g.shake = 6;
   g.mb.hazards.length = 0; g.shots = g.shots.filter((s) => !s.foe);
-  g.banner = "ASHMAW FALLS"; g.bannerT = 3;
+  g.banner = "WARDEN RUNE FALLS"; g.bannerT = 3;
   g.say("Ember Core obtained! +3 stat points, power meter full", 4);
   g.stats.bossKills = (g.stats.bossKills ?? 0) + 1;
   for (let i = 0; i < 12; i++) g.parts.emit(CH_COMBAT, i & 1 ? K_RING : K_SPARK, e.x, e.y - 20, Math.cos(i / 1.9) * 140, Math.sin(i / 1.9) * 140, 0.7, C_GOLD, 0, 2);

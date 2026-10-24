@@ -48,12 +48,12 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
       f.sigilDone ? ["This sigil belonged to the Sunwarden's own guard. The man who kept the sun lit.", "If a Sunwarden is draining the Wellsprings... then he isn't keeping the light anymore. He's hoarding it.", "The tide stair on Sigil Quay goes down to our Wellspring. Your sigil opens it. Mind the girl in the black coat; she's been watching you."]
         : f.sigil ? ["Let me see it. Hold it to the light. Oh."]
         : ["You came down the slab from the mountain? Nobody's used it since the tide rose.", "Neri Calloway. I keep the records of Vesper, what the sea left of them.", "There's a sun-sigil on Sigil Quay, south-east. The shades won't let me near it. Bring it and I'll tell you what it means."] },
-    x: { name: "Old Calder", coat: "#3a4a48", hair: "#a0a0a0", skin: "#c8a080", trim: "#c8b060", tall: -2, lines: () =>
+    x: { name: "Old Calder", coat: "#3a4a48", hair: "#a0a0a0", skin: "#c8a080", trim: "#c8b060", tall: -2, lines: (f) => f.tideBossDown ? ["He used to walk the Court, you know. The warden. Kind voice. That's the worst part."] :
       ["The water rose the night the sun went out. Three hundred years, and my feet are still wet.", "The canals glow because the Wellspring is down there somewhere, drowned. Still breathing."] },
   },
   kilnreach: {
     k: { name: "Brann Okoro", coat: "#5a3428", hair: "#1a1210", skin: "#8a5a3a", trim: "#ff7a2a", tall: 2, lines: (f) =>
-      f.quarryBossDown ? ["You felt it too? The mountain's heartbeat is steady again.", "That thing down there wore a sun on its chest, a dead one. Same sun I saw carved on the old slab in the arena wall.", "The slab is awake now. It points to Vesper, the city the sea took. Let's go see who carved it."]
+      f.quarryBossDown ? ["You felt it too? The mountain's heartbeat is steady again.", "That thing down there wore a sun on its chest, a dead one. Same sun I saw carved on the old slab in the arena wall.", "The slab is awake now. It points to Vesper, the city the sea took. Let's go see who carved it.", "My grandmother says the smiths forged a crown for the sun's keeper, once. I'd like to know who wore it."]
       : f.brann ? ["That's my heart-ember, still warm. I owe you a mountain.", "Down in the Quarry Heart, something big is drinking. When you go, my hammer goes with you."]
       : f.heart ? ["You found it! Hand it here. Carefully."]
       : f.metBrann ? ["Still looking? The seam is past the galleries, north and east from the lift. It glows like a coal.", "The mountain's heartbeat's heartbeat is skipping. Something below the quarry is drinking the embers, same as your spring.", "When you go down there, I'm coming. My hammer's been bored for weeks."]
