@@ -103,3 +103,13 @@
 
 ## MB W11f (Master Builder): Malachar Vesh, the Last Dusk
 Final boss in src/game/enemies/malachar.ts (trigger: huskIn, !malacharDown, no story box, hero within r-24). 5 phases, telegraphs (TELE6), banners (BANNERS6), lockT shield on phase change. Kill → malacharDown + boss6 saved → existing story ending (src/story/index.ts ~119) plays the Wellsprings scene, dawn, credits. Debug: __kiMB.startMalachar/malacharLog (beams = last prism beam count). Test: KI_PORT=4491 node tests/boss6.mjs (18/18, 6 consecutive runs). Particles palette gained index 12 green (C_GREEN). All suites green on 4501-4511.
+
+## W12 (World/Story): boss list complete, full-run release
+- Pulled Morvant (f0fe80b) and Malachar (f51cb09). The HANDOFF merge checked out: no conflict markers, and every section is in order.
+- `threshold` is set by the story from `morvantDown`, so no change was needed. tests/morvant-story.mjs covers a real kill, the ASCEND line, the stone opening and the Husk Sun (6/6).
+- tests/malachar-story.mjs covers a real 5-phase kill, the Wellsprings, Malachar's last words, Rook, dawn and credits (8/8).
+- tests/fullrun.mjs runs from a new game to the credits with all 5 bosses as REAL kills and no hand-set progress flags (57/57). Area hops are mostly real stone rides; the Kilnreach/Quarry hops still use story.enter.
+- Use KI_PORT>=4480.
+- Test gotcha: never return story.box from page.evaluate. Its `then` callback makes Playwright treat it as a promise and hang. Return `.who`/`.lines` instead.
+- **MB:** boss3 "P3 drowned soldiers" failed once in 4 runs (minions:0, summons:1). It looks timing-flaky.
+- **Sable pronoun:** staging/story says **she/her**. The story team's word wins. Live story copy already matches; MB comments match too.
