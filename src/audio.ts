@@ -3,9 +3,11 @@
  * Driven by diffing game state each frame, so the sim (game.ts / src/game/*) needs no audio calls.
  * Music: area theme, boss theme when a boss is engaged (game.bossActive, if present). Mute: N key (saved).
  */
-type G = { mode: string; stats: Record<string, number>; shield: boolean; tf: number; area: { music?: string }; bossActive?: boolean; dialog?: unknown };
+type G = { mode: string; stats: Record<string, number>; shield: boolean; tf: number; area: { music?: string }; bossActive?: boolean; dialog?: unknown;
+  mb?: { sfx: string[]; charging: boolean; hover: boolean } };
 const BASE = import.meta.env.BASE_URL + "audio/";
-const VOL: Record<string, number> = { "punch-light": 0.7, "block": 0.7, "blast-charge": 0.7, "shield": 0.7, "exp-pickup": 0.5 };
+const VOL: Record<string, number> = { "punch-light": 0.7, "block": 0.7, "blast-charge": 0.7, "shield": 0.7, "exp-pickup": 0.5,
+  "kiblast-charge-full": 0.7, "flight-takeoff": 0.7, "flight-land": 0.7, "kiblast-charge-loop": 0.5, "flight-loop": 0.5 };
 const KEY = "kiquest.mute.v1";
 
 export class Audio {
@@ -44,7 +46,18 @@ export class Audio {
     const b = this.bufs.get(n); if (!b) { this.load(n); return; }
     const s = this.ctx.createBufferSource(), g = this.ctx.createGain();
     s.buffer = b; g.gain.value = VOL[n] ?? 1; s.connect(g).connect(this.sfx); s.start();
-    if (n === "levelup" || n === "transform") this.duck();
+    if (n === "levelup" || n === "transform" || n === "transform-powerup") this.duck();
+  }
+  loops = new Map<string, { s: AudioBufferSourceNode; g: GainNode }>();
+  /** Start/stop a looping SFX (whole-file loop). */
+  loop(n: string, on: boolean) {
+    const cur = this.loops.get(n);
+    if (!on) { if (cur) { cur.s.stop(); this.loops.delete(n); } return; }
+    if (cur || !this.ctx) return;
+    const b = this.bufs.get(n); if (!b) { this.load(n); return; }
+    const s = this.ctx.createBufferSource(), g = this.ctx.createGain();
+    s.buffer = b; s.loop = true; g.gain.value = VOL[n] ?? 1; s.connect(g).connect(this.sfx); s.start();
+    this.loops.set(n, { s, g });
   }
   private duck() { if (!this.ctx || this.muted) return; const t = this.ctx.currentTime, g = this.music.gain; g.cancelScheduledValues(t); g.setValueAtTime(0.22, t); g.linearRampToValueAtTime(0.45, t + 2); }
   setMusic(n: string) {
@@ -73,6 +86,13 @@ export class Audio {
       if (d("travels") > 0) this.play("transform");
     }
     this.prev = { ...S };
+    if (g.mb) {
+      for (const n of g.mb.sfx) this.play(n);
+      g.mb.sfx.length = 0;
+      const play = g.mode === "play";
+      this.loop("kiblast-charge-loop", play && g.mb.charging);
+      this.loop("flight-loop", play && g.mb.hover);
+    }
     if (g.shield && !this.prevShield) this.play("shield");
     this.prevShield = g.shield;
     if (g.tf >= 100 && this.prevTf < 100) this.play("transform");

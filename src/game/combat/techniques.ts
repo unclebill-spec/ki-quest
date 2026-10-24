@@ -31,6 +31,7 @@ export function updateTechnique(g: Game, dt: number) {
   if (t.id === "beam") {
     if (inp.pressed("blast") && g.blastCd <= 0) { m.charging = true; m.charge = 0; }
     if (m.charging) {
+      if (m.charge < BEAM_FULL && m.charge + dt >= BEAM_FULL) m.sfx.push("kiblast-charge-full");
       m.charge = Math.min(BEAM_FULL, m.charge + dt);
       if (g.frame % 4 === 0) { const a = g.parts.rand() * 6.28; g.parts.emit(CH_COMBAT, K_SPARK, p.x + p.fx * 10 + Math.cos(a) * 12, p.y - 14 + Math.sin(a) * 12, -Math.cos(a) * 50, -Math.sin(a) * 50, 0.22, C_CYAN); }
       if (!inp.down("blast")) {
