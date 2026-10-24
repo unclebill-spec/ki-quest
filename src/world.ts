@@ -1,53 +1,84 @@
-/** Area data: one grey-box area, "Emberfall Hollow". Tiles are placeholders. */
+/** Areas: ASCII maps (src/areas/maps.ts) -> tiles, lamps, props, NPCs, spawns, gates and updraft stones. */
+import { LANTERNMOSS, HUSHWATER } from "./areas/maps";
 export const TILE = 16;
 export const MW = 48, MH = 34;
-export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3;
+export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3, T_WATER = 4, T_PATH = 5, T_BOARD = 6, T_WARD = 7;
 export interface Lamp { x: number; y: number; c: readonly [number, number, number]; seed: number }
 export interface Spawn { kind: "brute" | "wisp"; x: number; y: number }
-export interface Area { name: string; tiles: Uint8Array; lamps: Lamp[]; pad: { x: number; y: number }; start: { x: number; y: number }; spawns: Spawn[] }
-
-function rng(seed: number) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-
-export function buildArea(): Area {
-  const t = new Uint8Array(MW * MH);
-  const r = rng(7);
-  const set = (x: number, y: number, v: number) => { if (x >= 0 && y >= 0 && x < MW && y < MH) t[y * MW + x] = v; };
-  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
-    const edge = x === 0 || y === 0 || x === MW - 1 || y === MH - 1;
-    t[y * MW + x] = edge ? T_WALL : r() < 0.18 ? T_MOSS : T_FLOOR;
-  }
-  // rock clusters
-  for (let i = 0; i < 14; i++) {
-    const cx = 3 + Math.floor(r() * (MW - 6)), cy = 3 + Math.floor(r() * (MH - 6));
-    if (Math.abs(cx - 8) < 6 && Math.abs(cy - 8) < 5) continue;
-    const n = 2 + Math.floor(r() * 5);
-    for (let k = 0; k < n; k++) set(cx + Math.floor(r() * 3) - 1, cy + Math.floor(r() * 3) - 1, T_WALL);
-  }
-  // ruined plaza with the save pad
-  for (let y = 4; y <= 11; y++) for (let x = 4; x <= 12; x++) set(x, y, T_PLAZA);
-  for (const [x, y] of [[4, 4], [12, 4], [4, 11], [12, 11]]) set(x, y, T_WALL);
-  // a dividing ridge with two gaps
-  for (let y = 1; y < MH - 1; y++) if (y !== 9 && y !== 10 && y !== 24 && y !== 25) set(24, y, T_WALL);
-  const lamps: Lamp[] = [
-    { x: 4.5, y: 4.5, c: [1, 0.62, 0.3], seed: 1 }, { x: 12.5, y: 4.5, c: [1, 0.62, 0.3], seed: 2 },
-    { x: 4.5, y: 11.5, c: [1, 0.62, 0.3], seed: 3 }, { x: 12.5, y: 11.5, c: [1, 0.62, 0.3], seed: 4 },
-    { x: 24.5, y: 8.5, c: [0.35, 0.8, 1], seed: 5 }, { x: 24.5, y: 23.5, c: [0.35, 0.8, 1], seed: 6 },
-    { x: 36.5, y: 16.5, c: [0.62, 0.38, 1], seed: 7 }, { x: 15.5, y: 26.5, c: [0.62, 0.38, 1], seed: 8 },
-  ].map((l) => ({ ...l, c: l.c as unknown as Lamp["c"], x: l.x * TILE, y: l.y * TILE }));
-  for (const l of lamps) set(Math.floor(l.x / TILE), Math.floor(l.y / TILE), T_WALL);
-  const spawns: Spawn[] = [
-    { kind: "brute", x: 18, y: 16 }, { kind: "brute", x: 14, y: 24 }, { kind: "wisp", x: 20, y: 28 },
-    { kind: "brute", x: 30, y: 8 }, { kind: "wisp", x: 34, y: 12 }, { kind: "brute", x: 38, y: 22 },
-    { kind: "wisp", x: 42, y: 28 }, { kind: "brute", x: 32, y: 28 }, { kind: "wisp", x: 40, y: 6 },
-  ].map((s) => ({ ...s, kind: s.kind as Spawn["kind"], x: s.x * TILE + 8, y: s.y * TILE + 8 }));
-  for (const s of spawns) set(Math.floor(s.x / TILE), Math.floor(s.y / TILE), T_FLOOR);
-  return { name: "Emberfall Hollow", tiles: t, lamps, pad: { x: 8.5 * TILE, y: 7.5 * TILE }, start: { x: 8.5 * TILE, y: 9.5 * TILE }, spawns };
+export interface Prop { kind: "house" | "tree" | "grave"; x: number; y: number }
+export interface Npc { id: string; x: number; y: number }
+export interface Travel { x: number; y: number; to: string; label: string }
+export interface Ward { tx: number; ty: number; lvl: number }
+export interface Area {
+  id: string; name: string; music: string; theme: "moss" | "marsh";
+  tiles: Uint8Array; lamps: Lamp[]; pad: { x: number; y: number }; start: { x: number; y: number }; spawns: Spawn[];
+  props: Prop[]; npcs: Npc[]; travel: Travel[]; wards: Ward[];
+  zones: { name: string; x0: number; y0: number; x1: number; y1: number }[];
 }
+
+interface Def { id: string; name: string; music: string; theme: Area["theme"]; rows: string[]; lamp: Lamp["c"]; to: string; toLabel: string; wardLvl: number; zones: Area["zones"] }
+export const AREA_DEFS: Record<string, Def> = {
+  lanternmoss: {
+    id: "lanternmoss", name: "Lanternmoss Hollow", music: "area1-theme", theme: "moss", rows: LANTERNMOSS, lamp: [0.35, 0.8, 1],
+    to: "hushwater", toLabel: "Hushwater", wardLvl: 4,
+    zones: [{ name: "Wickhaven", x0: 1, y0: 1, x1: 20, y1: 10 }, { name: "The Old Watch", x0: 31, y0: 1, x1: 46, y1: 11 },
+      { name: "Witchlight Fen", x0: 1, y0: 11, x1: 13, y1: 32 }, { name: "Updraft Cliff", x0: 43, y0: 1, x1: 46, y1: 5 }, { name: "Glowcap Woods", x0: 0, y0: 0, x1: 47, y1: 33 }],
+  },
+  hushwater: {
+    id: "hushwater", name: "Hushwater", music: "area1-theme", theme: "marsh", rows: HUSHWATER, lamp: [0.62, 0.42, 1],
+    to: "lanternmoss", toLabel: "Lanternmoss Hollow", wardLvl: 0,
+    zones: [{ name: "Hushwater Landing", x0: 1, y0: 1, x1: 5, y1: 6 }, { name: "Hushwater Town", x0: 16, y0: 5, x1: 33, y1: 13 },
+      { name: "Lantern Graveyard", x0: 34, y0: 1, x1: 46, y1: 9 }, { name: "Sunken Meadow", x0: 0, y0: 14, x1: 47, y1: 33 }, { name: "Hushwater Fen", x0: 0, y0: 0, x1: 47, y1: 33 }],
+  },
+};
+
+const TILECH: Record<string, number> = { "#": T_WALL, ",": T_MOSS, "=": T_PLAZA, "~": T_WATER, ":": T_PATH, b: T_BOARD, W: T_WARD };
+
+export function buildArea(id = "lanternmoss"): Area {
+  const d = AREA_DEFS[id] ?? AREA_DEFS.lanternmoss;
+  const t = new Uint8Array(MW * MH);
+  const C = (n: number) => n * TILE + 8;
+  const lamps: Lamp[] = [], props: Prop[] = [], npcs: Npc[] = [], spawns: Spawn[] = [], travel: Travel[] = [], wards: Ward[] = [];
+  let pad = { x: C(2), y: C(2) }, start: { x: number; y: number } | null = null;
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
+    let ch = (d.rows[y] ?? "")[x] ?? "#";
+    if (x === 0 || y === 0 || x === MW - 1 || y === MH - 1) ch = "#";
+    let v = TILECH[ch] ?? T_FLOOR;
+    if (ch === "L") { lamps.push({ x: C(x), y: C(y), c: d.lamp, seed: lamps.length + 1 }); v = T_WALL; }
+    else if (ch === "T") { props.push({ kind: "tree", x: C(x), y: C(y) }); v = T_WALL; }
+    else if (ch === "G") { props.push({ kind: "grave", x: C(x), y: C(y) }); v = T_WALL; }
+    else if (ch === "H") props.push({ kind: "house", x: C(x + 1), y: C(y + 1) });
+    else if (ch === "S") { pad = { x: C(x), y: C(y) }; v = T_PLAZA; }
+    else if (ch === "@") start = { x: C(x), y: C(y) };
+    else if (ch === "U") travel.push({ x: C(x), y: C(y), to: d.to, label: d.toLabel });
+    else if (ch === "W") wards.push({ tx: x, ty: y, lvl: d.wardLvl });
+    else if (ch === "g" || ch === "w") spawns.push({ kind: ch === "g" ? "brute" : "wisp", x: C(x), y: C(y) });
+    else if (/[a-z]/.test(ch) && ch !== "b") { npcs.push({ id: ch, x: C(x), y: C(y) }); v = T_PLAZA; }
+    if (t[y * MW + x] !== T_WALL) t[y * MW + x] = v;
+  }
+  // houses: 3x2 solid footprint
+  for (const h of props) if (h.kind === "house") {
+    const tx = Math.floor(h.x / TILE) - 1, ty = Math.floor(h.y / TILE) - 1;
+    for (let yy = ty; yy < ty + 2; yy++) for (let xx = tx; xx < tx + 3; xx++) t[yy * MW + xx] = T_WALL;
+  }
+  // a lamp glow on every house and plaza edge looks busy; houses carry their own cap glow (drawn in areas/art.ts)
+  return { id: d.id, name: d.name, music: d.music, theme: d.theme, tiles: t, lamps, pad, start: start ?? { x: pad.x, y: pad.y + 2 * TILE }, spawns, props, npcs, travel, wards, zones: d.zones };
+}
+
+export function zoneAt(a: Area, px: number, py: number) {
+  const x = px / TILE, y = py / TILE;
+  return a.zones.find((z) => x >= z.x0 && x <= z.x1 + 1 && y >= z.y0 && y <= z.y1 + 1)?.name ?? a.name;
+}
+
+/** Sealed wards open when the hero's level is high enough (set by story/world.ts each frame). */
+export let wardOpen = false;
+export function setWardOpen(v: boolean) { wardOpen = v; }
 
 export function solidAt(a: Area, px: number, py: number) {
   const x = Math.floor(px / TILE), y = Math.floor(py / TILE);
   if (x < 0 || y < 0 || x >= MW || y >= MH) return true;
-  return a.tiles[y * MW + x] === T_WALL;
+  const v = a.tiles[y * MW + x];
+  return v === T_WALL || v === T_WATER || (v === T_WARD && !wardOpen);
 }
 /** Move a circle-ish body (half-width hw) with axis-separated collision. */
 export function moveBody(a: Area, o: { x: number; y: number }, dx: number, dy: number, hw = 5) {

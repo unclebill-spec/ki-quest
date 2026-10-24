@@ -6,6 +6,8 @@ import { installer } from "./vendor/install";
 import { enterFullscreen, canFullscreen } from "./vendor/screen";
 import { readSave } from "./save";
 import { Audio } from "./audio";
+import { Story } from "./story";
+import { storyOverlay } from "./areas/art";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
@@ -13,6 +15,7 @@ const stage = document.getElementById("stage")!;
 const input = new Input(stage);
 const game = new Game(input);
 const audio = new Audio();
+const story = new Story(game, input);
 addEventListener("pointerdown", () => audio.unlock()); addEventListener("keydown", () => audio.unlock());
 
 // Landscape layout: keep 16:9, integer scale when it fits, fractional on small phones.
@@ -32,7 +35,7 @@ const syncInstall = () => { const s = inst?.state(); installBtn.hidden = !(s ===
 inst?.subscribe(syncInstall); syncInstall();
 installBtn.onclick = async () => { if (inst?.state() === "ios") { document.getElementById("iosTip")!.hidden = false; } else await inst?.install(); syncInstall(); };
 fsBtn.hidden = !canFullscreen(); fsBtn.onclick = () => void enterFullscreen();
-const begin = () => { title.hidden = true; game.start(true); };
+const begin = () => { title.hidden = true; const cont = !!readSave(); game.start(true); story.begin(cont); };
 startBtn.onclick = begin;
 startBtn.focus();
 
@@ -52,17 +55,17 @@ const DT = 1 / 60;
 function loop(now: number) {
   acc += Math.min(0.1, (now - last) / 1000); last = now;
   while (acc >= DT) {
-    game.step(DT); acc -= DT;
+    if (!story.update(DT)) { game.step(DT); story.after(); } acc -= DT;
     if (game.mode === "title" && (input.pressed("melee") || input.pressed("pause")) && !title.hidden) begin();
   }
   audio.watch(game as never);
-  if (game.mode !== "title") render(ctx, game);
+  if (game.mode !== "title") { render(ctx, game); storyOverlay(ctx, game, story, W, H); }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
 
 declare global { interface Window { __ki: unknown } }
 window.__ki = {
-  game, input, audio,
+  game, input, audio, story,
   state: () => ({ mode: game.mode, hp: game.hp, ep: game.ep, lvl: game.lvl, exp: game.exp, pts: game.pts, str: game.str, x: game.p.x, y: game.p.y, shots: game.shots.length, alive: game.enemies.filter((e) => !e.dead).length, ...game.stats }),
 };

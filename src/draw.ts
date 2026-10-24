@@ -1,6 +1,7 @@
 /** Rendering: placeholder tiles, hero/foes, Gravewake light layer (multiply) + additive ki glow, HUD and menus. */
 import { Game, Enemy, expNext } from "./game";
-import { TILE, MW, MH, T_WALL, T_MOSS, T_PLAZA } from "./world";
+import { TILE, MW, MH } from "./world";
+import { tile, worldSprites, worldLights, worldGlow, areaMap } from "./areas/art";
 import { lightSprite, flickerStep, rgbCss, RGB } from "./vendor/light";
 import { buildAtlas, ATLAS_CELL, maskSize } from "./vendor/particles";
 
@@ -87,10 +88,7 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   const a = g.area;
   for (let ty = Math.floor(cy / TILE); ty <= Math.floor((cy + H) / TILE); ty++) for (let tx = Math.floor(cx / TILE); tx <= Math.floor((cx + W) / TILE); tx++) {
     if (tx < 0 || ty < 0 || tx >= MW || ty >= MH) continue;
-    const v = a.tiles[ty * MW + tx], X = tx * TILE - cx, Y = ty * TILE - cy, ch = (tx + ty) & 1;
-    if (v === T_WALL) { c.fillStyle = "#3a3448"; c.fillRect(X, Y, TILE, TILE); c.fillStyle = "#4c4560"; c.fillRect(X, Y, TILE, 4); c.fillStyle = "#231f2e"; c.fillRect(X, Y + 13, TILE, 3); }
-    else if (v === T_PLAZA) { c.fillStyle = ch ? "#5a5260" : "#544c5a"; c.fillRect(X, Y, TILE, TILE); c.fillStyle = "#463f4c"; c.fillRect(X, Y, TILE, 1); c.fillRect(X, Y, 1, TILE); }
-    else { c.fillStyle = v === T_MOSS ? (ch ? "#33452f" : "#2f402b") : ch ? "#3d3a46" : "#383542"; c.fillRect(X, Y, TILE, TILE); }
+    tile(c, a.theme, a.tiles[ty * MW + tx], tx * TILE - cx, ty * TILE - cy, tx, ty, g.time);
   }
   // save pad
   const padX = a.pad.x - cx, padY = a.pad.y - cy;
@@ -101,12 +99,14 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   // entities sorted by y
   const list: { y: number; d: () => void }[] = [];
   for (const e of g.enemies) if (!e.dead) list.push({ y: e.y, d: () => foe(c, e, e.x - cx, e.y - cy, g.time) });
+  worldSprites(c, g, cx, cy, list);
   list.push({ y: p.y, d: () => { if (p.inv > 0 && g.frame % 6 < 3) return; hero(c, g, p.x - cx, p.y - cy); } });
   list.sort((m, n) => m.y - n.y).forEach((o) => o.d());
   // light layer (Gravewake light.ts): ambient + banded light sprites, multiplied over the world
   lctx.globalCompositeOperation = "source-over"; lctx.fillStyle = rgbCss(AMBIENT); lctx.fillRect(0, 0, W, H);
   lctx.globalCompositeOperation = "lighter";
   for (const l of a.lamps) addLight(l.x - cx, l.y - cy, 80, l.c, flickerStep(g.frame, l.seed));
+  worldLights(g, cx, cy, addLight);
   addLight(padX, padY, 48, [0.35, 0.85, 0.95], flickerStep(g.frame, 9));
   addLight(p.x - cx, p.y - cy - 14, 48, g.shield ? [0.4, 0.8, 1] : [0.7, 0.66, 0.8], 0);
   for (const s of g.shots) addLight(s.x - cx, s.y - cy, 32, s.foe ? [0.8, 0.3, 0.9] : [0.4, 0.85, 1], 0);
@@ -115,6 +115,7 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   // emissives: additive (lighter)
   c.globalCompositeOperation = "lighter";
   for (const l of a.lamps) glow(c, l.x - cx, l.y - cy - 8, 10, rgbCss(l.c, 0.8));
+  worldGlow(c, g, cx, cy, glow);
   glow(c, padX, padY, 16, "rgba(90,220,255,.5)", 0.6 + 0.3 * Math.sin(g.time * 3));
   for (const e of g.enemies) if (!e.dead) {
     const X = e.x - cx, Y = e.y - cy;
@@ -205,12 +206,11 @@ function pauseMenu(c: CanvasRenderingContext2D, g: Game) {
   c.fillText("Inventory · Equip · Options · Journal tabs arrive in a later chunk", W / 2, H - 6);
 }
 function mapView(c: CanvasRenderingContext2D, g: Game) {
-  c.fillStyle = "rgba(6,4,12,.88)"; c.fillRect(0, 0, W, H);
-  const s = 3, ox = Math.round(W / 2 - (MW * s) / 2), oy = 30;
-  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) { const v = g.area.tiles[y * MW + x]; c.fillStyle = v === T_WALL ? "#4c4560" : v === T_PLAZA ? "#6a6070" : "#26232e"; c.fillRect(ox + x * s, oy + y * s, s, s); }
-  c.fillStyle = "#7ff0ff"; c.fillRect(ox + (g.area.pad.x / TILE) * s - 2, oy + (g.area.pad.y / TILE) * s - 2, 4, 4);
-  for (const e of g.enemies) if (!e.dead) { c.fillStyle = "#ff4a4a"; c.fillRect(ox + (e.x / TILE) * s - 1, oy + (e.y / TILE) * s - 1, 2, 2); }
-  c.fillStyle = g.frame & 16 ? "#fff" : "#ffd04a"; c.fillRect(ox + (g.p.x / TILE) * s - 2, oy + (g.p.y / TILE) * s - 2, 4, 4);
-  c.textAlign = "center"; c.font = "bold 10px monospace"; c.fillStyle = "#cfe8ff"; c.fillText(`SCANNER · ${g.area.name}`, W / 2, 20);
-  c.font = "6px monospace"; c.fillStyle = "#8a84a0"; c.fillText("Map stub: world map, scans and radar come later · M / Select to close", W / 2, H - 8);
+  c.fillStyle = "rgba(6,4,12,.9)"; c.fillRect(0, 0, W, H);
+  const s = 3.5, ox = Math.round(W / 2 - (MW * s) / 2), oy = 28;
+  c.fillStyle = "#cfe8ff"; c.textAlign = "center"; c.font = "bold 10px monospace"; c.fillText(`LENS MAP · ${g.area.name}`, W / 2, 18);
+  areaMap(c, g, ox, oy, s);
+  c.font = "6px monospace"; c.fillStyle = "#8a84a0"; c.textAlign = "center";
+  c.fillText("cyan: hearthstone · white: updraft stone · green: people · red: foes · M / Select to close", W / 2, H - 6);
 }
+

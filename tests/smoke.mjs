@@ -13,7 +13,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
   const errs = []; page.on("pageerror", (e) => errs.push(String(e))); page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
   await page.goto("http://localhost:4173/ki-quest/");
-  await page.evaluate(() => localStorage.clear());
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem("kiquest.story.v1", JSON.stringify({ introSeen: true })); });
   await page.reload();
   await page.click("#startBtn");
   const S = () => page.evaluate(() => window.__ki.state());
