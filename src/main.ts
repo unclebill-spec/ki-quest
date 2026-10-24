@@ -7,7 +7,7 @@ import { enterFullscreen, canFullscreen } from "./vendor/screen";
 import { readSave } from "./save";
 import { Audio } from "./audio";
 import { Story } from "./story";
-import { storyOverlay } from "./areas/art";
+import { storyOverlay, bindStory } from "./areas/art";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
@@ -16,6 +16,7 @@ const input = new Input(stage);
 const game = new Game(input);
 const audio = new Audio();
 const story = new Story(game, input);
+bindStory(story);
 addEventListener("pointerdown", () => audio.unlock()); addEventListener("keydown", () => audio.unlock());
 
 // Landscape layout: keep 16:9, integer scale when it fits, fractional on small phones.

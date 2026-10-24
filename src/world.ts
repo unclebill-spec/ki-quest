@@ -8,11 +8,12 @@ export interface Spawn { kind: "brute" | "wisp"; x: number; y: number }
 export interface Prop { kind: "house" | "tree" | "grave"; x: number; y: number }
 export interface Npc { id: string; x: number; y: number }
 export interface Travel { x: number; y: number; to: string; label: string }
+export interface Orb { i: number; x: number; y: number }
 export interface Ward { tx: number; ty: number; lvl: number }
 export interface Area {
   id: string; name: string; music: string; theme: "moss" | "marsh";
   tiles: Uint8Array; lamps: Lamp[]; pad: { x: number; y: number }; start: { x: number; y: number }; spawns: Spawn[];
-  props: Prop[]; npcs: Npc[]; travel: Travel[]; wards: Ward[];
+  props: Prop[]; npcs: Npc[]; orbs: Orb[]; travel: Travel[]; wards: Ward[];
   zones: { name: string; x0: number; y0: number; x1: number; y1: number }[];
 }
 
@@ -38,7 +39,7 @@ export function buildArea(id = "lanternmoss"): Area {
   const d = AREA_DEFS[id] ?? AREA_DEFS.lanternmoss;
   const t = new Uint8Array(MW * MH);
   const C = (n: number) => n * TILE + 8;
-  const lamps: Lamp[] = [], props: Prop[] = [], npcs: Npc[] = [], spawns: Spawn[] = [], travel: Travel[] = [], wards: Ward[] = [];
+  const lamps: Lamp[] = [], props: Prop[] = [], npcs: Npc[] = [], spawns: Spawn[] = [], travel: Travel[] = [], wards: Ward[] = [], orbs: Orb[] = [];
   let pad = { x: C(2), y: C(2) }, start: { x: number; y: number } | null = null;
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
     let ch = (d.rows[y] ?? "")[x] ?? "#";
@@ -50,6 +51,7 @@ export function buildArea(id = "lanternmoss"): Area {
     else if (ch === "H") props.push({ kind: "house", x: C(x + 1), y: C(y + 1) });
     else if (ch === "S") { pad = { x: C(x), y: C(y) }; v = T_PLAZA; }
     else if (ch === "@") start = { x: C(x), y: C(y) };
+    else if (ch === "*") orbs.push({ i: orbs.length, x: C(x), y: C(y) });
     else if (ch === "U") travel.push({ x: C(x), y: C(y), to: d.to, label: d.toLabel });
     else if (ch === "W") wards.push({ tx: x, ty: y, lvl: d.wardLvl });
     else if (ch === "g" || ch === "w") spawns.push({ kind: ch === "g" ? "brute" : "wisp", x: C(x), y: C(y) });
@@ -62,7 +64,7 @@ export function buildArea(id = "lanternmoss"): Area {
     for (let yy = ty; yy < ty + 2; yy++) for (let xx = tx; xx < tx + 3; xx++) t[yy * MW + xx] = T_WALL;
   }
   // a lamp glow on every house and plaza edge looks busy; houses carry their own cap glow (drawn in areas/art.ts)
-  return { id: d.id, name: d.name, music: d.music, theme: d.theme, tiles: t, lamps, pad, start: start ?? { x: pad.x, y: pad.y + 2 * TILE }, spawns, props, npcs, travel, wards, zones: d.zones };
+  return { id: d.id, name: d.name, music: d.music, theme: d.theme, tiles: t, lamps, pad, start: start ?? { x: pad.x, y: pad.y + 2 * TILE }, spawns, props, npcs, orbs, travel, wards, zones: d.zones };
 }
 
 export function zoneAt(a: Area, px: number, py: number) {

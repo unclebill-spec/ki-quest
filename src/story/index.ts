@@ -86,6 +86,14 @@ export class Story {
       this.say("Updraft stone", [`The rune slab hums. Ride the updraft to ${s.label}?`, "(Melee to fly. Step off to stay.)"], () => { this.fly = 1.8; this.flyTo = s.to; });
       return true;
     }
+    for (const o of g.area.orbs) {
+      const k = `orb_${g.area.id}_${o.i}`;
+      if (!this.flags[k] && Math.hypot(o.x - g.p.x, o.y + 6 - g.p.y) < 14) {
+        this.flags[k] = true; this.flags.orbs = ((this.flags.orbs as number) || 0) + 1; this.save();
+        const st = g.stats as Record<string, number>; st.talks = (st.talks ?? 0) + 1;
+        g.say(`Pip's glow orb caught (${this.flags.orbs}/6)`, 2);
+      }
+    }
     if (!g.area.travel.some((s) => Math.hypot(s.x - g.p.x, s.y - g.p.y) < 18)) this.flags.stoneT = false;
     return false;
   }
@@ -101,6 +109,7 @@ export class Story {
     this.say(def.name, def.lines(this.flags), () => {
       if (id === "a") this.flags.metAma = true;
       if (id === "m") this.flags.metMirela = true;
+      if (id === "p" && (this.flags.orbs as number) >= 6 && !this.flags.orbsDone) { this.flags.orbsDone = true; g.exp += 120; g.say("Lost Lanterns complete · +120 EXP", 2.5); }
       this.flags["talked_" + g.area.id + id] = true; this.save();
     });
   }

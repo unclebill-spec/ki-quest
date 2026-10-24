@@ -87,17 +87,25 @@ export function worldSprites(c: C2, g: Game, cx: number, cy: number, list: { y: 
     c.strokeStyle = "#c8f0ff"; c.lineWidth = 1; c.beginPath(); c.ellipse(X, Y, 8, 4, 0, 0, 7); c.stroke();
   }
 }
+/** Story handle so world art can hide collected orbs (set by main.ts). */
+let st: Story | null = null;
+export function bindStory(s: Story) { st = s; }
 /** Light sources for the multiply layer. */
 export function worldLights(g: Game, cx: number, cy: number, add: (x: number, y: number, r: number, col: [number, number, number], f: number) => void) {
   for (const p of g.area.props) if (p.kind === "house") add(p.x - cx, p.y - cy - 12, 56, [0.35, 0.55, 1], 0);
   for (const s of g.area.travel) add(s.x - cx, s.y - cy, 52, [0.7, 0.9, 1], 0);
   for (const n of g.area.npcs) add(n.x - cx, n.y - cy - 12, 30, [0.8, 0.75, 0.7], 0);
+  for (const o of g.area.orbs) if (!st?.flags[`orb_${g.area.id}_${o.i}`]) add(o.x - cx, o.y - cy - 10, 36, [0.45, 0.85, 1], 0);
 }
 /** Additive glows after the light layer. */
 export function worldGlow(c: C2, g: Game, cx: number, cy: number, glow: (c: C2, x: number, y: number, r: number, col: string, a?: number) => void) {
   for (const p of g.area.props) {
     if (p.kind === "house") { glow(c, p.x - cx, p.y - cy - 16, 22, "rgba(80,140,255,.35)"); glow(c, p.x - cx - 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); glow(c, p.x - cx + 10, p.y - cy - 2, 5, "rgba(255,210,140,.7)"); }
     else if (p.kind === "tree") glow(c, p.x - cx, p.y - cy - 17, 10, g.area.theme === "marsh" ? "rgba(170,110,255,.45)" : "rgba(90,220,240,.4)");
+  }
+  for (const o of g.area.orbs) if (!st?.flags[`orb_${g.area.id}_${o.i}`]) {
+    const X = o.x - cx + Math.sin(g.time * 1.3 + o.i) * 3, Y = o.y - cy - 10 + Math.sin(g.time * 2 + o.i * 2) * 3;
+    glow(c, X, Y, 12, "rgba(120,230,255,.55)"); glow(c, X, Y, 4, "#ffffff");
   }
   for (const s of g.area.travel) {
     const k = 0.5 + 0.3 * Math.sin(g.time * 2.5);
@@ -156,6 +164,7 @@ export function areaMap(c: C2, g: Game, ox: number, oy: number, s: number) {
   for (const z of a.zones.slice(0, -1)) c.fillText(z.name, ox + ((z.x0 + z.x1 + 1) / 2) * s, oy + ((z.y0 + z.y1 + 1) / 2) * s);
   c.fillStyle = "#7ff0ff"; c.fillRect(ox + (a.pad.x / TILE) * s - 2, oy + (a.pad.y / TILE) * s - 2, 4, 4);
   for (const t of a.travel) { c.fillStyle = "#fff"; c.fillRect(ox + (t.x / TILE) * s - 2, oy + (t.y / TILE) * s - 2, 4, 4); }
+  for (const o of a.orbs) if (!st?.flags[`orb_${a.id}_${o.i}`]) { c.fillStyle = "#c8f8ff"; c.fillRect(ox + (o.x / TILE) * s - 1, oy + (o.y / TILE) * s - 1, 2, 2); }
   for (const n of a.npcs) { c.fillStyle = "#6aff8a"; c.fillRect(ox + (n.x / TILE) * s - 1.5, oy + (n.y / TILE) * s - 1.5, 3, 3); }
   for (const e of g.enemies) if (!e.dead) { c.fillStyle = "#ff4a4a"; c.fillRect(ox + (e.x / TILE) * s - 1, oy + (e.y / TILE) * s - 1, 2, 2); }
   c.fillStyle = g.frame & 16 ? "#fff" : "#ffd04a"; c.fillRect(ox + (g.p.x / TILE) * s - 2, oy + (g.p.y / TILE) * s - 2, 4, 4);

@@ -27,6 +27,15 @@ try {
   for (let i = 0; i < 8 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
   ok("Ama flag set + objective moves on", await E(() => window.__ki.story.flags.metAma === true && /Lv 4/.test(window.__ki.story.objective())));
   await shot("wickhaven");
+  // Lost Lanterns: catch 6 glow orbs, hand in to Pip
+  for (let i = 0; i < 6; i++) { await E((i) => { const g = window.__ki.game, o = g.area.orbs[i]; g.p.x = o.x; g.p.y = o.y + 6; }, i); await p.waitForTimeout(80); }
+  ok("6 glow orbs caught", await E(() => window.__ki.story.flags.orbs === 6));
+  await E(() => { const g = window.__ki.game, n = g.area.npcs.find((n) => n.id === "p"); g.p.x = n.x + 14; g.p.y = n.y; });
+  const exp0 = await E(() => window.__ki.game.exp + window.__ki.game.lvl * 1000);
+  await p.waitForTimeout(100); await p.keyboard.press("KeyJ"); await p.waitForTimeout(300);
+  for (let i = 0; i < 8 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
+  ok("Lost Lanterns reward", await E((e0) => window.__ki.story.flags.orbsDone === true && window.__ki.game.exp + window.__ki.game.lvl * 1000 > e0, exp0));
+  await E(() => { window.__ki.game.lvl = 1; window.__ki.game.exp = 0; });
   // sealed ward blocks at Lv 1
   await E(() => { const g = window.__ki.game, w = g.area.wards[0]; g.p.x = w.tx * 16 - 10; g.p.y = w.ty * 16 + 8; });
   await p.keyboard.down("KeyD"); await p.waitForTimeout(400); await p.keyboard.up("KeyD"); await p.waitForTimeout(100);
