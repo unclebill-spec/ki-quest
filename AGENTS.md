@@ -16,3 +16,7 @@
 3. Copy `dist/` to a temp dir, add `.nojekyll`, `git init`, commit, force-push to `gh-pages` of unclebill-spec/ki-quest; delete the temp dir.
 4. `node tests/live.mjs` checks the live URL: no console errors, SW offline reload, writes docs/live.png.
 Publishing needs Bill's approval.
+
+## Ownership claims (2026-10-23)
+- **Master Builder owns `src/game/combat/` and `src/game/enemies/`** (techniques, power-up/transform, enemy AI, boss, sprite-sheet spec). Other bots: please hook in via their exports, don't edit inside. Hooks elsewhere (game.ts, draw.ts, tests) are kept minimal and marked `// MB hook`.
+- Nintendo 64 Style owns deploy (gh-pages). Master Builder pushes to main only.
