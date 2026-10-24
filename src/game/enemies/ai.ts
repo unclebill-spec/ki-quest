@@ -7,6 +7,7 @@ import { meterGain, TF_HIT } from "../combat/powerup";
 import { updateBoss, bossKilled } from "./boss";
 import { updateSlag, slagKilled } from "./slagheart";
 import { updateAurel, aurelKilled } from "./aurel";
+import { updateTwin, twinKilled, twinShielded, twinsLog } from "./twins";
 import { hurtAlly } from "../combat/companion";
 
 /** Extra spawns this module adds to the area (wardens), on open floor near the given tiles. */
@@ -25,6 +26,7 @@ export function freeNear(a: Area, tx: number, ty: number) {
 /** Called from Game.damageFoe before applying damage. Returns adjusted damage/knockback. */
 export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, crit: boolean, pierce = false) {
   if ((e.kind === "boss" && g.mb.boss.lockT > 0) || (e.kind === "slag" && g.mb.boss2.lockT > 0) || (e.kind === "aurel" && g.mb.boss3.lockT > 0)) return { d: 0, kx: 0, ky: 0, blocked: true };
+  if (twinShielded(g, e)) { twinsLog.shieldedHits++; return { d: 0, kx: 0, ky: 0, blocked: true }; }
   if (e.kind === "warden" && e.guard) {
     const n = Math.hypot(kx, ky) || 1, front = (kx / n) * e.ax + (ky / n) * e.ay < -0.2;
     if (front) {
@@ -44,11 +46,12 @@ export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, c
 export function onFoeKill(g: Game, e: Enemy) {
   const info = FOE_INFO[e.kind];
   e.respawn = e.minion ? Infinity : info.respawn;
-  const n = e.kind === "boss" ? 10 : e.kind === "slag" || e.kind === "aurel" ? 12 : 3, each = Math.ceil(info.exp / n);
+  const n = e.kind === "boss" ? 10 : e.kind === "slag" || e.kind === "aurel" ? 12 : e.kind === "vey" || e.kind === "nell" ? 8 : 3, each = Math.ceil(info.exp / n);
   for (let i = 0; i < n; i++) { const a = (i / n) * 6.28; g.mb.orbs.push({ x: e.x, y: e.y - 8, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60 - 30, v: each, t: 0 }); }
   if (e.kind === "boss") bossKilled(g, e);
   if (e.kind === "slag") slagKilled(g, e);
   if (e.kind === "aurel") aurelKilled(g, e);
+  if (e.kind === "vey" || e.kind === "nell" || e.kind === "pylon") twinKilled(g, e);
 }
 
 function shoot(g: Game, x: number, y: number, ang: number, sp: number, dmg: number, life = 2.4) {
@@ -76,6 +79,8 @@ export function updateFoes(g: Game, dt: number) {
     else if (e.kind === "boss") [wx, wy] = updateBoss(g, e, dt, ux, uy, dist);
     else if (e.kind === "slag") [wx, wy] = updateSlag(g, e, dt, ux, uy, dist);
     else if (e.kind === "aurel") [wx, wy] = updateAurel(g, e, dt, ux, uy, dist);
+    else if (e.kind === "vey" || e.kind === "nell") [wx, wy] = updateTwin(g, e, dt, ux, uy, dist);
+    else if (e.kind === "pylon") [wx, wy] = [0, 0];
     else if (e.kind === "brute") {
       // melee rusher: chase, "!" + lunge-line telegraph, lunge
       if (e.state === "idle") { e.wander += dt; wx = Math.cos(e.wander * 0.7) * 14; wy = Math.sin(e.wander * 0.5) * 14; if (dist < 120) e.state = "chase"; }

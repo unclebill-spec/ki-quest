@@ -13,6 +13,7 @@ import { makeMB } from "./game/combat/state";
 import { updateAllies } from "./game/combat/companion";
 import { updateArena2 } from "./game/enemies/slagheart";
 import { updateArena3 } from "./game/enemies/aurel";
+import { updateArena4 } from "./game/enemies/twins";
 import { isBigBoss } from "./game/enemies/types";
 export type { Enemy } from "./game/enemies/types";
 
@@ -38,7 +39,7 @@ export class Game {
   parts = new ParticlePool();
   stats = { crits: 0, normals: 0, blasts: 0, kills: 0, saves: 0, levelUps: 0, shieldBlocks: 0, hurt: 0, transforms: 0, guarded: 0, guardBreaks: 0, bossKills: 0, foeShots: 0 };
   mb = makeMB();
-  get bossActive() { return this.mb.boss.active || this.mb.boss2.active || this.mb.boss3.active; } // MB hook: audio boss theme
+  get bossActive() { return this.mb.boss.active || this.mb.boss2.active || this.mb.boss3.active || this.mb.boss4.active; } // MB hook: audio boss theme
   private hitSerial = 1;
 
   constructor(public input: Input) { this.reset(); }
@@ -52,7 +53,7 @@ export class Game {
   reset() {
     Object.assign(this.p, { x: this.area.start.x, y: this.area.start.y });
     this.hp = this.maxHp; this.ep = this.maxEp;
-    const done = this.mb.boss.done, done2 = this.mb.boss2.done, done3 = this.mb.boss3.done; this.mb = makeMB(); this.mb.boss.done = done; this.mb.boss2.done = done2; this.mb.boss3.done = done3; this.tf = 0;
+    const done = this.mb.boss.done, done2 = this.mb.boss2.done, done3 = this.mb.boss3.done, done4 = this.mb.boss4.done; this.mb = makeMB(); this.mb.boss.done = done; this.mb.boss2.done = done2; this.mb.boss3.done = done3; this.mb.boss4.done = done4; this.tf = 0;
     this.enemies = [...this.area.spawns, ...extraSpawns(this.area)].map((s) => this.makeEnemy(s.kind, s.x, s.y));
   }
   makeEnemy(kind: FoeKind, x: number, y: number): Enemy { return mbMakeEnemy(kind, x, y); }
@@ -86,7 +87,7 @@ export class Game {
     if (this.mode === "map") { if (inp.pressed("melee") || inp.pressed("blast")) this.mode = "play"; return; }
     this.toastT -= dt; this.bannerT -= dt; this.levelT -= dt; this.shake = Math.max(0, this.shake - dt * 20);
     this.hero(dt);
-    updatePowerup(this, dt); updateArena(this, dt); updateArena2(this, dt); updateArena3(this, dt); // MB hook
+    updatePowerup(this, dt); updateArena(this, dt); updateArena2(this, dt); updateArena3(this, dt); updateArena4(this, dt); // MB hook
     updateFoes(this, dt);
     updateAllies(this, dt); // MB hook: companions (Mirela, Brann)
     this.projectiles(dt);
@@ -224,6 +225,7 @@ export class Game {
       if (this.mb.boss.active) { this.enemies = this.enemies.filter((e) => e.kind !== "boss"); this.mb.boss.active = false; this.mb.hazards.length = 0; }
       if (this.mb.boss2.active) { this.enemies = this.enemies.filter((e) => e.kind !== "slag" && !e.minion); this.mb.boss2.active = false; this.mb.hazards.length = 0; }
       if (this.mb.boss3.active) { this.enemies = this.enemies.filter((e) => e.kind !== "aurel" && !e.minion); this.mb.boss3.active = false; this.mb.hazards.length = 0; } // MB hook
+      if (this.mb.boss4.active) { this.enemies = this.enemies.filter((e) => e.kind !== "vey" && e.kind !== "nell" && e.kind !== "pylon" && !e.minion); this.mb.boss4.active = false; this.mb.hazards.length = 0; } // MB hook
     }
   }
 
