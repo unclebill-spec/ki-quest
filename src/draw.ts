@@ -3,6 +3,7 @@ import { Game, Enemy, expNext } from "./game";
 import { TILE, MW, MH } from "./world";
 import { tile, worldSprites, worldLights, worldGlow, areaMap } from "./areas/art";
 import { lightSprite, flickerStep, rgbCss, RGB } from "./vendor/light";
+import * as MB from "./game/combat/draw"; // MB hook
 import { buildAtlas, ATLAS_CELL, maskSize } from "./vendor/particles";
 
 export const W = 384, H = 216;
@@ -27,7 +28,7 @@ function hero(c: CanvasRenderingContext2D, g: Game, x: number, y: number) {
   const L = Math.round(x) - 12, T = Math.round(y) - 32;
   c.save();
   if (flip) { c.translate(L * 2 + 24, 0); c.scale(-1, 1); }
-  const r = (cx: number, cy: number, w: number, h: number, col: string) => { c.fillStyle = col; c.fillRect(L + cx, T + cy, w, h); };
+  const r = (cx: number, cy: number, w: number, h: number, col: string) => { c.fillStyle = MB.heroPal(g, col); c.fillRect(L + cx, T + cy, w, h); };
   // shadow
   c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(L + 12, T + 31, 8, 2.5, 0, 0, 7); c.fill();
   // boots + legs (pants): two separate legs
@@ -54,7 +55,7 @@ function hero(c: CanvasRenderingContext2D, g: Game, x: number, y: number) {
   r(8, 5, 8, 8, "#e2ad84"); r(10, 12, 4, 1, "#c48d66");
   if (!back) { if (side) r(13, 8, 2, 2, "#101018"); else { r(9, 8, 2, 2, "#101018"); r(13, 8, 2, 2, "#101018"); } }
   // spiky hair (dark teal) — original silhouette: swept back, three spikes
-  c.fillStyle = "#2f7a90";
+  c.fillStyle = MB.heroPal(g, "#2f7a90");
   c.beginPath(); c.moveTo(L + 7, T + 8); c.lineTo(L + 5, T + 1); c.lineTo(L + 10, T + 4); c.lineTo(L + 12, T - 1); c.lineTo(L + 14, T + 4);
   c.lineTo(L + 19, T + 1); c.lineTo(L + 17, T + 8); c.lineTo(L + 16, T + 5); c.lineTo(L + 8, T + 5); c.closePath(); c.fill();
   if (back) r(8, 5, 8, 6, "#2f7a90");
@@ -96,11 +97,12 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   c.strokeStyle = "#7ff0ff"; c.lineWidth = 1; c.beginPath(); c.ellipse(padX, padY, 11, 5, 0, 0, 7); c.stroke();
   // lamp posts
   for (const l of a.lamps) { const X = l.x - cx, Y = l.y - cy; c.fillStyle = "#2a2433"; c.fillRect(X - 3, Y - 6, 6, 10); c.fillStyle = rgbCss(l.c); c.fillRect(X - 2, Y - 10, 4, 4); }
+  MB.drawGround(c, g, cx, cy); // MB hook
   // entities sorted by y
   const list: { y: number; d: () => void }[] = [];
-  for (const e of g.enemies) if (!e.dead) list.push({ y: e.y, d: () => foe(c, e, e.x - cx, e.y - cy, g.time) });
+  for (const e of g.enemies) if (!e.dead) list.push({ y: e.y, d: () => { if (!MB.drawFoeMB(c, g, e, e.x - cx, e.y - cy)) foe(c, e, e.x - cx, e.y - cy, g.time); } });
   worldSprites(c, g, cx, cy, list);
-  list.push({ y: p.y, d: () => { if (p.inv > 0 && g.frame % 6 < 3) return; hero(c, g, p.x - cx, p.y - cy); } });
+  list.push({ y: p.y, d: () => { if (p.inv > 0 && g.frame % 6 < 3) return; if (!MB.drawHeroSprite(c, g, p.x - cx, p.y - cy)) hero(c, g, p.x - cx, p.y - cy); } });
   list.sort((m, n) => m.y - n.y).forEach((o) => o.d());
   // light layer (Gravewake light.ts): ambient + banded light sprites, multiplied over the world
   lctx.globalCompositeOperation = "source-over"; lctx.fillStyle = rgbCss(AMBIENT); lctx.fillRect(0, 0, W, H);
@@ -108,6 +110,7 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   for (const l of a.lamps) addLight(l.x - cx, l.y - cy, 80, l.c, flickerStep(g.frame, l.seed));
   worldLights(g, cx, cy, addLight);
   addLight(padX, padY, 48, [0.35, 0.85, 0.95], flickerStep(g.frame, 9));
+  MB.addLights(g, cx, cy, (x, y, r, col) => addLight(x, y, r, col, 0));
   addLight(p.x - cx, p.y - cy - 14, 48, g.shield ? [0.4, 0.8, 1] : [0.7, 0.66, 0.8], 0);
   for (const s of g.shots) addLight(s.x - cx, s.y - cy, 32, s.foe ? [0.8, 0.3, 0.9] : [0.4, 0.85, 1], 0);
   for (const e of g.enemies) if (!e.dead && e.kind === "wisp" && e.state === "tele") addLight(e.x - cx, e.y - cy - 16, 32, [0.8, 0.3, 0.9], 0);
@@ -120,18 +123,21 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   for (const e of g.enemies) if (!e.dead) {
     const X = e.x - cx, Y = e.y - cy;
     if (e.kind === "brute") { c.fillStyle = e.state === "tele" ? "#ffdd55" : "#ff3030"; c.fillRect(X - 5, Y - 15, 3, 2); c.fillRect(X + 2, Y - 15, 3, 2); }
-    else glow(c, X, Y - 16, e.state === "tele" ? 6 + (0.7 - e.t) * 18 : 6, "rgba(220,90,255,.9)");
+    else if (e.kind === "wisp") glow(c, X, Y - 16, e.state === "tele" ? 6 + (0.7 - e.t) * 18 : 6, "rgba(220,90,255,.9)");
   }
+  MB.drawAdditive(c, g, cx, cy);
   for (const s of g.shots) {
     const X = s.x - cx, Y = s.y - cy;
+    if (MB.drawShot(c, s, X, Y)) continue;
     if (s.foe) { glow(c, X, Y, 10, "rgba(230,80,255,.9)"); c.fillStyle = "#ffd0ff"; c.fillRect(X - 1.5, Y - 1.5, 3, 3); }
     else { glow(c, X - s.vx * 0.03, Y - s.vy * 0.03, 9, "rgba(60,160,255,.6)"); glow(c, X, Y, 13, "rgba(80,200,255,.95)"); glow(c, X, Y, 5, "#ffffff"); }
   }
   if (g.shield) { const r = 20 + Math.sin(g.time * 20); c.strokeStyle = "rgba(120,220,255,.9)"; c.lineWidth = 2; c.beginPath(); c.arc(p.x - cx, p.y - cy - 14, r, 0, 7); c.stroke(); glow(c, p.x - cx, p.y - cy - 14, r + 4, "rgba(60,150,255,.35)"); }
   if (g.levelT > 0) glow(c, p.x - cx, p.y - cy - 16, 30 + (2.5 - g.levelT) * 20, "rgba(255,220,120,.7)", Math.min(1, g.levelT));
   c.globalCompositeOperation = "source-over";
+  MB.drawTelegraphs(c, g, cx, cy);
   // telegraphs (drawn over light so they always read)
-  for (const e of g.enemies) if (!e.dead && e.state === "tele") {
+  for (const e of g.enemies) if (!e.dead && e.state === "tele" && (e.kind === "brute" || e.kind === "wisp")) {
     const X = Math.round(e.x - cx), Y = Math.round(e.y - cy);
     c.fillStyle = (g.frame >> 2) & 1 ? "#ffef6a" : "#ff5a3a"; c.fillRect(X - 1, Y - 34, 3, 7); c.fillRect(X - 1, Y - 25, 3, 2);
     if (e.kind === "brute") { c.strokeStyle = "rgba(255,80,60,.8)"; c.lineWidth = 2; c.beginPath(); c.moveTo(X, Y - 4); c.lineTo(X + e.ax * 40, Y - 4 + e.ay * 40); c.stroke(); }
@@ -154,7 +160,7 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
     const X = Math.round(n.x - cx), Y = Math.round(n.y - cy);
     c.fillStyle = "#000"; c.fillText(n.txt, X + 1, Y + 1); c.fillStyle = n.col; c.fillText(n.big ? n.txt + "!" : n.txt, X, Y);
   }
-  hud(c, g);
+  hud(c, g); MB.drawHudMB(c, g, W);
   if (g.mode === "pause") pauseMenu(c, g);
   if (g.mode === "map") mapView(c, g);
 }
@@ -165,17 +171,11 @@ function bar(c: CanvasRenderingContext2D, x: number, y: number, w: number, h: nu
   c.fillStyle = "rgba(255,255,255,.25)"; c.fillRect(x, y, Math.round(w * Math.max(0, Math.min(1, v))), 1);
 }
 function hud(c: CanvasRenderingContext2D, g: Game) {
-  // technique icon
-  c.fillStyle = "#000a"; c.fillRect(4, 4, 22, 22); c.strokeStyle = "#8a7cff"; c.lineWidth = 1; c.strokeRect(4.5, 4.5, 21, 21);
-  c.globalCompositeOperation = "lighter"; glow(c, 15, 15, 9, "rgba(80,200,255,.95)"); glow(c, 15, 15, 3, "#fff"); c.globalCompositeOperation = "source-over";
-  c.font = "bold 8px monospace"; c.textAlign = "left";
+  c.font = "bold 8px monospace"; c.textAlign = "left"; // technique icon: MB.drawHudMB
   c.fillStyle = "#fff"; c.fillText(`Lv${g.lvl}`, 30, 11);
   bar(c, 52, 5, 90, 6, g.hp / g.maxHp, "#46d66a"); c.fillStyle = "#cfe"; c.fillText("HP", 146, 11);
   bar(c, 52, 14, 90, 4, g.ep / g.maxEp, "#3aa8ff"); c.fillStyle = "#cfe"; c.fillText("EP", 146, 19);
   bar(c, 30, 22, 112, 2, g.exp / expNext(g.lvl), "#ffd04a");
-  // transform meter placeholder
-  bar(c, 4, 30, 22, 3, g.tf / 100, g.tf >= 100 ? (g.frame & 8 ? "#ff7aff" : "#c060ff") : "#9050d0");
-  c.font = "6px monospace"; c.fillStyle = "#c9b"; c.fillText(g.tf >= 100 ? "TF RDY" : "TF", 4, 40);
   if (g.pts > 0) { c.font = "bold 7px monospace"; c.fillStyle = g.frame & 16 ? "#ffd04a" : "#fff"; c.fillText(`+${g.pts} pts`, 160, 11); }
   c.textAlign = "center";
   if (g.bannerT > 0) {

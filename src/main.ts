@@ -5,6 +5,8 @@ import { render, W, H, MENU_ROWS } from "./draw";
 import { installer } from "./vendor/install";
 import { enterFullscreen, canFullscreen } from "./vendor/screen";
 import { readSave } from "./save";
+import { preloadSheets } from "./game/combat/draw"; // MB hook
+preloadSheets();
 import { Audio } from "./audio";
 import { Story } from "./story";
 import { storyOverlay, bindStory } from "./areas/art";

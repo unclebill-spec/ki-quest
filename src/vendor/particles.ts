@@ -56,6 +56,8 @@ export const FX_PALETTE = [
   "#8f2d3a", // 7 potion red
   "#e07a2f", // 8 ember
   "#8a6844", // 9 dirt brown
+  "#7ff0ff", // 10 ki cyan (Ki Quest addition)
+  "#d070ff", // 11 ki violet (Ki Quest addition)
 ] as const;
 export const C_GOLD = 0;
 export const C_BONE = 1;
@@ -65,6 +67,8 @@ export const C_ASH = 4;
 export const C_ASH_DARK = 5;
 export const C_WHITE = 6;
 export const C_RED = 7;
+export const C_CYAN = 10;
+export const C_VIOLET = 11;
 
 function hexRgb(hex: string): [number, number, number] {
   const v = hex.replace("#", "");

@@ -5,12 +5,12 @@
  */
 import { readStick, readPad, PAD, STICK_CAP } from "./vendor/screen";
 
-export type Btn = "melee" | "blast" | "block" | "cycle" | "pause" | "map" | "run" | "up" | "down" | "confirm";
+export type Btn = "melee" | "blast" | "block" | "cycle" | "pause" | "map" | "run" | "up" | "down" | "confirm" | "transform";
 const KEYMAP: Record<string, Btn> = {
-  KeyJ: "melee", KeyK: "blast", ShiftLeft: "block", ShiftRight: "block", KeyQ: "cycle", Escape: "pause", KeyM: "map",
+  KeyJ: "melee", KeyK: "blast", ShiftLeft: "block", ShiftRight: "block", KeyQ: "cycle", Escape: "pause", KeyM: "map", KeyT: "transform", KeyL: "transform",
   Enter: "confirm", Space: "confirm", ArrowUp: "up", ArrowDown: "down",
 };
-const PADMAP: [number, Btn][] = [[PAD.A, "melee"], [PAD.B, "blast"], [PAD.X, "run"], [PAD.LB, "cycle"], [PAD.RB, "block"], [PAD.Start, "pause"], [PAD.Back, "map"], [PAD.Up, "up"], [PAD.Down, "down"]];
+const PADMAP: [number, Btn][] = [[PAD.A, "melee"], [PAD.B, "blast"], [PAD.X, "run"], [PAD.LB, "cycle"], [PAD.RB, "block"], [PAD.Start, "pause"], [PAD.Back, "map"], [PAD.Y, "transform"], [PAD.Up, "up"], [PAD.Down, "down"]];
 const DIRKEYS: Record<string, [number, number]> = { KeyW: [0, -1], KeyS: [0, 1], KeyA: [-1, 0], KeyD: [1, 0], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
 
 export class Input {
