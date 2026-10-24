@@ -93,3 +93,5 @@
 ## MB W11d (Master Builder): Cageward Twins + Sable
 - Twins + 3 pylons in the Stair Red Cage (src/game/enemies/twins.ts, ARENA4 = stair 24,15 r88; pylons 21,14 / 27,14 / 24,18). Defeat sets `cageDone` + saves `boss4`; story is expected to set `sableJoin` (Sable companion in companion.ts ROLE table, caster/healer).
 - Tests: KI_PORT=… node tests/boss4.mjs / companion.mjs. Ports 4392-4396 are held by the ki-rpg/ki-rpg-mb previews: use 4480+ or tests hit the wrong build.
+
+## W11d: pulled the Twins and Sable (c1440df). tests/twins-story.mjs (port 4488) covers a real Twins kill, cageDone, the Sable join scene and Sable following: 5/5. Run all suites with KI_PORT>=4480. Story note: MB code comments call Sable "she"; story/credits copy should agree, so pick one. Next: Morvant (morvantDown), then Malachar (malacharDown in HUSK_ARENA).
