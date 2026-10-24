@@ -21,8 +21,8 @@ interface Def { id: string; name: string; music: string; theme: Area["theme"]; r
 export const AREA_DEFS: Record<string, Def> = {
   lanternmoss: {
     id: "lanternmoss", name: "Lanternmoss Hollow", music: "area1-theme", theme: "moss", rows: LANTERNMOSS, lamp: [0.35, 0.8, 1],
-    to: "hushwater", toLabel: "Hushwater", wardLvl: 4,
-    zones: [{ name: "Wickhaven", x0: 1, y0: 1, x1: 20, y1: 10 }, { name: "The Old Watch", x0: 31, y0: 1, x1: 46, y1: 11 },
+    to: "hushwater", toLabel: "Hushwater", wardLvl: 8,
+    zones: [{ name: "Wickhaven", x0: 1, y0: 1, x1: 20, y1: 10 }, { name: "Wellspring Grotto", x0: 32, y0: 11, x1: 44, y1: 23 }, { name: "The Old Watch", x0: 31, y0: 1, x1: 46, y1: 11 },
       { name: "Witchlight Fen", x0: 1, y0: 11, x1: 13, y1: 32 }, { name: "Updraft Cliff", x0: 43, y0: 1, x1: 46, y1: 5 }, { name: "Glowcap Woods", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },
   hushwater: {

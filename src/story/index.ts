@@ -13,6 +13,7 @@ type Box = { who: string; lines: string[]; i: number; t: number; then?: () => vo
 
 export class Story {
   flags: Flags = {};
+  lastKills = 0;
   box: Box | null = null;
   intro = -1; introT = 0;
   fly = 0; flyTo = ""; near: string | null = null; zone = ""; zoneT = 0;
@@ -86,6 +87,12 @@ export class Story {
       this.say("Updraft stone", [`The rune slab hums. Ride the updraft to ${s.label}?`, "(Melee to fly. Step off to stay.)"], () => { this.fly = 1.8; this.flyTo = s.to; });
       return true;
     }
+    const kills = g.stats.kills;
+    if (g.area.id === "hushwater" && this.flags.reedQ && !this.flags.reedDone && kills > this.lastKills) {
+      this.flags.reedN = Math.min(8, ((this.flags.reedN as number) || 0) + kills - this.lastKills); this.save();
+      g.say(`Meadow quieted ${this.flags.reedN}/8`, 1.5);
+    }
+    this.lastKills = kills;
     for (const s of g.area.springs) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 14) {
       if (!this.flags.spring) { this.flags.spring = true; g.pts += 3; this.save(); g.say("Hidden Wellspring found · +3 stat points", 3); }
       else if (g.hp < g.maxHp || g.ep < g.maxEp) g.say("The spring restores you", 1.2);
@@ -94,7 +101,9 @@ export class Story {
     for (const o of g.area.orbs) {
       const k = `orb_${g.area.id}_${o.i}`;
       if (!this.flags[k] && Math.hypot(o.x - g.p.x, o.y + 6 - g.p.y) < 14) {
-        this.flags[k] = true; this.flags.orbs = ((this.flags.orbs as number) || 0) + 1; this.save();
+        this.flags[k] = true;
+        if (g.area.id !== "lanternmoss") { this.flags.bell = true; this.save(); g.say("Found the Ferry Bell · bring it to Fen Marrow", 2.5); continue; }
+        this.flags.orbs = ((this.flags.orbs as number) || 0) + 1; this.save();
         const st = g.stats as Record<string, number>; st.talks = (st.talks ?? 0) + 1;
         g.say(`Pip's glow orb caught (${this.flags.orbs}/6)`, 2);
       }
@@ -114,15 +123,26 @@ export class Story {
     this.say(def.name, def.lines(this.flags), () => {
       if (id === "a") this.flags.metAma = true;
       if (id === "m") this.flags.metMirela = true;
+      const F = this.flags;
+      if (id === "f" && F.bell && !F.bellDone) { F.bellDone = true; g.exp += 80; g.say("Ferry Bell returned · +80 EXP", 2.5); }
+      if (id === "h") { if (!F.reedQ) F.reedQ = true; else if ((F.reedN as number) >= 8 && !F.reedDone) { F.reedDone = true; g.exp += 100; g.pts += 2; g.say("Quiet the Meadow complete · +100 EXP, +2 pts", 2.5); } }
+      if (id === "m" && F.bellDone && F.reedDone && !F.oath) { F.oath = true; g.exp += 150; g.say("Lantern Oath · Mirela will join you · +150 EXP", 3); }
       if (id === "p" && (this.flags.orbs as number) >= 6 && !this.flags.orbsDone) { this.flags.orbsDone = true; g.exp += 120; g.say("Lost Lanterns complete · +120 EXP", 2.5); }
       this.flags["talked_" + g.area.id + id] = true; this.save();
     });
   }
   objective(): string {
     const f = this.flags, g = this.g;
-    if (g.area.id === "hushwater") return f.metMirela ? "Explore Hushwater · Sunken Meadow to the south" : "Find the graveyard keeper on the hill";
+    if (g.area.id === "hushwater") {
+      if (!f.metMirela) return "Find the graveyard keeper on the hill";
+      if (f.oath) return "Mirela is with you · return to Lanternmoss";
+      const q: string[] = [];
+      if (!f.bellDone) q.push(f.bell ? "Bring the bell to Fen" : "Find Fen's Ferry Bell");
+      if (!f.reedDone) q.push(!f.reedQ ? "Talk to Tallis Reed" : `Quiet the Meadow ${(f.reedN as number) || 0}/8`);
+      return q.length ? q.join(" · ") : "Tell Mirela the town is safe";
+    }
     if (!f.metAma) return "Talk to Elder Ama in Wickhaven";
-    if (g.lvl < 4) return "Train in Glowcap Woods · reach Lv 4 (sealed ward)";
+    if (g.lvl < 4) return "Train in Glowcap Woods · reach Lv 8 (sealed ward)";
     return "Pass the sealed ward at the Old Watch · ride the updraft";
   }
 }

@@ -21,3 +21,4 @@
 - Ground was flat 16x16 colour squares on a 2-tone checker with hard grid edges. Now `src/areas/groundgen.ts` (reusable generator) builds, per theme, 4 seeded variants of floor/moss/path/plaza/water with 3-step Bayer-dithered noise + detail pixels (tufts, pebbles, cracks, seam moss, spores), plus ragged edge/corner fringes by priority (moss > path > floor > plaza > water; dark rim on shores). Variant chosen by position hash. Nearest-neighbour only.
 - `art.ts tile()` takes optional `tiles` (draw.ts passes `a.tiles`); without it the old flat path still runs. Walls, collision, maps unchanged.
 - `node tests/ground.mjs before|after` (KI_PORT, default 4181) -> docs/ground_<tag>_*.png + fps @4x CPU throttle (56 fps after, 57 before).
+- Executor W4: Hushwater quests (Ferry Bell for Fen, Quiet the Meadow x8 for Tallis, Lantern Oath with Mirela) + Orrin NPC; Wellspring Grotto rock ring around ARENA (38,17), entrances W and S, zone banner; ward now Lv 8.

@@ -26,7 +26,7 @@ try {
   ok("talks to Elder Ama", await E(() => window.__ki.story.box?.who === "Elder Ama Quill"));
   await shot("dialog");
   for (let i = 0; i < 8 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
-  ok("Ama flag set + objective moves on", await E(() => window.__ki.story.flags.metAma === true && /Lv 4/.test(window.__ki.story.objective())));
+  ok("Ama flag set + objective moves on", await E(() => window.__ki.story.flags.metAma === true && /Lv 8/.test(window.__ki.story.objective())));
   await shot("wickhaven");
   // Lost Lanterns: catch 6 glow orbs, hand in to Pip
   for (let i = 0; i < 6; i++) { await E((i) => { const g = window.__ki.game, o = g.area.orbs[i]; g.p.x = o.x; g.p.y = o.y + 6; }, i); await p.waitForTimeout(80); }
@@ -45,13 +45,13 @@ try {
   // sealed ward blocks at Lv 1
   await E(() => { const g = window.__ki.game, w = g.area.wards[0]; g.p.x = w.tx * 16 - 10; g.p.y = w.ty * 16 + 8; });
   await p.keyboard.down("KeyD"); await p.waitForTimeout(400); await p.keyboard.up("KeyD"); await p.waitForTimeout(100);
-  ok("sealed ward says Lv 4", await E(() => /Lv 4/.test(window.__ki.story.box?.lines[0] ?? "")));
+  ok("sealed ward says Lv 8", await E(() => /Lv 8/.test(window.__ki.story.box?.lines[0] ?? "")));
   while (await E(() => !!window.__ki.story.box)) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
   ok("ward still solid at Lv 1", await E(() => window.__ki.game.p.x < window.__ki.game.area.wards[0].tx * 16));
   // level up, pass the ward, ride the updraft
-  await E(() => { const g = window.__ki.game, w = g.area.wards[0]; g.lvl = 4; g.p.x = w.tx * 16 - 6; g.p.y = w.ty * 16 + 8; });
+  await E(() => { const g = window.__ki.game, w = g.area.wards[0]; g.lvl = 8; g.p.x = w.tx * 16 - 6; g.p.y = w.ty * 16 + 8; });
   await p.keyboard.down("KeyD"); await p.waitForTimeout(500); await p.keyboard.up("KeyD");
-  ok("ward opens at Lv 4", await E(() => window.__ki.game.p.x > window.__ki.game.area.wards[0].tx * 16 + 8));
+  ok("ward opens at Lv 8", await E(() => window.__ki.game.p.x > window.__ki.game.area.wards[0].tx * 16 + 8));
   await E(() => { const g = window.__ki.game, s = g.area.travel[0]; g.p.x = s.x; g.p.y = s.y + 14; });
   await p.keyboard.down("KeyW"); await p.waitForTimeout(250); await p.keyboard.up("KeyW"); await p.waitForTimeout(100);
   ok("updraft prompt", await E(() => /Hushwater/.test(window.__ki.story.box?.lines[0] ?? "")));
@@ -66,6 +66,18 @@ try {
   await shot("mirela");
   while (await E(() => !!window.__ki.story.box)) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
   await p.keyboard.press("KeyM"); await p.waitForTimeout(200); await shot("map"); await p.keyboard.press("KeyM");
+  // Hushwater quests
+  const talk = async (id) => { await E((id) => { const g = window.__ki.game, n = g.area.npcs.find((n) => n.id === id); g.p.x = n.x + 14; g.p.y = n.y; }, id); await p.waitForTimeout(120); await p.keyboard.press("KeyJ"); await p.waitForTimeout(300);
+    for (let i = 0; i < 8 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(180); } };
+  await talk("r"); await talk("h");
+  ok("Reed quest accepted", await E(() => window.__ki.story.flags.reedQ === true));
+  for (let i = 0; i < 8; i++) { await E(() => window.__ki.game.stats.kills++); await p.waitForTimeout(60); }
+  ok("meadow count 8", await E(() => window.__ki.story.flags.reedN === 8));
+  await E(() => { const g = window.__ki.game, o = g.area.orbs[0]; g.p.x = o.x; g.p.y = o.y + 6; }); await p.waitForTimeout(150);
+  ok("ferry bell found", await E(() => window.__ki.story.flags.bell === true));
+  await talk("f"); await talk("h"); await talk("m");
+  ok("Lantern Oath", await E(() => window.__ki.story.flags.bellDone && window.__ki.story.flags.reedDone && window.__ki.story.flags.oath));
+  await p.waitForTimeout(200); await shot("oath");
   // continue restores the area
   await E(() => window.__ki.game.autosave()); await p.reload(); await p.click("#startBtn"); await p.waitForTimeout(400);
   ok("continue restores Hushwater", await E(() => window.__ki.game.area.id === "hushwater"));

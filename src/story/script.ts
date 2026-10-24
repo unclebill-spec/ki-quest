@@ -26,12 +26,21 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
       : ["My glow orbs ran away again. Six of them!", `If you see a little light that looks embarrassed, that's one of mine. (${(f.orbs as number) || 0}/6 found)`] },
   },
   hushwater: {
-    f: { name: "Fen Marrow", coat: "#5a5a3a", hair: "#b0b0b0", skin: "#c08868", trim: "#c8a0ff", lines: () =>
-      ["You came on the updraft. Brave, or lost. Same thing out here.", "Listen to the water. It hums near places no one sees. The water, I find, listens back."] },
-    h: { name: "Tallis Reed", coat: "#2a5a6a", hair: "#202838", skin: "#d8a888", trim: "#9fe8ff", tall: -4, lines: () =>
-      ["Welcome to Hushwater. Mind the boardwalks; the fen takes boots.", "The graveyard's up on the hill. The keeper there talks to people who aren't there. Nicest person in town."] },
+    f: { name: "Fen Marrow", coat: "#5a5a3a", hair: "#b0b0b0", skin: "#c08868", trim: "#c8a0ff", lines: (f) =>
+      f.bellDone ? ["The bell's back on the ferry post. The fog parts when it rings. Mostly."]
+      : f.bell ? ["That's my Ferry Bell! Where was it? No, don't tell me. The meadow, wasn't it.", "Here. A ferryman pays his debts, even the ferryman's grumpy cousin."]
+      : ["You came on the updraft. Brave, or lost. Same thing out here.", "My Ferry Bell washed away in the last fog. South, past the meadow, I'd wager. Bring it back?"] },
+    h: { name: "Tallis Reed", coat: "#2a5a6a", hair: "#202838", skin: "#d8a888", trim: "#9fe8ff", tall: -4, lines: (f) =>
+      f.reedDone ? ["The meadow's quiet. First time in a month I've slept. Thank you."]
+      : (f.reedN as number) >= 8 ? ["Eight of them? The meadow's quiet already. Take this, and my thanks."]
+      : f.reedQ ? [`The meadow things are still prowling. ${(f.reedN as number) || 0} of 8 down.`]
+      : ["Welcome to Hushwater. Mind the boardwalks; the fen takes boots.", "Something's stirring in the Sunken Meadow south of town. Quiet eight of them for me?", "The graveyard's up on the hill. The keeper there talks to people who aren't there. Nicest person in town."] },
     m: { name: "Mirela Vant", coat: "#5a3a8a", hair: "#1e1830", skin: "#e8c8b8", trim: "#c8a0ff", lines: (f) =>
-      f.metMirela ? ["The wraiths are restless. They keep saying 'drinker'. I'd like to know who taught them that word.", "When you're ready, I'll walk with you. Mind my lantern; it bites."]
+      f.oath ? ["The dead are calmer since you came. So am I, a little.", "Under your Wickhaven there's a grotto. That's where the spring went. Let's go take it back."]
+      : f.bellDone && f.reedDone ? ["Fen's bell is ringing and the meadow is quiet. The wraiths noticed.", "All right, lamp-lighter. Lantern Oath: I'll walk with you to the Wellspring Grotto."]
+      : f.metMirela ? ["The wraiths are restless. They keep saying 'drinker'. I'd like to know who taught them that word.", "When you're ready, I'll walk with you. Mind my lantern; it bites."]
         : ["You're the lamp-lighter from Wickhaven. The wraiths told me you'd come. They also said you're loud.", "Mirela Vant. I keep this graveyard. Something drained the spring under your town, and the dead felt it here.", "We'll be travelling together soon, I think. Don't make it weird."] },
+    r: { name: "Orrin Cask", coat: "#3a3a2a", hair: "#806040", skin: "#c89870", trim: "#ffb060", tall: -2, lines: () =>
+      ["Ferry's closed. Bell's gone. Fog's thick. It's a whole thing.", "Fen keeps a bell for the fog. Lose it and the boats go in circles. Ask him about it."] },
   },
 };
