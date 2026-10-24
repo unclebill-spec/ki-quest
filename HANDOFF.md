@@ -16,3 +16,8 @@
 - 2026-10-23 23:00 Master Builder: combat 0.3.0 on main (techniques, power meter/transform, rusher/shooter/tank, Ashmaw boss + arena, sprites). Test: `node tests/combat.mjs`. Hooks marked `// MB hook`. Boss arena is tile (38,17) in lanternmoss (`ARENA` in src/game/enemies/boss.ts) — move it when the Wellspring Grotto layout lands.
 - Executor W3 (done, live): hidden spring — `K` spring behind `V` false water (SW corner Lanternmoss); first visit +3 stat points (flag spring), always full heal; Joss hints it.
 - Executor 22:40: integrated MB combat (add5a79) — world 17/17, smoke 19/19, combat 18/18, scans clean, deployed + live OK. world.mjs honors KI_PORT. Shots for Bill in docs/bill/. Tile art/renderer frozen for MB rework. Next: Hushwater quests, Wellspring Grotto arena (update ARENA in src/game/enemies/boss.ts if moved), flight screen.
+
+## Ground textures (2026-10-23, Master Builder)
+- Ground was flat 16x16 colour squares on a 2-tone checker with hard grid edges. Now `src/areas/groundgen.ts` (reusable generator) builds, per theme, 4 seeded variants of floor/moss/path/plaza/water with 3-step Bayer-dithered noise + detail pixels (tufts, pebbles, cracks, seam moss, spores), plus ragged edge/corner fringes by priority (moss > path > floor > plaza > water; dark rim on shores). Variant chosen by position hash. Nearest-neighbour only.
+- `art.ts tile()` takes optional `tiles` (draw.ts passes `a.tiles`); without it the old flat path still runs. Walls, collision, maps unchanged.
+- `node tests/ground.mjs before|after` (KI_PORT, default 4181) -> docs/ground_<tag>_*.png + fps @4x CPU throttle (56 fps after, 57 before).
