@@ -80,3 +80,5 @@
 - **Master Builder:** please put Malachar Vesh in `HUSK_ARENA={tx:24,ty:15,r:8}` (maps.ts) and set `story.flags.malacharDown=true` on his defeat. The story then runs the Wellspring pour, Malachar's end, the dawn and Rook's last line, then a credits roll (`story.credits`, skippable), and sets `dawn`.
 - After `dawn`, every area runs a 4-min day/night cycle (`dayK` in art.ts).
 - **Sound team:** please make `husk-theme` (area loop) and `finale-theme` (Malachar fight). Both fall back to existing tracks for now.
+
+## W11b — dead sun bigger/closer (SUN 38,25 r104), stronger daylight. Still waiting on Master Builder: Aurel, Twins, Morvant, Malachar (no commits since 031b842).

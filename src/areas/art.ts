@@ -130,7 +130,7 @@ function npc(c: C2, id: string, area: string, x: number, y: number, t: number) {
 
 /** Push props, NPCs, stones into the y-sorted draw list (called from draw.ts). */
 /** The husk sun seen from the Stair: a vast dark sphere hanging in the void, south-east of the rings. */
-const SUN = { x: 41 * 16, y: 27 * 16, r: 64 };
+const SUN = { x: 38 * 16, y: 25 * 16, r: 104 };
 const edge = (T: Uint8Array, x: number, y: number) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => T[(y + b) * 48 + x + a] === T_WATER);
 /** Day strength after the dawn epilogue: a gentle 4-minute day/night cycle (0 = glow night, 1 = noon). */
 export const dayK = (t: number) => Math.max(0, Math.sin((t / 240) * Math.PI * 2));
@@ -166,10 +166,10 @@ export function worldLights(g: Game, cx: number, cy: number, add: (x: number, y:
   if (g.area.theme === "violet") { // the Stair: soft violet fill, neon ring edges, the husk sun's cold rim
     add(192, 108, 340, [0.2, 0.15, 0.28], 0);
     for (let ty = Y0; ty < Math.min(34, Y0 + 16); ty++) for (let tx = X0; tx < Math.min(48, X0 + 27); tx++) if ((tx + ty) % 3 === 0 && T[ty * 48 + tx] !== T_WATER && T[ty * 48 + tx] !== T_WALL && edge(T, tx, ty)) add(tx * 16 + 8 - cx, ty * 16 + 8 - cy, 34, [0.32, 0.16, 0.5], 0);
-    add(SUN.x - cx, SUN.y - cy, 150, [0.22, 0.1, 0.3], 0);
+    add(SUN.x - cx, SUN.y - cy, 220, [0.22, 0.1, 0.3], 0);
   }
   if (g.area.theme === "husk") add(192, 108, 360, [0.3, 0.16, 0.12], 0);
-  if (st?.flags.dawn) { const k = dayK(g.time); if (k > 0.02) add(192, 108, 460, [0.9 * k, 0.8 * k, 0.55 * k], 0); }
+  if (st?.flags.dawn) { const k = dayK(g.time); if (k > 0.02) add(192, 108, 520, [1.5 * k, 1.35 * k, 1.0 * k], 0); }
   if (g.area.theme === "ember" || g.area.theme === "tide" || g.area.theme === "husk") { // lava / glowing canals light the scene
     const t = g.area.tiles, x0 = Math.max(0, Math.floor(cx / 16)), y0 = Math.max(0, Math.floor(cy / 16));
     for (let ty = y0; ty < Math.min(34, y0 + 15); ty += 2) for (let tx = x0; tx < Math.min(48, x0 + 25); tx += 2) if (t[ty * 48 + tx] === T_WATER) add(tx * 16 + 8 - cx, ty * 16 + 8 - cy, 44, g.area.theme === "ember" ? [0.55, 0.22, 0.08] : g.area.theme === "husk" ? [0.5, 0.3, 0.1] : [0.1, 0.35, 0.35], 0);
