@@ -56,3 +56,9 @@
 - Slagheart: src/game/enemies/slagheart.ts, own `g.mb.boss2` BossState; ARENA2 is derived from QUARRY_ARENA (move the arena there). Debug hook `globalThis.__kiMB = { startSlagheart, slagLog, ARENA2, MOVES2 }`.
 - Sprite generator: tools/art/build_slag_golem.py (re-run, then check_sheets.py).
 - Tests: tests/boss2.mjs (port 4394). Combat phase-moves check is seeded + state-driven (5/5 clean).
+
+## W9 (World/Story) — Undertide, general arena slot, Sable hooks, per-area music
+- New area `undertide` ("The Undertide", tide theme) via `Y` stone on Drowned Vesper's Sigil Quay (43,29), gated on `sigilDone`.
+- **Master Builder:** `UNDERTIDE_ARENA = {tx:37,ty:17,r:6}` exported from src/areas/maps.ts; drowned Wellspring `K` at the centre, entry by the south bridge. Please spawn the tide general there and set `story.flags.tideBossDown = true` on defeat; that triggers the Sable beat (`sable3`, +150 EXP) and objective change.
+- Sable flags: `sable1` (Vesper balcony after sigil), `sable2` (approach to Wellspring), `sable3` (after tideBossDown). Sable is a foe now; save her turn for later.
+- Audio: `area.music` may be `"a|b|c"`; `Audio.HAVE` lists shipped tracks and the first one present plays. **Sound team:** wanted `area3-theme` (Kilnreach), `quarry-theme`, `area4-theme` (Vesper), `undertide-theme`. Drop the files in staging/sound; World adds them to public/audio + HAVE. area2-theme now shipped (Hushwater, Vesper fallback).

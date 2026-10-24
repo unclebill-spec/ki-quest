@@ -1,5 +1,5 @@
 /** Areas: ASCII maps (src/areas/maps.ts) -> tiles, lamps, props, NPCs, spawns, gates and updraft stones. */
-import { LANTERNMOSS, HUSHWATER, KILNREACH, EMBERQUARRY, DROWNED } from "./areas/maps";
+import { LANTERNMOSS, HUSHWATER, KILNREACH, EMBERQUARRY, DROWNED, UNDERTIDE } from "./areas/maps";
 export const TILE = 16;
 export const MW = 48, MH = 34;
 export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3, T_WATER = 4, T_PATH = 5, T_BOARD = 6, T_WARD = 7, T_HIDDEN = 8;
@@ -26,25 +26,31 @@ export const AREA_DEFS: Record<string, Def> = {
       { name: "Witchlight Fen", x0: 1, y0: 11, x1: 13, y1: 32 }, { name: "Updraft Cliff", x0: 43, y0: 1, x1: 46, y1: 5 }, { name: "Glowcap Woods", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },
   hushwater: {
-    id: "hushwater", name: "Hushwater", music: "area1-theme", theme: "marsh", rows: HUSHWATER, lamp: [0.62, 0.42, 1],
+    id: "hushwater", name: "Hushwater", music: "area2-theme", theme: "marsh", rows: HUSHWATER, lamp: [0.62, 0.42, 1],
     to: "lanternmoss", toLabel: "Lanternmoss Hollow", to2: "kilnreach", to2Label: "Kilnreach", wardLvl: 0,
     zones: [{ name: "Hushwater Landing", x0: 1, y0: 1, x1: 5, y1: 6 }, { name: "Hushwater Town", x0: 16, y0: 5, x1: 33, y1: 13 },
       { name: "Lantern Graveyard", x0: 34, y0: 1, x1: 46, y1: 9 }, { name: "Sunken Meadow", x0: 0, y0: 14, x1: 47, y1: 33 }, { name: "Hushwater Fen", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },
+  undertide: {
+    id: "undertide", name: "The Undertide", music: "undertide-theme|area4-theme|area2-theme", theme: "tide", rows: UNDERTIDE, lamp: [0.3, 0.8, 1],
+    to: "drowned", toLabel: "Drowned Vesper", wardLvl: 0,
+    zones: [{ name: "Drowned Wellspring", x0: 29, y0: 9, x1: 45, y1: 23 }, { name: "Tide Stair", x0: 1, y0: 25, x1: 9, y1: 31 },
+      { name: "Kelp Galleries", x0: 0, y0: 0, x1: 47, y1: 33 }],
+  },
   drowned: {
-    id: "drowned", name: "Drowned Vesper", music: "area1-theme", theme: "tide", rows: DROWNED, lamp: [0.4, 0.95, 0.85],
-    to: "kilnreach", toLabel: "Kilnreach", wardLvl: 0,
+    id: "drowned", name: "Drowned Vesper", music: "area4-theme|area2-theme", theme: "tide", rows: DROWNED, lamp: [0.4, 0.95, 0.85],
+    to: "kilnreach", toLabel: "Kilnreach", to2: "undertide", to2Label: "The Undertide", wardLvl: 0,
     zones: [{ name: "Tidewarden Court", x0: 15, y0: 13, x1: 31, y1: 22 }, { name: "Sunken Landing", x0: 1, y0: 1, x1: 11, y1: 9 },
       { name: "Sigil Quay", x0: 36, y0: 24, x1: 46, y1: 32 }, { name: "Drowned Vesper", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },
   emberquarry: {
-    id: "emberquarry", name: "Emberheart Quarry", music: "area1-theme", theme: "ember", rows: EMBERQUARRY, lamp: [1, 0.4, 0.2],
+    id: "emberquarry", name: "Emberheart Quarry", music: "quarry-theme|area3-theme|area1-theme", theme: "ember", rows: EMBERQUARRY, lamp: [1, 0.4, 0.2],
     to: "kilnreach", toLabel: "Kilnreach", to2: "drowned", to2Label: "Drowned Vesper", wardLvl: 0,
     zones: [{ name: "Quarry Heart", x0: 31, y0: 9, x1: 46, y1: 23 }, { name: "Smith's Lift", x0: 1, y0: 2, x1: 8, y1: 6 }, { name: "Heart-Ember Seam", x0: 28, y0: 3, x1: 36, y1: 9 },
       { name: "Cinder Galleries", x0: 0, y0: 0, x1: 47, y1: 33 }],
   },
   kilnreach: {
-    id: "kilnreach", name: "Kilnreach", music: "area1-theme", theme: "ember", rows: KILNREACH, lamp: [1, 0.45, 0.25],
+    id: "kilnreach", name: "Kilnreach", music: "area3-theme|area1-theme", theme: "ember", rows: KILNREACH, lamp: [1, 0.45, 0.25],
     to: "hushwater", toLabel: "Hushwater", to2: "emberquarry", to2Label: "Emberheart Quarry", wardLvl: 0,
     zones: [{ name: "Kilnreach Forge Square", x0: 3, y0: 13, x1: 18, y1: 21 }, { name: "Cinder Landing", x0: 1, y0: 1, x1: 9, y1: 5 },
       { name: "Emberflow", x0: 13, y0: 1, x1: 35, y1: 18 }, { name: "Quarry Road", x0: 17, y0: 22, x1: 40, y1: 26 }, { name: "Kilnreach Slopes", x0: 0, y0: 0, x1: 47, y1: 33 }],

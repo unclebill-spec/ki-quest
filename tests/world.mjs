@@ -121,6 +121,23 @@ try {
   ok("sun-sigil quest done", await E(() => window.__ki.story.flags.sigil === true && window.__ki.story.flags.sigilDone === true));
   await E(() => { const g = window.__ki.game; g.p.x = 23 * 16; g.p.y = 18 * 16; }); await p.waitForTimeout(500);
   await p.screenshot({ path: "docs/bill/drowned.png" });
+  for (let i = 0; i < 40 && !(await E(() => window.__ki.story.flags.sable1)); i++) { if (await E(() => window.__ki.story.box && window.__ki.story.box.who !== "Sable Kestrel")) await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  ok("Sable watches from the balcony", await E(() => window.__ki.story.flags.sable1 === true));
+  await p.screenshot({ path: "docs/bill/vesper-after-sigil.png" });
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await E(() => { const t = window.__ki.game.area.travel.find((t) => t.to === "undertide"); window.__ki.game.p.x = t.x; window.__ki.game.p.y = t.y; window.__ki.story.flags.stoneT = false; }); await p.waitForTimeout(300);
+  for (let i = 0; i < 6 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
+  await p.waitForFunction(() => window.__ki.game.area.id === "undertide" && window.__ki.story.fly <= 0, null, { timeout: 8000 }).catch(() => {}); await p.waitForTimeout(400);
+  ok("tide stair to the Undertide", await E(() => window.__ki.game.area.id === "undertide"));
+  await E(() => { window.__ki.story.box = null; const g = window.__ki.game; g.p.x = 37 * 16; g.p.y = 24 * 16; }); await p.waitForTimeout(400);
+  ok("Sable at the drowned Wellspring", await E(() => window.__ki.story.flags.sable2 === true));
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await E(() => { const g = window.__ki.game; g.p.x = 37 * 16; g.p.y = 20 * 16; }); await p.waitForTimeout(900);
+  await p.screenshot({ path: "docs/bill/undertide.png" });
+  await E(() => { window.__ki.story.flags.tideBossDown = true; }); await p.waitForTimeout(300);
+  ok("post-general Sable beat", await E(() => window.__ki.story.flags.sable3 === true));
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  ok("per-area music", await E(() => window.__ki.audio.cur === "area2-theme"));
   await p.keyboard.press("KeyM"); await p.waitForTimeout(300); await p.screenshot({ path: "docs/bill/map-area4.png" }); await p.keyboard.press("KeyM");
   await E(() => { window.__ki.story.enter("lanternmoss"); }); await p.waitForTimeout(200);
   await E(() => { const g = window.__ki.game; g.p.x = 36 * 16; g.p.y = 18 * 16; }); await p.waitForTimeout(1200);

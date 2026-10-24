@@ -60,6 +60,10 @@ export class Audio {
     this.loops.set(n, { s, g });
   }
   private duck() { if (!this.ctx || this.muted) return; const t = this.ctx.currentTime, g = this.music.gain; g.cancelScheduledValues(t); g.setValueAtTime(0.22, t); g.linearRampToValueAtTime(0.45, t + 2); }
+  /** Tracks shipped in public/audio. An area's `music` may list candidates "a|b|c"; the first shipped one plays.
+   *  Add a name here when the sound team delivers it (e.g. area3-theme, area4-theme, quarry-theme, undertide-theme). */
+  static HAVE = new Set(["area1-theme", "area2-theme", "boss-theme"]);
+  static pick(m: string) { return m.split("|").find((n) => Audio.HAVE.has(n)) ?? "area1-theme"; }
   setMusic(n: string) {
     if (n === this.cur) return;
     this.cur = n; if (this.src) { this.src.stop(); this.src = null; }
@@ -97,6 +101,6 @@ export class Audio {
     this.prevShield = g.shield;
     if (g.tf >= 100 && this.prevTf < 100) this.play("transform");
     this.prevTf = g.tf;
-    this.setMusic(g.mode === "title" ? "" : g.bossActive ? "boss-theme" : (g.area.music ?? "area1-theme"));
+    this.setMusic(g.mode === "title" ? "" : g.bossActive ? "boss-theme" : Audio.pick(g.area.music ?? "area1-theme"));
   }
 }
