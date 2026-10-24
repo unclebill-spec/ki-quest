@@ -5,12 +5,15 @@ import { render, W, H, MENU_ROWS } from "./draw";
 import { installer } from "./vendor/install";
 import { enterFullscreen, canFullscreen } from "./vendor/screen";
 import { readSave } from "./save";
+import { Audio } from "./audio";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 const stage = document.getElementById("stage")!;
 const input = new Input(stage);
 const game = new Game(input);
+const audio = new Audio();
+addEventListener("pointerdown", () => audio.unlock()); addEventListener("keydown", () => audio.unlock());
 
 // Landscape layout: keep 16:9, integer scale when it fits, fractional on small phones.
 function fit() {
@@ -52,6 +55,7 @@ function loop(now: number) {
     game.step(DT); acc -= DT;
     if (game.mode === "title" && (input.pressed("melee") || input.pressed("pause")) && !title.hidden) begin();
   }
+  audio.watch(game as never);
   if (game.mode !== "title") render(ctx, game);
   requestAnimationFrame(loop);
 }
@@ -59,6 +63,6 @@ requestAnimationFrame(loop);
 
 declare global { interface Window { __ki: unknown } }
 window.__ki = {
-  game, input,
+  game, input, audio,
   state: () => ({ mode: game.mode, hp: game.hp, ep: game.ep, lvl: game.lvl, exp: game.exp, pts: game.pts, str: game.str, x: game.p.x, y: game.p.y, shots: game.shots.length, alive: game.enemies.filter((e) => !e.dead).length, ...game.stats }),
 };
