@@ -73,8 +73,8 @@ export function hurtAlly(g: Game, d: number, fx: number, fy: number, a: Ally = g
   if (a.hp <= 0) { a.hp = 0; a.ko = true; a.kos++; a.calmT = 0; a.atk = 0; g.say(`${a.name} is down!`, 1.5); }
 }
 
-export const anyBossActive = (g: Game) => g.mb.boss.active || g.mb.boss2.active;
-const isBoss = (e: Enemy) => e.kind === "boss" || e.kind === "slag";
+export const anyBossActive = (g: Game) => g.mb.boss.active || g.mb.boss2.active || g.mb.boss3.active;
+const isBoss = (e: Enemy) => e.kind === "boss" || e.kind === "slag" || e.kind === "aurel";
 
 export function updateAllies(g: Game, dt: number) { for (const a of g.mb.allies) updateAlly(g, a, dt); separate(g); }
 /** Companions never stack: push apart pairs closer than 14 px. */

@@ -8,13 +8,15 @@ export interface MBState {
   sfx: string[]; hover: boolean;
   orbs: Orb[]; hazards: Hazard[]; boss: BossState;
   /** Kilnreach quarry boss, Slagheart (src/game/enemies/slagheart.ts). */ boss2: BossState;
+  /** Undertide boss, Count Aurel (src/game/enemies/aurel.ts). */ boss3: BossState;
   /** Companions (src/game/combat/companion.ts): [Mirela, Brann]. ally = allies[0] (Mirela). */ allies: Ally[]; ally: Ally;
 }
 export function makeMB(): MBState {
   const allies = [makeAlly("mirela"), makeAlly("brann")];
   return { tech: 0, charge: 0, charging: false, fire: 0, tfOn: false, tfT: 0, chargingKi: false, sfx: [], hover: false, orbs: [], hazards: [], allies, ally: allies[0],
     boss: { phase: 0, active: false, done: readBossDone(), lockT: 0, introT: 0 },
-    boss2: { phase: 0, active: false, done: readBossDone("boss2"), lockT: 0, introT: 0 } };
+    boss2: { phase: 0, active: false, done: readBossDone("boss2"), lockT: 0, introT: 0 },
+    boss3: { phase: 0, active: false, done: readBossDone("boss3"), lockT: 0, introT: 0 } };
 }
 const SLOT = "kiquest-mb-v1"; // localStorage slot name
 /** Slot shape {boss1?: true, boss2?: true}; writes merge so each boss keeps its own flag. */

@@ -140,4 +140,5 @@ export function slagKilled(g: Game, e: Enemy) {
   for (let i = 0; i < 14; i++) g.parts.emit(CH_COMBAT, i & 1 ? K_RING : K_SPARK, e.x, e.y - 22, Math.cos(i / 2.2) * 150, Math.sin(i / 2.2) * 150, 0.7, C_GOLD, 0, 2);
 }
 
-(globalThis as unknown as { __kiMB: unknown }).__kiMB = { startSlagheart, slagLog, ARENA2, MOVES2 };
+const G = globalThis as unknown as { __kiMB?: Record<string, unknown> };
+G.__kiMB = { ...(G.__kiMB ?? {}), startSlagheart, slagLog, ARENA2, MOVES2 };

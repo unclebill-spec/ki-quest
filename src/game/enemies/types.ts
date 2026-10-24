@@ -1,5 +1,7 @@
 /** Enemy data. Kinds: brute = melee rusher, wisp = ranged shooter, warden = tank/blocker, boss = area boss. Owner: Master Builder. */
-export type FoeKind = "brute" | "wisp" | "warden" | "boss" | "slag";
+export type FoeKind = "brute" | "wisp" | "warden" | "boss" | "slag" | "aurel";
+/** Arena bosses (big body, boss bar, companions dodge their telegraphs). */
+export const isBigBoss = (k: string) => k === "boss" || k === "slag" || k === "aurel";
 export type FoeState = "idle" | "chase" | "tele" | "act" | "recover";
 export interface Enemy {
   kind: FoeKind; x: number; y: number; vx: number; vy: number; hp: number; max: number;
@@ -13,7 +15,7 @@ export interface Enemy {
   /** Boss-summoned add: never respawns. */ minion: boolean;
 }
 export interface Orb { x: number; y: number; vx: number; vy: number; v: number; t: number }
-export interface Hazard { x: number; y: number; r: number; t: number; max: number; dmg: number; foe: boolean }
+export interface Hazard { x: number; y: number; r: number; t: number; max: number; dmg: number; foe: boolean; /** drawn cyan (Count Aurel tide splashes) */ tide?: boolean }
 export interface BossState { phase: number; active: boolean; done: boolean; lockT: number; introT: number }
 
 export const FOE_INFO: Record<FoeKind, { name: string; hp: number; exp: number; heavy: number; respawn: number }> = {
@@ -22,6 +24,7 @@ export const FOE_INFO: Record<FoeKind, { name: string; hp: number; exp: number; 
   warden: { name: "Stoneward", hp: 70, exp: 14, heavy: 0.35, respawn: 35 },
   boss: { name: "Warden Rune", hp: 420, exp: 80, heavy: 0.08, respawn: Infinity },
   slag: { name: "Slagheart", hp: 620, exp: 140, heavy: 0.05, respawn: Infinity },
+  aurel: { name: "Count Aurel", hp: 760, exp: 180, heavy: 0.05, respawn: Infinity },
 };
 
 export function makeEnemy(kind: FoeKind, x: number, y: number): Enemy {
