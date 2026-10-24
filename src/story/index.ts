@@ -84,6 +84,7 @@ export class Story {
     }
     for (const s of g.area.travel) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 10 && !this.flags.stoneT) {
       this.flags.stoneT = true;
+      if (s.to === "stair" && !this.flags.malachar) { this.say("Undertide stone", ["A violet slab, colder than the sea. It points north, up.", "Whatever is up there hasn't been named yet. Find out who the guard was guarding."]); return true; }
       if (s.to === "undertide" && !this.flags.sigilDone) { this.say("Tide stair", ["A stair of wet rune-stone, going down under the canals. The seal is a sun with a missing ray.", "Neri would know how to open it."]); return true; }
       if (s.to === "drowned" && !this.flags.quarryBossDown) { this.say("Rune slab", ["A slab in the arena wall, carved with a drowned sun. It's dark.", "Whatever is drinking the Quarry Heart is still here. Deal with it first."]); return true; }
       if (s.to === "emberquarry" && !this.flags.brannQ) { this.say("Quarry lift", ["A rune-lift down into the quarry. It's locked with a smith's seal.", "Brann in Forge Square would have the key."]); return true; }
@@ -92,6 +93,30 @@ export class Story {
       return true;
     }
     const F = this.flags, B = (k: string, who: string, lines: string[], exp = 0) => { F[k] = true; this.save(); if (exp) g.gainExp(exp); this.say(who, lines); return true; };
+    // Act II close: the Archive (after Count Aurel falls) and Malachar's projection
+    if (g.area.id === "drowned" && F.tideBossDown && !F.twist && !this.box) {
+      F.twist = true; this.save(); g.gainExp(300);
+      const red = () => { for (const l of g.area.lamps) { (l as { c0?: unknown }).c0 ??= l.c; l.c = [1, 0.12, 0.22]; } };
+      const unred = () => { for (const l of g.area.lamps) { const o = l as unknown as { c0?: typeof l.c }; if (o.c0) l.c = o.c0; } };
+      const s = (who: string, lines: string[], then?: () => void) => () => this.say(who, lines, then);
+      this.say("The Archive", ["(Neri breaks the seal. Three records survive the sea.)", "I. The Sunwardens: a robed order who tended the sun with a crown of smith-forged light. Each served a lifetime, then passed the crown on.",
+        "II. The last warden: young, kind, and in love with the night. Its quiet, its lanterns, the way people gathered close. He wrote: \"In the dark, they need me.\"",
+        "III. He stopped feeding the sun his light and kept it for himself. The sun went out. Vesper's guard drowned the city to bury the records.", "The last line reads: \"Sunwarden Malachar Vesh, the Last Dusk.\""],
+        s("Rook", ["He didn't lose the sun. He let it starve, because he liked being needed."], s("Mirela", ["The wraiths always said the dark had a keeper. I thought they meant death."],
+        s("Brann", ["Then the Wellsprings aren't stolen. They're being stored. For what?"], s("Neri", ["For when the last light goes out. Then he's the only one left, and everyone has to kneel to be warm."],
+        () => { red(); g.shake = 6; this.say("Malachar Vesh", ["(Every lamp in the Court turns red at once. A vast shadow in black-and-crimson plate rises over the fountain, a crown of red spikes floating above it.)",
+          "So the sea gave up my name. Good. I'm tired of hiding it.", "I held the sun for forty years. Do you know what it's like to light a world that never once looks up and thanks you?",
+          "In the dark, they look up. They gather close. They need. I gave them the night, and I'll give them one last light: me.", "Sable. Come home."],
+          () => { unred(); F.malachar = true; this.save(); this.say("Neri", ["(The projection fades. A red light streaks north over the sea.)", "That was Sable. North is the Stair. No one comes back from the Stair.", "The Undertide stone points north. Its cold slab would wake for you now."]); }); }))))); return true;
+    }
+    // Act III open: the Sunwarden's Stair
+    if (g.area.id === "stair" && !F.stairIn && !this.box) return B("stairIn", "The Sunwarden's Stair", ["(Broken stone rings float up and up toward a vast dark sphere: the husk of the sun.)", "The murals in the waystation carry a name now: \"Malachar Vesh, the last warden.\"", "Court soldiers everywhere... but they're not looking at you. They're hunting someone."], 200);
+    if (F.cageDone && !F.sableJoin && g.area.id === "stair" && !this.box) { F.sableJoin = true; this.save(); g.gainExp(400);
+      this.say("Sable Kestrel", ["(The red cage shatters. Sable sits up, pale and shaking.)", "He said I was his favourite. He says that to everyone he drinks.", "Teach me to fight for something, lamplighter. I only ever learned to fight for someone."],
+        () => this.say("The party", ["Mirela: \"The dead trust you. Barely. So will I.\"", "Brann: \"You're too thin. I'll cook.\"", "Rook: \"Lamplighters light anyone's lamp. Even a vampire's.\""])); return true; }
+    if (F.morvantDown && !F.threshold && g.area.id === "stair" && !this.box) { F.threshold = true; this.save(); g.gainExp(500);
+      this.say("Morvant", ["ASCEND. LIGHT IT. ...PLEASE.", "(The eclipse golem kneels and becomes a bridge to the top ring. Up close, the husk sun flickers.)"],
+        () => this.say("The party", ["Brann: \"It's not dead. It's starving.\"", "Mirela: \"There are wraiths in it. Old wardens. They're asleep.\"", "Sable: \"He'll be at its heart. He likes to be at the heart of things.\"", "Rook: \"Then we give back everything he drank. Every spring. All of it.\""])); return true; }
     // Sable Kestrel hooks (staging cast: Malachar's herald; foe now, turns late, 4th hero)
     if (g.area.id === "drowned" && F.sigilDone && !F.sable1 && !this.box) return B("sable1", "Sable Kestrel", ["(A girl in a black riding coat watches from a broken balcony.)", "So you can read old suns now. How nice for you, lamp-lighter.", "Go down the tide stair if you like. The Drinker's general is waiting, and so is the truth. You won't like either."]);
     if (g.area.id === "undertide" && !F.sable2 && !F.tideBossDown && g.p.x > 28 * 16 && g.p.y > 20 * 16 && !this.box) return B("sable2", "Sable Kestrel", ["(Sable Kestrel waits at the Wellspring's door. She doesn't block it.)", "He told me to stop you here. I'm going to watch instead. Don't make me regret it.", "Count Aurel keeps this door. He kept it while the city drowned.", "He remembers the sun better than any of you. Ask yourselves why."]);
@@ -116,6 +141,7 @@ export class Story {
       const k = `orb_${g.area.id}_${o.i}`;
       if (!this.flags[k] && Math.hypot(o.x - g.p.x, o.y + 6 - g.p.y) < 14) {
         this.flags[k] = true;
+        if (g.area.id === "stair") { if (!this.flags.crownShard) { this.flags.crownShard = true; g.gainExp(150); this.save(); g.say("Found a shard of the Sunwardens' crown · +150 EXP", 2.5); } continue; }
         if (g.area.id === "drowned") { this.flags.sigil = true; this.save(); g.say("Found a sun-sigil · show it to Neri", 2.5); continue; }
         if (g.area.id === "emberquarry") { this.flags.heart = true; this.save(); g.say("Found Brann's Heart-Ember · bring it to Brann", 2.5); continue; }
         if (g.area.id !== "lanternmoss") { this.flags.bell = true; this.save(); g.say("Found the Ferry Bell · bring it to Fen Marrow", 2.5); continue; }
@@ -153,6 +179,10 @@ export class Story {
   }
   objective(): string {
     const f = this.flags, g = this.g;
+    if (g.area.id === "stair") return f.threshold ? "The husk sun is starving. Finale: give back every spring" : f.morvantDown ? "Climb to the top ring" : f.sableJoin ? "Top ring: get past Morvant, the Eclipse Golem" : "Free Sable from the Red Cage (centre ring)";
+    if (g.area.id === "drowned" && f.malachar) return "Malachar Vesh is named · the Undertide stone now points north to the Stair";
+    if (g.area.id === "undertide" && f.malachar) return "Ride the Undertide stone (by the tide stair) north to the Sunwarden's Stair";
+    if (g.area.id === "undertide" && f.tideBossDown && !f.twist) return "Return to Neri in Vesper: the Archive is open";
     if (g.area.id === "undertide") return f.tideBossDown ? "The drowned Wellspring breathes again · Sable is wavering" : "Reach the drowned Wellspring (east, over the south bridge)";
     if (g.area.id === "drowned") return f.sigilDone ? "Take the tide stair on Sigil Quay down to the drowned Wellspring" : f.sigil ? "Show the sun-sigil to Neri in Tidewarden Court" : f.metNeri ? "Find the sun-sigil on Sigil Quay (SE)" : "Find the tide-keeper in Tidewarden Court";
     if (g.area.id === "kilnreach") return f.brann ? "Brann is with you · the Quarry Heart waits below" : f.heart ? "Bring the Heart-Ember to Brann" : f.metBrann ? "Take the quarry lift (Quarry Road east) · find the Heart-Ember" : "Find the quarry-smith in Forge Square";

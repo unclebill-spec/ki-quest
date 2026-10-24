@@ -137,7 +137,28 @@ try {
   await E(() => { window.__ki.story.flags.tideBossDown = true; }); await p.waitForTimeout(300);
   ok("post-general Sable beat", await E(() => window.__ki.story.flags.sable3 === true));
   for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
-  ok("per-area music", await E(() => window.__ki.audio.cur === "area2-theme"));
+  ok("per-area music", await E(() => window.__ki.audio.cur === "drowned-vesper"));
+  await E(() => { window.__ki.story.box = null; window.__ki.story.enter("drowned"); }); await p.waitForTimeout(900);
+  ok("Archive opens after Aurel", await E(() => window.__ki.story.flags.twist === true && window.__ki.story.box?.who === "The Archive"));
+  for (let i = 0; i < 40 && (await E(() => window.__ki.story.box?.who !== "Malachar Vesh")); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await p.keyboard.press("KeyJ"); await p.waitForTimeout(600);
+  ok("Malachar projection turns the lamps red", await E(() => window.__ki.game.area.lamps.every((l) => l.c[0] === 1 && l.c[1] < 0.2)));
+  await p.screenshot({ path: "docs/bill/malachar.png" });
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  ok("Malachar named, lamps restored", await E(() => window.__ki.story.flags.malachar === true && window.__ki.game.area.lamps.every((l) => l.c[0] < 1)));
+  await E(() => { window.__ki.story.box = null; window.__ki.story.enter("stair"); }); await p.waitForTimeout(900);
+  ok("Sunwarden's Stair intro", await E(() => window.__ki.game.area.id === "stair" && window.__ki.story.flags.stairIn === true));
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await E(() => { const g = window.__ki.game; g.p.x = 24 * 16; g.p.y = 19 * 16; }); await p.waitForTimeout(900);
+  await p.screenshot({ path: "docs/bill/stair-cage.png" });
+  await E(() => { window.__ki.story.flags.cageDone = true; }); await p.waitForTimeout(400);
+  ok("Sable joins after the Red Cage", await E(() => window.__ki.story.flags.sableJoin === true));
+  await p.screenshot({ path: "docs/bill/sable-joins.png" });
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await E(() => { window.__ki.story.flags.morvantDown = true; const g = window.__ki.game; g.p.x = 32 * 16; g.p.y = 7 * 16; }); await p.waitForTimeout(500);
+  ok("threshold beat after Morvant", await E(() => window.__ki.story.flags.threshold === true));
+  for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  await p.waitForTimeout(500); await p.screenshot({ path: "docs/bill/stair-top.png" });
   await p.keyboard.press("KeyM"); await p.waitForTimeout(300); await p.screenshot({ path: "docs/bill/map-area4.png" }); await p.keyboard.press("KeyM");
   await E(() => { window.__ki.story.enter("lanternmoss"); }); await p.waitForTimeout(200);
   await E(() => { const g = window.__ki.game; g.p.x = 36 * 16; g.p.y = 18 * 16; }); await p.waitForTimeout(1200);

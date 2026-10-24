@@ -3,7 +3,7 @@
  * Driven by diffing game state each frame, so the sim (game.ts / src/game/*) needs no audio calls.
  * Music: area theme, boss theme when a boss is engaged (game.bossActive, if present). Mute: N key (saved).
  */
-type G = { mode: string; stats: Record<string, number>; shield: boolean; tf: number; area: { music?: string }; bossActive?: boolean; dialog?: unknown;
+type G = { mode: string; stats: Record<string, number>; shield: boolean; tf: number; area: { music?: string; bossMusic?: string }; bossActive?: boolean; dialog?: unknown;
   mb?: { sfx: string[]; charging: boolean; hover: boolean } };
 const BASE = import.meta.env.BASE_URL + "audio/";
 const VOL: Record<string, number> = { "punch-light": 0.7, "block": 0.7, "blast-charge": 0.7, "shield": 0.7, "exp-pickup": 0.5,
@@ -62,7 +62,7 @@ export class Audio {
   private duck() { if (!this.ctx || this.muted) return; const t = this.ctx.currentTime, g = this.music.gain; g.cancelScheduledValues(t); g.setValueAtTime(0.22, t); g.linearRampToValueAtTime(0.45, t + 2); }
   /** Tracks shipped in public/audio. An area's `music` may list candidates "a|b|c"; the first shipped one plays.
    *  Add a name here when the sound team delivers it (e.g. area3-theme, area4-theme, quarry-theme, undertide-theme). */
-  static HAVE = new Set(["area1-theme", "area2-theme", "boss-theme"]);
+  static HAVE = new Set(["area1-theme", "area2-theme", "boss-theme", "boss2-theme", "kilnreach-theme", "kilnreach-quarry", "drowned-vesper"]);
   static pick(m: string) { return m.split("|").find((n) => Audio.HAVE.has(n)) ?? "area1-theme"; }
   setMusic(n: string) {
     if (n === this.cur) return;
@@ -101,6 +101,6 @@ export class Audio {
     this.prevShield = g.shield;
     if (g.tf >= 100 && this.prevTf < 100) this.play("transform");
     this.prevTf = g.tf;
-    this.setMusic(g.mode === "title" ? "" : g.bossActive ? "boss-theme" : Audio.pick(g.area.music ?? "area1-theme"));
+    this.setMusic(g.mode === "title" ? "" : g.bossActive ? Audio.pick(g.area.bossMusic ?? "boss-theme") : Audio.pick(g.area.music ?? "area1-theme"));
   }
 }

@@ -8,17 +8,18 @@ import { groundSet, drawGround, type GroundSet, type Kind } from "./groundgen";
 type C2 = CanvasRenderingContext2D;
 const PAL = {
   moss: { floor: ["#3d3a46", "#383542"], moss: ["#33452f", "#2f402b"], path: ["#5a4c3c", "#54473a"], wall: ["#3a3448", "#4c4560", "#231f2e"], water: ["#1c2a4a", "#22325a"] },
+  violet: { floor: ["#3a3248", "#363044"], moss: ["#2e2a44", "#2a2640"], path: ["#4a4258", "#463e54"], wall: ["#2e2838", "#4e4660", "#161220"], water: ["#0a0614", "#0c0818"] },
   tide: { floor: ["#2a3a40", "#26363c"], moss: ["#1e3a3a", "#1c3636"], path: ["#3c4a4a", "#384646"], wall: ["#2a3438", "#4a5a5c", "#141c20"], water: ["#0e4a5a", "#125664"] },
   ember: { floor: ["#3a2e2a", "#362a26"], moss: ["#2e2626", "#2a2222"], path: ["#5a4232", "#54402e"], wall: ["#3a2a28", "#5a3a30", "#1e1412"], water: ["#8a2a10", "#a03a14"] },
   marsh: { floor: ["#2f3440", "#2b303b"], moss: ["#2c3a3a", "#283636"], path: ["#4a4438", "#454034"], wall: ["#2e2a3e", "#403a56", "#1c1828"], water: ["#241a44", "#2c2052"] },
 };
 
-const GPAL = { moss: { spore: "#6ad8ff", plaza: "#544c5a" }, marsh: { spore: "#b48aff", plaza: "#4c4652" }, ember: { spore: "#ff8a4a", plaza: "#6a5650" }, tide: { spore: "#7affe0", plaza: "#4e5e60" } };
-const GSETS: Partial<Record<"moss" | "marsh" | "ember" | "tide", GroundSet>> = {};
-const gset = (t: "moss" | "marsh" | "ember" | "tide") => (GSETS[t] ??= groundSet({ floor: PAL[t].floor[0], moss: PAL[t].moss[0], path: PAL[t].path[0], water: PAL[t].water[0], ...GPAL[t] }, t === "moss" ? 1 : t === "marsh" ? 2 : t === "ember" ? 3 : 4));
+const GPAL = { moss: { spore: "#6ad8ff", plaza: "#544c5a" }, marsh: { spore: "#b48aff", plaza: "#4c4652" }, ember: { spore: "#ff8a4a", plaza: "#6a5650" }, tide: { spore: "#7affe0", plaza: "#4e5e60" }, violet: { spore: "#c48aff", plaza: "#5a4e6a" } };
+const GSETS: Partial<Record<"moss" | "marsh" | "ember" | "tide" | "violet", GroundSet>> = {};
+const gset = (t: "moss" | "marsh" | "ember" | "tide" | "violet") => (GSETS[t] ??= groundSet({ floor: PAL[t].floor[0], moss: PAL[t].moss[0], path: PAL[t].path[0], water: PAL[t].water[0], ...GPAL[t] }, t === "moss" ? 1 : t === "marsh" ? 2 : t === "ember" ? 3 : 4));
 const KIND: Record<number, Kind> = { [T_FLOOR]: "floor", [T_MOSS]: "moss", [T_PATH]: "path", [T_PLAZA]: "plaza", [T_WATER]: "water", [T_HIDDEN]: "water", [T_WARD]: "floor" };
 
-export function tile(c: C2, theme: "moss" | "marsh" | "ember" | "tide", v: number, X: number, Y: number, tx: number, ty: number, time: number, tiles?: Uint8Array) {
+export function tile(c: C2, theme: "moss" | "marsh" | "ember" | "tide" | "violet", v: number, X: number, Y: number, tx: number, ty: number, time: number, tiles?: Uint8Array) {
   if (v === T_HIDDEN) v = T_WATER;
   const P = PAL[theme], ch = (tx + ty) & 1;
   const k = KIND[v];
@@ -232,7 +233,7 @@ export function areaMap(c: C2, g: Game, ox: number, oy: number, s: number) {
 
 /** World-map flight screen: the Mirrorfen Reaches, a dotted route and the hero's glow riding the updraft. */
 const SPOTS: Record<string, { x: number; y: number; name: string }> = {
-  lanternmoss: { x: 0.28, y: 0.58, name: "Lanternmoss Hollow" }, hushwater: { x: 0.7, y: 0.38, name: "Hushwater" }, kilnreach: { x: 0.86, y: 0.72, name: "Kilnreach" }, emberquarry: { x: 0.9, y: 0.84, name: "Emberheart Quarry" }, drowned: { x: 0.52, y: 0.16, name: "Drowned Vesper" },
+  lanternmoss: { x: 0.28, y: 0.58, name: "Lanternmoss Hollow" }, hushwater: { x: 0.7, y: 0.38, name: "Hushwater" }, kilnreach: { x: 0.86, y: 0.72, name: "Kilnreach" }, emberquarry: { x: 0.9, y: 0.84, name: "Emberheart Quarry" }, drowned: { x: 0.52, y: 0.16, name: "Drowned Vesper" }, undertide: { x: 0.56, y: 0.22, name: "The Undertide" }, stair: { x: 0.5, y: 0.05, name: "Sunwarden's Stair" },
 };
 const LOCKED = [{ x: 0.3, y: 0.8, name: "Wellspring Grotto" }];
 function flightMap(c: C2, g: Game, s: Story, W: number, H: number) {

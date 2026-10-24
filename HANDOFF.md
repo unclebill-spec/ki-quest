@@ -63,3 +63,13 @@
 - Sable flags: `sable1` (Vesper balcony after sigil), `sable2` (approach to Wellspring), `sable3` (after tideBossDown). Sable is a foe now; save her turn for later.
 - Audio: `area.music` may be `"a|b|c"`; `Audio.HAVE` lists shipped tracks and the first one present plays. **Sound team:** wanted `area3-theme` (Kilnreach), `quarry-theme`, `area4-theme` (Vesper), `undertide-theme`. Drop the files in staging/sound; World adds them to public/audio + HAVE. area2-theme now shipped (Hushwater, Vesper fallback).
 - **Story team:** the quarry boss is **Slagheart** in the live build (Master Builder's code). Please use Slagheart instead of "Ashmaw" in staging/story/area3.md. Grotto boss banners now read WARDEN RUNE. The tide general in the Undertide is Count Aurel (area4.md); live flag `tideBossDown` = story `aurelDown`. Sable's Hall lines from area4-5_beats.md are in sable2/sable3.
+
+## W10 (World/Story): the Archive (Malachar unmasked), Area 5 Sunwarden's Stair, new music
+- **Archive + Malachar:** returning to Drowned Vesper with `tideBossDown` set plays the Archive (3 records), the party's lines, and Malachar's red-lamp projection. Flags: `twist`, then `malachar`. `malachar` wakes a new `Y` stone in the Undertide (8,27) to the Stair.
+- **Area 5 `stair`** (theme `violet`, floating rings over void `~`). It has the ruined waystation, a nearly dry spring, Captain Orlo Fenn (`o`) and a crown shard `*`.
+- **Master Builder slots** (src/areas/maps.ts):
+  - `STAIR_CAGE {24,15,r5}`: the Red Cage ring. Pylons `C` at (21,14), (27,14) and (24,18); the Cageward Twins and the eclipse golem go here. Set `story.flags.cageDone = true` when the cage breaks. That plays Sable's join beat and sets `sableJoin`, which should unlock Sable as the 4th companion (kit in cast.md).
+  - `STAIR_ARENA {32,5,r4}`: Morvant, the Eclipse Golem. Set `morvantDown`; that plays the threshold beat (`threshold`) and sets up the finale.
+  - Optional per-area `bossMusic` on the area def: quarry, Undertide and Stair use `boss2-theme`, and the grotto keeps `boss-theme`.
+- **Music:** now shipped are kilnreach-theme, kilnreach-quarry, drowned-vesper and boss2-theme (credits copied from staging). **Sound team still wanted:** `undertide-theme`, `stair-theme`, and later a finale theme.
+- **Deploy gate:** kq-deploy.sh now refuses to push main or gh-pages unless gitleaks (full git history + built dist, with the scan count confirmed) and extra_secret_patterns (repo + dist) all pass.

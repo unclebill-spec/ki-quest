@@ -43,6 +43,11 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
     r: { name: "Orrin Cask", coat: "#3a3a2a", hair: "#806040", skin: "#c89870", trim: "#ffb060", tall: -2, lines: () =>
       ["Ferry's closed. Bell's gone. Fog's thick. It's a whole thing.", "Fen keeps a bell for the fog. Lose it and the boats go in circles. Ask him about it."] },
   },
+  stair: {
+    o: { name: "Captain Orlo Fenn", coat: "#3a2a4a", hair: "#c08040", skin: "#e0b090", trim: "#ff3a5a", lines: (f) =>
+      f.sableJoin ? ["You got her out. Good. I'll tell the Court she fell off the Stair. They'll believe anything that ends in falling."]
+      : ["Captain Orlo Fenn. Promoted. Don't clap.", "They're hunting the herald. She refused him. I didn't sign up for hunting our own.", "She's caged in red light on the middle ring. Three pylons hold it. My lot can't touch them. Maybe you can."] },
+  },
   drowned: {
     n: { name: "Neri Calloway", coat: "#1e4a52", hair: "#d0e8e0", skin: "#b88a70", trim: "#7affe0", lines: (f) =>
       f.sigilDone ? ["This sigil belonged to the Sunwarden's own guard. The man who kept the sun lit.", "If a Sunwarden is draining the Wellsprings... then he isn't keeping the light anymore. He's hoarding it.", "The tide stair on Sigil Quay goes down to our Wellspring. Your sigil opens it. Mind the girl in the black coat; she's been watching you."]
