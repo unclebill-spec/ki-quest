@@ -1,36 +1,48 @@
 /**
- * Mirela, companion fighter (joins after the Lantern Oath: story flag `oath` in kiquest.story.v1, or `mirela` in the game save).
- * Follows a few steps behind the hero (never parks in a doorway), teleports beside the hero when far or stuck,
- * melees the nearest foe in range, sometimes fires a ki bolt, retreats when low, steps back from boss telegraphs.
- * Knocked out at 0 HP; revives once the fight is over (no foes near for a few seconds) or on a save pad. Owner: Master Builder.
+ * Companions (a list on g.mb.allies; g.mb.ally is Mirela, kept for older hooks/tests).
+ * - Mirela: joins after the Lantern Oath (story flag `oath`, or `mirela` in the save). Quick melee + ki bolts, teal sash.
+ * - Brann Okoro: joins on story flag `brann` (or `brann` in the save). Tank/bruiser: more HP, takes less damage, slower heavier
+ *   swings, and taunts nearby foes onto himself every few seconds (ai.ts aims taunted foes at him). Amber sash.
+ * Both follow a few steps behind the hero on opposite sides (never in a doorway, never stacked on each other), teleport beside
+ * the hero when far or stuck, retreat when low, step back from boss telegraphs, are knocked out at 0 HP and revive once the
+ * fight is over or on a save pad. Damage stays modest. Owner: Master Builder.
  */
 import type { Game } from "../../game";
 import type { Enemy } from "../enemies/types";
 import { moveBody, solidAt, TILE } from "../../world";
-import { CH_COMBAT, K_SPARK, K_RING, C_CYAN, C_WHITE } from "../../vendor/particles";
+import { CH_COMBAT, K_SPARK, K_RING, C_CYAN, C_WHITE, C_GOLD } from "../../vendor/particles";
 
+export type AllyId = "mirela" | "brann";
 export interface Ally {
-  joined: boolean; x: number; y: number; fx: number; fy: number; hp: number; max: number; ko: boolean;
+  id: AllyId; name: string; joined: boolean; tauntCd: number; taunts: number; x: number; y: number; fx: number; fy: number; hp: number; max: number; ko: boolean;
   state: "follow" | "fight" | "retreat" | "dodge"; atk: number; atkT: number; atkStep: number; boltCd: number; inv: number;
   walk: number; moving: boolean; stuckT: number; lx: number; ly: number; calmT: number; kx: number; ky: number;
   hits: number; bolts: number; teleports: number; kos: number;
 }
 export const LEASH = 100, ALLY_MAX = 70, ALLY_RANGE = 120, ALLY_SPEED = 78;
 const STORY_KEY = "kiquest.story.v1", SAVE_KEYS = ["kiquest-save-v1", "kiquest-autosave-v1"];
+/** Per-companion role. flag = story flag that makes them join; the save field has the same name as the id. */
+export const ROLES: Record<AllyId, { name: string; flag: string; max: number; speed: number; atkCd: number; melee: number; reach: number; armor: number; bolt: boolean; taunt: boolean; side: number; sash: string; sashD: string }> = {
+  mirela: { name: "Mirela", flag: "oath", max: ALLY_MAX, speed: ALLY_SPEED, atkCd: 0.85, melee: 1, reach: 22, armor: 1, bolt: true, taunt: false, side: 1, sash: "#3ee0c8", sashD: "#1f8a7a" },
+  brann: { name: "Brann", flag: "brann", max: 130, speed: 66, atkCd: 1.35, melee: 1.45, reach: 24, armor: 0.6, bolt: false, taunt: true, side: -1, sash: "#ffb02a", sashD: "#a8621a" },
+};
+export const TAUNT_R = 64, TAUNT_T = 3, TAUNT_CD = 7;
 
-/** True if the Lantern Oath flag is set or any save says she joined (old saves without the field: false). */
-export function readJoined() {
+/** True if the join flag is set or any save says they joined (old saves without the field: false). */
+export function readJoined(id: AllyId = "mirela") {
   try {
-    if (JSON.parse(localStorage.getItem(STORY_KEY) || "{}")?.oath === true) return true;
-    return SAVE_KEYS.some((k) => JSON.parse(localStorage.getItem(k) || "null")?.mirela === true);
+    if (JSON.parse(localStorage.getItem(STORY_KEY) || "{}")?.flags?.[ROLES[id].flag] === true) return true;
+    if (JSON.parse(localStorage.getItem(STORY_KEY) || "{}")?.[ROLES[id].flag] === true) return true;
+    return SAVE_KEYS.some((k) => JSON.parse(localStorage.getItem(k) || "null")?.[id] === true);
   } catch { return false; }
 }
-export function makeAlly(joined = readJoined()): Ally {
-  return { joined, x: -999, y: -999, fx: 0, fy: 1, hp: ALLY_MAX, max: ALLY_MAX, ko: false, state: "follow", atk: 0, atkT: 0, atkStep: 0, boltCd: 2,
+export function makeAlly(id: AllyId = "mirela", joined = readJoined(id)): Ally {
+  const R = ROLES[id];
+  return { id, name: R.name, joined, tauntCd: 3, taunts: 0, x: -999, y: -999, fx: 0, fy: 1, hp: R.max, max: R.max, ko: false, state: "follow", atk: 0, atkT: 0, atkStep: 0, boltCd: 2,
     inv: 0, walk: 0, moving: false, stuckT: 0, lx: 0, ly: 0, calmT: 0, kx: 0, ky: 0, hits: 0, bolts: 0, teleports: 0, kos: 0 };
 }
 /** Modest damage: well under the hero's (hero melee 3 + str*1.5, bolt 6 + pow*2.5). */
-export const allyMelee = (g: Game) => 2.5 + g.lvl * 0.5;
+export const allyMelee = (g: Game, a?: Ally) => (2.5 + g.lvl * 0.5) * (a ? ROLES[a.id].melee : 1);
 export const allyBolt = (g: Game) => 4 + g.lvl * 0.7;
 
 const free = (g: Game, x: number, y: number) => !solidAt(g.area, x - 5, y - 3) && !solidAt(g.area, x + 5, y - 3) && !solidAt(g.area, x - 5, y + 2) && !solidAt(g.area, x + 5, y + 2);
@@ -54,34 +66,49 @@ function nearestFoe(g: Game, a: Ally, r: number) {
   for (const e of g.enemies) { if (e.dead || Math.hypot(e.x - g.p.x, e.y - g.p.y) > LEASH) continue; const d = Math.hypot(e.x - a.x, e.y - a.y); if (d < bd) { bd = d; best = e; } }
   return best;
 }
-export function hurtAlly(g: Game, d: number, fx: number, fy: number) {
-  const a = g.mb.ally; if (!a.joined || a.ko || a.inv > 0) return;
-  a.hp -= d; a.inv = 0.5; const ang = Math.atan2(a.y - fy, a.x - fx); a.kx = Math.cos(ang) * 140; a.ky = Math.sin(ang) * 140;
+export function hurtAlly(g: Game, d: number, fx: number, fy: number, a: Ally = g.mb.ally) {
+  if (!a.joined || a.ko || a.inv > 0) return;
+  d *= ROLES[a.id].armor; a.hp -= d; a.inv = 0.5; const ang = Math.atan2(a.y - fy, a.x - fx); a.kx = Math.cos(ang) * 140; a.ky = Math.sin(ang) * 140;
   g.num(a.x, a.y - 34, d, "#ffc0e0");
-  if (a.hp <= 0) { a.hp = 0; a.ko = true; a.kos++; a.calmT = 0; a.atk = 0; g.say("Mirela is down!", 1.5); }
+  if (a.hp <= 0) { a.hp = 0; a.ko = true; a.kos++; a.calmT = 0; a.atk = 0; g.say(`${a.name} is down!`, 1.5); }
 }
 
-export function updateAlly(g: Game, dt: number) {
-  const a = g.mb.ally, p = g.p;
-  if (!a.joined) { if (g.frame % 30 === 0 && readJoined()) { a.joined = true; warp(g, a); g.say("Mirela joins you!", 2); } else return; }
-  a.inv = Math.max(0, a.inv - dt); a.boltCd -= dt;
+export const anyBossActive = (g: Game) => g.mb.boss.active || g.mb.boss2.active;
+const isBoss = (e: Enemy) => e.kind === "boss" || e.kind === "slag";
+
+export function updateAllies(g: Game, dt: number) { for (const a of g.mb.allies) updateAlly(g, a, dt); separate(g); }
+/** Companions never stack: push apart pairs closer than 14 px. */
+function separate(g: Game) {
+  const L = g.mb.allies.filter((a) => a.joined && !a.ko && a.x >= 0);
+  for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) {
+    const a = L[i], b = L[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+    if (d < 14) { const ux = d > 0 ? dx / d : 1, uy = d > 0 ? dy / d : 0, k = (14 - d) / 2; for (const [o, sg] of [[a, -1], [b, 1]] as [Ally, number][]) { const ox = o.x, oy = o.y; moveBody(g.area, o, sg * ux * k, sg * uy * k); if (isDoorway(g, o.x, o.y) && !isDoorway(g, ox, oy)) { o.x = ox; o.y = oy; } } }
+  }
+}
+
+function updateAlly(g: Game, a: Ally, dt: number) {
+  const p = g.p, R = ROLES[a.id];
+  if (!a.joined) { if (g.frame % 30 === 0 && readJoined(a.id)) { a.joined = true; warp(g, a); g.say(`${a.name} joins you!`, 2); } else return; }
+  a.inv = Math.max(0, a.inv - dt); a.boltCd -= dt; a.tauntCd -= dt;
   const toHero = Math.hypot(p.x - a.x, p.y - a.y);
   if (toHero > 170 || a.x < 0) warp(g, a);
   // revive: on a save pad, or when no foe is near for 3 s and no boss fight
   if (a.ko) {
     const near = nearestFoe(g, a, 160);
-    a.calmT = near || g.mb.boss.active ? 0 : a.calmT + dt;
-    if (g.onPad || a.calmT > 3) { a.ko = false; a.hp = g.onPad ? a.max : a.max * 0.6; a.inv = 1; g.say("Mirela is back on her feet", 1.5); g.parts.emit(CH_COMBAT, K_RING, a.x, a.y - 12, 0, 0, 0.4, C_CYAN); }
+    a.calmT = near || anyBossActive(g) ? 0 : a.calmT + dt;
+    if (g.onPad || a.calmT > 3) { a.ko = false; a.hp = g.onPad ? a.max : a.max * 0.6; a.inv = 1; g.say(`${a.name} is back on their feet`, 1.5); g.parts.emit(CH_COMBAT, K_RING, a.x, a.y - 12, 0, 0, 0.4, C_CYAN); }
     a.moving = false; a.kx = a.ky = 0; return;
   }
   if (g.onPad) a.hp = a.max;
   // threats on her: foe shots, brute lunges (hazards are handled in ai.ts)
-  for (const s of g.shots) if (s.foe && s.life > 0 && Math.hypot(s.x - a.x, s.y - (a.y - 14)) < 9) { s.life = 0; hurtAlly(g, s.dmg * 0.8, s.x - s.vx, s.y - s.vy); }
-  for (const e of g.enemies) if (!e.dead && e.kind === "brute" && e.state === "act" && Math.hypot(e.x - a.x, e.y - a.y) < 14) hurtAlly(g, 6, e.x, e.y);
+  for (const s of g.shots) if (s.foe && s.life > 0 && Math.hypot(s.x - a.x, s.y - (a.y - 14)) < 9) { s.life = 0; hurtAlly(g, s.dmg * 0.8, s.x - s.vx, s.y - s.vy, a); }
+  for (const e of g.enemies) if (!e.dead && e.kind === "brute" && e.state === "act" && Math.hypot(e.x - a.x, e.y - a.y) < 14) hurtAlly(g, 6, e.x, e.y, a);
   if (a.ko) return;
-  const boss = g.enemies.find((e) => !e.dead && e.kind === "boss");
+  const boss = g.enemies.find((e) => !e.dead && isBoss(e));
   const foe = nearestFoe(g, a, ALLY_RANGE);
-  let tx = p.x - p.fx * 22 + p.fy * 10, ty = p.y - p.fy * 16 - p.fx * 6, sp = ALLY_SPEED;
+  // rest spots: behind the hero, Mirela on one side and Brann on the other
+  const sd = R.side;
+  let tx = p.x - p.fx * 22 + p.fy * 12 * sd, ty = p.y - p.fy * 16 - p.fx * 8 * sd, sp = R.speed;
   if (boss && boss.state === "tele") {
     a.state = "dodge"; const d = Math.hypot(a.x - boss.x, a.y - boss.y) || 1;
     tx = boss.x + ((a.x - boss.x) / d) * 110; ty = boss.y + ((a.y - boss.y) / d) * 110; sp = 110;
@@ -92,21 +119,31 @@ export function updateAlly(g: Game, dt: number) {
   } else if (foe && toHero < LEASH) {
     a.state = "fight"; const dx = foe.x - a.x, dy = foe.y - a.y, d = Math.hypot(dx, dy) || 1;
     a.fx = dx / d; a.fy = dy / d;
-    if (a.boltCd <= 0 && d > 40 && Math.random() < 0.04) {
+    if (R.taunt && a.tauntCd <= 0) {
+      // taunt: nearby non-boss foes turn on him for a few seconds
+      let n = 0; for (const e of g.enemies) if (!e.dead && !isBoss(e) && Math.hypot(e.x - a.x, e.y - a.y) < TAUNT_R) { e.taunt = TAUNT_T; e.tauntBy = a.id; n++; }
+      if (n) { a.tauntCd = TAUNT_CD; a.taunts++; g.parts.emit(CH_COMBAT, K_RING, a.x, a.y - 16, 0, 0, 0.45, C_GOLD); g.nums.push({ x: a.x, y: a.y - 40, txt: "TAUNT!", col: "#ffb02a", t: 0.9, big: false }); }
+    }
+    if (R.bolt && a.boltCd <= 0 && d > 40 && Math.random() < 0.04) {
       a.boltCd = 3.5 + Math.random() * 2; a.bolts++; a.atk = 0.3; a.atkStep = 4;
       g.shots.push({ x: a.x + a.fx * 8, y: a.y - 14, vx: a.fx * 200, vy: a.fy * 200, life: 0.8, foe: false, dmg: allyBolt(g), tech: 0 });
     }
     tx = foe.x - (dx / d) * 16; ty = foe.y - (dy / d) * 4;
-    if (d < 22 && a.atkT <= 0) {
-      a.atkT = 0.85; a.atk = 0.28; a.atkStep = a.atkStep % 3 + 1; a.hits++;
+    if (d < R.reach && a.atkT <= 0) {
+      a.atkT = R.atkCd; a.atk = 0.28; a.atkStep = a.atkStep % 3 + 1; a.hits++;
       const crit = Math.random() < 0.08;
-      g.damageFoe(foe, allyMelee(g) * (crit ? 1.6 : 1), a.fx * 40, a.fy * 40, crit);
+      g.damageFoe(foe, allyMelee(g, a) * (crit ? 1.6 : 1), a.fx * (R.taunt ? 90 : 40), a.fy * (R.taunt ? 90 : 40), crit);
+      if (R.taunt) g.shake = Math.max(g.shake, 1);
       g.parts.emit(CH_COMBAT, K_SPARK, foe.x, foe.y - 10, a.fx * 50, -20, 0.2, C_WHITE);
     }
   } else a.state = "follow";
   a.atkT -= dt; a.atk = Math.max(0, a.atk - dt);
   // never park in a doorway: slide the rest spot back toward the hero side
-  if (a.state === "follow" && isDoorway(g, tx, ty)) { tx = (tx + p.x) / 2 - p.fx * 4; ty = (ty + p.y) / 2 - p.fy * 4; if (isDoorway(g, tx, ty)) { tx = p.x + p.fy * 16; ty = p.y - p.fx * 16; } }
+  if (a.state === "follow" && (isDoorway(g, tx, ty) || !free(g, tx, ty))) {
+    const c: [number, number][] = [[(tx + p.x) / 2 - p.fx * 4, (ty + p.y) / 2 - p.fy * 4], [p.x + p.fy * 16 * sd, p.y - p.fx * 16 * sd], [p.x - p.fy * 16 * sd, p.y + p.fx * 16 * sd],
+      [p.x - p.fx * 20, p.y - p.fy * 20], [p.x + p.fx * 18 + p.fy * 14 * sd, p.y + p.fy * 18 - p.fx * 14 * sd], [p.x + 18 * sd, p.y], [p.x, p.y + 18 * sd], [p.x - 18 * sd, p.y], [p.x, p.y - 18 * sd]];
+    const ok = c.find(([x, y]) => !isDoorway(g, x, y) && free(g, x, y)); if (ok) [tx, ty] = ok;
+  }
   const dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy);
   const stop = a.state === "follow" ? 6 : 3;
   a.moving = d > stop && a.atk <= 0;
@@ -124,5 +161,5 @@ export function updateAlly(g: Game, dt: number) {
   if (a.moving && d > 20 && moved < 8 * dt) a.stuckT += dt; else a.stuckT = Math.max(0, a.stuckT - dt);
   if (a.stuckT > 0.8 || !free(g, a.x, a.y)) warp(g, a);
   // boss arena barrier applies to her too
-  if (g.mb.boss.active && a.state !== "dodge" && toHero > 120) warp(g, a);
+  if (anyBossActive(g) && a.state !== "dodge" && toHero > 120) warp(g, a);
 }

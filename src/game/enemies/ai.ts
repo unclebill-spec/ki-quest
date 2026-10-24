@@ -5,6 +5,7 @@ import { moveBody, solidAt, TILE, Area } from "../../world";
 import { CH_COMBAT, K_SPARK, K_RING, K_DUST, C_GOLD, C_CYAN, C_DUST, C_RED } from "../../vendor/particles";
 import { meterGain, TF_HIT } from "../combat/powerup";
 import { updateBoss, bossKilled } from "./boss";
+import { updateSlag, slagKilled } from "./slagheart";
 import { hurtAlly } from "../combat/companion";
 
 /** Extra spawns this module adds to the area (wardens), on open floor near the given tiles. */
@@ -22,7 +23,7 @@ export function freeNear(a: Area, tx: number, ty: number) {
 
 /** Called from Game.damageFoe before applying damage. Returns adjusted damage/knockback. */
 export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, crit: boolean, pierce = false) {
-  if (e.kind === "boss" && g.mb.boss.lockT > 0) return { d: 0, kx: 0, ky: 0, blocked: true };
+  if ((e.kind === "boss" && g.mb.boss.lockT > 0) || (e.kind === "slag" && g.mb.boss2.lockT > 0)) return { d: 0, kx: 0, ky: 0, blocked: true };
   if (e.kind === "warden" && e.guard) {
     const n = Math.hypot(kx, ky) || 1, front = (kx / n) * e.ax + (ky / n) * e.ay < -0.2;
     if (front) {
@@ -35,16 +36,17 @@ export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, c
     }
   }
   meterGain(g, TF_HIT);
-  e.hurt = e.kind === "boss" ? 0.04 : crit ? 0.35 : 0.16;
+  e.hurt = e.kind === "boss" || e.kind === "slag" ? 0.04 : crit ? 0.35 : 0.16;
   return { d, kx: kx * e.heavy, ky: ky * e.heavy, blocked: false };
 }
 
 export function onFoeKill(g: Game, e: Enemy) {
   const info = FOE_INFO[e.kind];
-  e.respawn = info.respawn;
-  const n = e.kind === "boss" ? 10 : 3, each = Math.ceil(info.exp / n);
+  e.respawn = e.minion ? Infinity : info.respawn;
+  const n = e.kind === "boss" ? 10 : e.kind === "slag" ? 12 : 3, each = Math.ceil(info.exp / n);
   for (let i = 0; i < n; i++) { const a = (i / n) * 6.28; g.mb.orbs.push({ x: e.x, y: e.y - 8, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60 - 30, v: each, t: 0 }); }
   if (e.kind === "boss") bossKilled(g, e);
+  if (e.kind === "slag") slagKilled(g, e);
 }
 
 function shoot(g: Game, x: number, y: number, ang: number, sp: number, dmg: number, life = 2.4) {
@@ -62,11 +64,15 @@ export function updateFoes(g: Game, dt: number) {
       continue;
     }
     e.flash = Math.max(0, e.flash - dt);
-    const dx = p.x - e.x, dy = p.y - e.y, dist = Math.hypot(dx, dy) || 1, ux = dx / dist, uy = dy / dist;
+    // taunted by a companion (Brann): aim at him instead of the hero
+    let px = p.x, py = p.y;
+    if (e.taunt > 0) { e.taunt -= dt; const a = g.mb.allies.find((q) => q.id === e.tauntBy); if (a && a.joined && !a.ko) { px = a.x; py = a.y; } else e.taunt = 0; }
+    const dx = px - e.x, dy = py - e.y, dist = Math.hypot(dx, dy) || 1, ux = dx / dist, uy = dy / dist;
     let wx = 0, wy = 0;
     e.t -= dt;
-    if (e.hurt > 0) { e.hurt -= dt; if (e.state === "tele" && e.kind !== "boss" && e.kind !== "warden") { e.state = "recover"; e.t = 0.3; } }
+    if (e.hurt > 0) { e.hurt -= dt; if (e.state === "tele" && e.kind !== "boss" && e.kind !== "slag" && e.kind !== "warden") { e.state = "recover"; e.t = 0.3; } }
     else if (e.kind === "boss") [wx, wy] = updateBoss(g, e, dt, ux, uy, dist);
+    else if (e.kind === "slag") [wx, wy] = updateSlag(g, e, dt, ux, uy, dist);
     else if (e.kind === "brute") {
       // melee rusher: chase, "!" + lunge-line telegraph, lunge
       if (e.state === "idle") { e.wander += dt; wx = Math.cos(e.wander * 0.7) * 14; wy = Math.sin(e.wander * 0.5) * 14; if (dist < 120) e.state = "chase"; }
@@ -93,7 +99,7 @@ export function updateFoes(g: Game, dt: number) {
       else if (e.state === "act") { if (e.t <= 0) { e.state = "recover"; e.t = 1.1; e.guard = false; } }
       else if (e.t <= 0) { e.state = "chase"; e.guard = true; }
     }
-    moveBody(g.area, e, (wx + e.vx) * dt, (wy + e.vy) * dt, e.kind === "boss" ? 12 : 6);
+    moveBody(g.area, e, (wx + e.vx) * dt, (wy + e.vy) * dt, e.kind === "boss" || e.kind === "slag" ? 12 : 6);
     e.vx *= Math.pow(0.004, dt); e.vy *= Math.pow(0.004, dt);
   }
   // keep foes from stacking
@@ -101,7 +107,7 @@ export function updateFoes(g: Game, dt: number) {
   for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) {
     const a = L[i], b = L[j];
     if (a.dead || b.dead) continue;
-    const R = a.kind === "boss" || b.kind === "boss" ? 26 : 16;
+    const big = (k: string) => k === "boss" || k === "slag", R = big(a.kind) || big(b.kind) ? 26 : 16;
     const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
     if (d > 0 && d < R) { const k = (R - d) / 2 / d; moveBody(g.area, a, -dx * k * a.heavy, -dy * k * a.heavy, 6); moveBody(g.area, b, dx * k * b.heavy, dy * k * b.heavy, 6); }
   }
@@ -116,7 +122,7 @@ function updateHazards(g: Game, dt: number) {
     if (h.t <= 0 && h.max > 0) {
       h.max = 0;
       if (Math.hypot(p.x - h.x, (p.y - h.y) * 1.6) < h.r) g.hurtHero(h.dmg, h.x, h.y);
-      const al = g.mb.ally; if (al.joined && Math.hypot(al.x - h.x, (al.y - h.y) * 1.6) < h.r) hurtAlly(g, h.dmg * 0.8, h.x, h.y);
+      for (const al of g.mb.allies) if (al.joined && Math.hypot(al.x - h.x, (al.y - h.y) * 1.6) < h.r) hurtAlly(g, h.dmg * 0.8, h.x, h.y, al);
       g.parts.emit(CH_COMBAT, K_RING, h.x, h.y - 2, 0, 0, 0.3, C_RED);
       for (let i = 0; i < 6; i++) g.parts.emit(CH_COMBAT, K_DUST, h.x + Math.cos(i) * h.r * 0.7, h.y + Math.sin(i) * h.r * 0.4, Math.cos(i) * 40, -20, 0.3, C_DUST, 60);
     }

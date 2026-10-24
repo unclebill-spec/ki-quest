@@ -7,12 +7,16 @@ export interface MBState {
   /** One-shot SFX cues for src/audio.ts (drained each frame); hover = transformed flight (loops flight-loop). */
   sfx: string[]; hover: boolean;
   orbs: Orb[]; hazards: Hazard[]; boss: BossState;
-  /** Mirela, companion fighter (src/game/combat/companion.ts). */ ally: Ally;
+  /** Kilnreach quarry boss, Slagheart (src/game/enemies/slagheart.ts). */ boss2: BossState;
+  /** Companions (src/game/combat/companion.ts): [Mirela, Brann]. ally = allies[0] (Mirela). */ allies: Ally[]; ally: Ally;
 }
 export function makeMB(): MBState {
-  return { tech: 0, charge: 0, charging: false, fire: 0, tfOn: false, tfT: 0, chargingKi: false, sfx: [], hover: false, orbs: [], hazards: [], ally: makeAlly(),
-    boss: { phase: 0, active: false, done: readBossDone(), lockT: 0, introT: 0 } };
+  const allies = [makeAlly("mirela"), makeAlly("brann")];
+  return { tech: 0, charge: 0, charging: false, fire: 0, tfOn: false, tfT: 0, chargingKi: false, sfx: [], hover: false, orbs: [], hazards: [], allies, ally: allies[0],
+    boss: { phase: 0, active: false, done: readBossDone(), lockT: 0, introT: 0 },
+    boss2: { phase: 0, active: false, done: readBossDone("boss2"), lockT: 0, introT: 0 } };
 }
 const SLOT = "kiquest-mb-v1"; // localStorage slot name
-export function readBossDone() { try { return JSON.parse(localStorage.getItem(SLOT) || "{}").boss1 === true; } catch { return false; } }
-export function writeBossDone() { try { localStorage.setItem(SLOT, JSON.stringify({ boss1: true })); } catch { /* storage blocked */ } }
+/** Slot shape {boss1?: true, boss2?: true}; writes merge so each boss keeps its own flag. */
+export function readBossDone(key = "boss1") { try { return JSON.parse(localStorage.getItem(SLOT) || "{}")[key] === true; } catch { return false; } }
+export function writeBossDone(key = "boss1") { try { const o = JSON.parse(localStorage.getItem(SLOT) || "{}") || {}; o[key] = true; localStorage.setItem(SLOT, JSON.stringify(o)); } catch { /* storage blocked */ } }
