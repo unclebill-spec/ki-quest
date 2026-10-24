@@ -105,11 +105,15 @@ function grave(c: C2, x: number, y: number) {
   c.fillStyle = "#6a6a80"; c.fillRect(x - 5, y - 8, 10, 13); c.fillRect(x - 3, y - 10, 6, 2);
   c.fillStyle = "#4a4a5e"; c.fillRect(x - 1, y - 6, 2, 7); c.fillRect(x - 3, y - 4, 6, 2);
 }
+/** Idle bob: wall-clock time plus a per-NPC phase from its id. Never from screen x (that moved with the camera and sped the bob up while walking). */
+/** Last drawn bob per NPC id (read by tests/npc-bob.mjs). */
+export const NPC_BOB: Record<string, number> = ((globalThis as Record<string, unknown>).__kiNpcBob ??= {}) as Record<string, number>;
+export const npcBob = (id: string, t: number) => Math.round(Math.sin(t * 2 + id.charCodeAt(0) * 1.7) * 0.6);
 /** NPC: ~16x26, real clothes (coat or tunic over a shirt, belt at the waist, trousers, boots), head ~1/4 of height. */
 function npc(c: C2, id: string, area: string, x: number, y: number, t: number) {
   const d = NPCS[area]?.[id]; if (!d) return;
   x = Math.round(x); y = Math.round(y);
-  const h = 26 + (d.tall ?? 0), bob = Math.round(Math.sin(t * 2 + x) * 0.6);
+  const h = 26 + (d.tall ?? 0), bob = npcBob(id, t); NPC_BOB[id] = bob; NPC_BOB[id + "@x"] = x;
   const top = y - h + bob, leg = Math.round(h * 0.38), torso = Math.round(h * 0.34), head = h - leg - torso;
   c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, 6, 2, 0, 0, 7); c.fill();
   // legs + boots

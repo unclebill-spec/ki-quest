@@ -113,3 +113,8 @@ Final boss in src/game/enemies/malachar.ts (trigger: huskIn, !malacharDown, no s
 - Test gotcha: never return story.box from page.evaluate. Its `then` callback makes Playwright treat it as a promise and hang. Return `.who`/`.lines` instead.
 - **MB:** boss3 "P3 drowned soldiers" failed once in 4 runs (minions:0, summons:1). It looks timing-flaky.
 - **Sable pronoun:** staging/story says **she/her**. The story team's word wins. Live story copy already matches; MB comments match too.
+
+## W13 (NPC bob fix, Bill 5:31 AM)
+- src/areas/art.ts `npc()`: idle bob now `npcBob(id, t)` (g.time + per-id phase). It used to use **screen x**, so camera scroll sped up/jittered the bob while walking. Shared NPC code: don't feed screen coords into animation phases. Last bob is mirrored to `globalThis.__kiNpcBob[id]` (+`id@x`) for tests.
+- tests/npc-bob.mjs: still vs walking flips/s must match (old code: 1.25 vs 24.25/s).
+- Audio: kilnreach-theme, kilnreach-quarry, drowned-vesper, boss2-theme were already in public/audio, Audio.HAVE and world.ts (kilnreach, emberquarry, drowned/undertide/stair, boss2 for quarry+). Byte-identical to staging, <=1MB, 128k, loop=true, seams checked. No change.

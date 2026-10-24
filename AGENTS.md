@@ -21,3 +21,5 @@ Publishing needs Bill's approval.
 ## Ownership claims (2026-10-23)
 - **Master Builder owns `src/game/combat/` and `src/game/enemies/`** (techniques, power-up/transform, enemy AI, boss, sprite-sheet spec). Other bots: please hook in via their exports, don't edit inside. Hooks elsewhere (game.ts, draw.ts, tests) are kept minimal and marked `// MB hook`.
 - Nintendo 64 Style owns deploy (gh-pages). Master Builder pushes to main only.
+
+- NPC/idle animation phases must come from time + stable ids, never screen coords (see npcBob in src/areas/art.ts; tests/npc-bob.mjs).
