@@ -89,7 +89,7 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   const a = g.area;
   for (let ty = Math.floor(cy / TILE); ty <= Math.floor((cy + H) / TILE); ty++) for (let tx = Math.floor(cx / TILE); tx <= Math.floor((cx + W) / TILE); tx++) {
     if (tx < 0 || ty < 0 || tx >= MW || ty >= MH) continue;
-    tile(c, a.theme, a.tiles[ty * MW + tx], tx * TILE - cx, ty * TILE - cy, tx, ty, g.time);
+    tile(c, a.theme, a.tiles[ty * MW + tx], tx * TILE - cx, ty * TILE - cy, tx, ty, g.time, a.tiles);
   }
   // save pad
   const padX = a.pad.x - cx, padY = a.pad.y - cy;

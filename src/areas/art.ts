@@ -1,8 +1,9 @@
 /** World art for areas: tile palettes, props (mushroom houses, cap trees, graves), NPCs, wards, updraft stones, and the story overlay. */
 import type { Game } from "../game";
 import type { Story } from "../story";
-import { TILE, T_WALL, T_MOSS, T_PLAZA, T_WATER, T_PATH, T_BOARD, T_WARD, T_HIDDEN, wardOpen } from "../world";
+import { TILE, MW, MH, T_FLOOR, T_WALL, T_MOSS, T_PLAZA, T_WATER, T_PATH, T_BOARD, T_WARD, T_HIDDEN, wardOpen } from "../world";
 import { NPCS, INTRO } from "../story/script";
+import { groundSet, drawGround, type GroundSet, type Kind } from "./groundgen";
 
 type C2 = CanvasRenderingContext2D;
 const PAL = {
@@ -10,9 +11,21 @@ const PAL = {
   marsh: { floor: ["#2f3440", "#2b303b"], moss: ["#2c3a3a", "#283636"], path: ["#4a4438", "#454034"], wall: ["#2e2a3e", "#403a56", "#1c1828"], water: ["#241a44", "#2c2052"] },
 };
 
-export function tile(c: C2, theme: "moss" | "marsh", v: number, X: number, Y: number, tx: number, ty: number, time: number) {
+const GPAL = { moss: { spore: "#6ad8ff", plaza: "#544c5a" }, marsh: { spore: "#b48aff", plaza: "#4c4652" } };
+const GSETS: Partial<Record<"moss" | "marsh", GroundSet>> = {};
+const gset = (t: "moss" | "marsh") => (GSETS[t] ??= groundSet({ floor: PAL[t].floor[0], moss: PAL[t].moss[0], path: PAL[t].path[0], water: PAL[t].water[0], ...GPAL[t] }, t === "moss" ? 1 : 2));
+const KIND: Record<number, Kind> = { [T_FLOOR]: "floor", [T_MOSS]: "moss", [T_PATH]: "path", [T_PLAZA]: "plaza", [T_WATER]: "water", [T_HIDDEN]: "water", [T_WARD]: "floor" };
+
+export function tile(c: C2, theme: "moss" | "marsh", v: number, X: number, Y: number, tx: number, ty: number, time: number, tiles?: Uint8Array) {
   if (v === T_HIDDEN) v = T_WATER;
   const P = PAL[theme], ch = (tx + ty) & 1;
+  const k = KIND[v];
+  if (tiles && k && v !== T_WARD) {
+    const G = gset(theme);
+    drawGround(c, G, k, X, Y, tx, ty, (dx, dy) => { const x = tx + dx, y = ty + dy; return x < 0 || y < 0 || x >= MW || y >= MH ? null : KIND[tiles[y * MW + x]] ?? null; });
+    if (v === T_WATER) { const w = Math.sin(time * 1.6 + tx * 0.9 + ty * 1.3); c.fillStyle = theme === "marsh" ? "rgba(190,140,255,.22)" : "rgba(120,200,255,.18)"; c.fillRect(X + 3 + Math.round(w * 2), Y + 6 + ((tx * 5 + ty) % 6), 6, 1); }
+    return;
+  }
   if (v === T_WALL) { c.fillStyle = P.wall[0]; c.fillRect(X, Y, TILE, TILE); c.fillStyle = P.wall[1]; c.fillRect(X, Y, TILE, 4); c.fillStyle = P.wall[2]; c.fillRect(X, Y + 13, TILE, 3); }
   else if (v === T_PLAZA) { c.fillStyle = ch ? "#5a5260" : "#544c5a"; c.fillRect(X, Y, TILE, TILE); c.fillStyle = "#463f4c"; c.fillRect(X, Y, TILE, 1); c.fillRect(X, Y, 1, TILE); }
   else if (v === T_WATER) {
@@ -20,9 +33,9 @@ export function tile(c: C2, theme: "moss" | "marsh", v: number, X: number, Y: nu
     const k = Math.sin(time * 1.6 + tx * 0.9 + ty * 1.3);
     c.fillStyle = theme === "marsh" ? "rgba(190,140,255,.22)" : "rgba(120,200,255,.18)"; c.fillRect(X + 3 + Math.round(k * 2), Y + 6 + ((tx * 5 + ty) % 6), 6, 1);
   }
-  else if (v === T_BOARD) { c.fillStyle = P.water[ch]; c.fillRect(X, Y, TILE, TILE); c.fillStyle = "#6a5038"; c.fillRect(X + 1, Y, TILE - 2, TILE); c.fillStyle = "#4a3828"; for (let i = 0; i < 4; i++) c.fillRect(X + 1, Y + i * 4 + 3, TILE - 2, 1); }
+  else if (v === T_BOARD) { if (tiles) c.drawImage(gset(theme).base.water[(tx * 7 + ty * 3) & 3], X, Y); else { c.fillStyle = P.water[ch]; c.fillRect(X, Y, TILE, TILE); } c.fillStyle = "#6a5038"; c.fillRect(X + 1, Y, TILE - 2, TILE); c.fillStyle = "#4a3828"; for (let i = 0; i < 4; i++) c.fillRect(X + 1, Y + i * 4 + 3, TILE - 2, 1); }
   else if (v === T_WARD) {
-    c.fillStyle = P.floor[ch]; c.fillRect(X, Y, TILE, TILE);
+    if (tiles) c.drawImage(gset(theme).base.floor[(tx * 7 + ty * 3) & 3], X, Y); else { c.fillStyle = P.floor[ch]; c.fillRect(X, Y, TILE, TILE); }
     if (!wardOpen) { c.fillStyle = "#2a2440"; c.fillRect(X + 1, Y, TILE - 2, TILE); c.fillStyle = `rgba(120,220,255,${0.5 + 0.3 * Math.sin(time * 3)})`; c.fillRect(X + 4, Y + 3, 8, 1); c.fillRect(X + 7, Y + 3, 2, 10); c.fillRect(X + 4, Y + 12, 8, 1); }
   }
   else { const p = v === T_MOSS ? P.moss : v === T_PATH ? P.path : P.floor; c.fillStyle = p[ch]; c.fillRect(X, Y, TILE, TILE); }
