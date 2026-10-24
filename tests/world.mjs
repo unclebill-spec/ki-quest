@@ -134,7 +134,7 @@ try {
   for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
   await E(() => { const g = window.__ki.game; g.p.x = 37 * 16; g.p.y = 20 * 16; }); await p.waitForTimeout(900);
   await p.screenshot({ path: "docs/bill/undertide.png" });
-  await E(() => { window.__ki.story.flags.tideBossDown = true; }); await p.waitForTimeout(300);
+  await E(() => { const g = window.__ki.game; window.__ki.story.flags.tideBossDown = true; /* Count Aurel now triggers here (W10): stand the fight down */ g.mb.boss3.active = false; g.mb.boss3.done = true; g.enemies.forEach((e) => { if (e.kind === "aurel" || e.minion) e.dead = true; }); g.mb.hazards.length = 0; }); await p.waitForTimeout(300);
   ok("post-general Sable beat", await E(() => window.__ki.story.flags.sable3 === true));
   for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
   ok("per-area music", await E(() => window.__ki.audio.cur === "drowned-vesper"));
