@@ -1,4 +1,10 @@
 # Changelog
+## 0.3.3 — 2026-10-23 (Master Builder: Count Aurel)
+- Count Aurel, tide general of the Undertide (arena = UNDERTIDE_ARENA tile 37,17 r6; src/game/enemies/aurel.ts): 760 HP, 4 phases (75/50/25%) with shockwave rings on each change; telegraphed tide-wave sweep (double in P3), rapier lunge chain (3, then 4 thrusts), whirlpool zones (pull 26 px/s), summoned drowned soldiers (cap 4), P4 rising-water ring. Teal/violet boss bar with 4-phase ticks, cyan tide hazards, companions dodge his telegraphs.
+- Spring keep-out: no hazard within 26 px of the central spring, Aurel clamped >= 38 px from it and steered away.
+- Defeat: story flag `tideBossDown` (Sable's beat), +5 pts, full heal/meter, saved as `boss3` in kiquest-mb-v1.
+- Sprite: tools/art/build_count_aurel.py → public/art/chars/count_aurel.png/.json (48x64, check_sheets 32/32), docs/count_aurel_8x.png.
+- Tests: tests/boss3.mjs (15 checks incl. fps at 4x); world.mjs stands the fight down when it fakes tideBossDown.
 ## 0.3.2 — 2026-10-23 (Master Builder: Brann + Slagheart)
 - Brann joins as second companion when the Heart-Ember is handed in (story flag `brann`). Companions are now a list (`g.mb.allies`; `g.mb.ally` = Mirela alias). Brann: tank/bruiser, 130 HP, slower, heavier melee (x1.45, knockback), 40% damage reduction, taunts foes within 64 px for 3 s (7 s cd), amber sash, sheet public/art/chars/brann.*. Allies rest on opposite sides, are pushed apart (14 px), never park/pushed into doorways. Save field `brann` (optional).
 - Slagheart, Emberheart Quarry boss (arena = QUARRY_ARENA in src/areas/maps.ts; src/game/enemies/slagheart.ts): 620 HP, 3 phases with shockwave on each change; telegraphed charge, ember rain, molten crack (+ triple crack), phase-3 summon (minions capped at 4); boss bar; reward +4 pts, full heal, saved as `boss2` in kiquest-mb-v1 (merged with boss1).

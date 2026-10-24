@@ -82,3 +82,8 @@
 - **Sound team:** please make `husk-theme` (area loop) and `finale-theme` (Malachar fight). Both fall back to existing tracks for now.
 
 ## W11b — dead sun bigger/closer (SUN 38,25 r104), stronger daylight. Still waiting on Master Builder: Aurel, Twins, Morvant, Malachar (no commits since 031b842).
+## MB W10b (Master Builder): Count Aurel, Undertide boss
+- Module src/game/enemies/aurel.ts; state `g.mb.boss3`; `isBigBoss(kind)` in types.ts covers boss/slag/aurel (hit radius, separation, hurt time). Triggers when the hero is within 80 px of the spring in UNDERTIDE_ARENA; spawns north of the spring.
+- Spring rule: `place()` drops hazards overlapping the 26 px spring radius (`aurelLog.dropped`), steering + clamp keep his body off (`aurelLog.minBossD`). Hazards carry `tide: true` (drawn cyan/violet).
+- Defeat sets `story.flags.tideBossDown` (gates Sable/Archive) and saves `boss3`. Test hooks merged into `globalThis.__kiMB`: startAurel, aurelLog, ARENA3, MOVES3, springOf, SPRING_R.
+- Note: walking to the Undertide spring now starts the fight; tests that fake tideBossDown must stand boss3 down (see world.mjs).
