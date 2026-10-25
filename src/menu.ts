@@ -31,12 +31,12 @@ export function sfx(n: UiSfx) {
   a.play(n);
 }
 const SLOTS: GearSlot[] = SLOT_ORDER;
-/** Shopkeepers (Story gear_text.md): NPC letter per area. Drowned Vesper's Marlo Quayle is not placed yet, so that shop sits at the save pad. */
+/** Shopkeepers (Story gear_text.md): NPC letter per area. Drowned Vesper's Marlo Quayle is `s` on the DROWNED map (5,3), next to the save pad. */
 export const KEEPERS: Record<string, { npc: string; name: string; hi: string }> = {
   lanternmoss: { npc: "j", name: "Joss Tumble", hi: "Potions, wraps, beads! Everything glows, nothing's refunded." },
   hushwater: { npc: "r", name: "Orrin Cask", hi: "Ferry's slow, so I sell boots. Fen Boots. Reed Circlets. Don't ask." },
   kilnreach: { npc: "q", name: "Dace Holloway", hi: "Cinder Fists, forged on Brann's anvil. Fair trade, fair weight." },
-  drowned: { npc: "", name: "Marlo Quayle", hi: "Marlo Quayle, chandler. Oilskins, greaves, and Tears in glass." },
+  drowned: { npc: "s", name: "Marlo Quayle", hi: "Marlo Quayle, chandler. Oilskins, greaves, and Tears in glass." },
 };
 /** Shop rows here: gear sold in this area + consumables (Tears from area 2 on). Empty when no keeper is near. */
 export function shopRows(g: Game): ({ kind: "gear"; it: Gear } | { kind: "item"; id: ItemId })[] {

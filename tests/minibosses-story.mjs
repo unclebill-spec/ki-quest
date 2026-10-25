@@ -39,6 +39,8 @@ try {
   }
   await go("hushwater", 20, 20, { ombrelleDown: true }); await page.waitForFunction(() => window.__ki.story.flags.ombrelleBeat, null, { timeout: 4000 }).catch(() => {});
   { const l = await lines(); ok("Sable's crypt-stair beat after Ombrelle (ombrelleBeat)", /drinks it/.test(l), l.slice(0, 80)); await E(() => { window.__ki.story.box = null; }); }
+  await go("drowned", 4, 3, {}); await page.waitForTimeout(300);
+  ok("Marlo Quayle placed in Drowned Vesper as shop keeper s", await E(() => !!window.__ki.game.area.npcs.find((n) => n.id === "s")));
   ok("no page errors", errs.length === 0, errs.slice(0, 3).join(" | "));
 } finally { await browser.close(); srv.kill(); }
 for (const r of results) console.log(r.join("  ")); const f = results.filter((r) => r[0] !== "PASS").length; console.log(`${results.length - f}/${results.length} passed`); process.exit(f ? 1 : 0);

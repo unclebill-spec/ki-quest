@@ -53,6 +53,8 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
       : ["Captain Orlo Fenn. Promoted. Don't clap.", "They're hunting the herald. She refused him. I didn't sign up for hunting our own.", "She's caged in red light on the middle ring. Three pylons hold it. My lot can't touch them. Maybe you can."] },
   },
   drowned: {
+    s: { name: "Marlo Quayle", coat: "#2a4a5a", hair: "#e0d0b0", skin: "#a87858", trim: "#80e0e0", lines: (f) =>
+      f.shopOpen ? ["Welcome aboard again. Mind the step; the sea moved it."] : ["Marlo Quayle, chandler. Oilskins, greaves, and Tears in glass.", "The city drowned. Business didn't. Please, browse."] },
     n: { name: "Neri Calloway", coat: "#1e4a52", hair: "#d0e8e0", skin: "#b88a70", trim: "#7affe0", lines: (f) =>
       f.sigilDone ? ["This sigil belonged to the Sunwarden's own guard. The man who kept the sun lit.", "If a Sunwarden is draining the Wellsprings... then he isn't keeping the light anymore. He's hoarding it.", "The tide stair on Sigil Quay goes down to our Wellspring. Your sigil opens it. Mind the girl in the black coat; she's been watching you."]
         : f.sigil ? ["Let me see it. Hold it to the light. Oh."]
