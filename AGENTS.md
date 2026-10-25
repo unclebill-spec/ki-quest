@@ -30,4 +30,6 @@ Publishing needs Bill's approval.
 ## HD2D W14 (menus/gear/saves) notes
 - Pause menu lives in src/menu.ts (HD-2D Cozy Builder). Hook new tabs there, not in draw.ts `pauseMenu` (legacy, unused). `MENU_ROWS` is deliberately off-canvas.
 - Save record is v2. Anything reading saves should go through `parseSave`/`migrate` in save.ts. New fields must be optional, and `mirela`/`brann` must be kept.
-- Damage/HP math must use `g.eStr/ePow/eEnd` (gear-inclusive), not raw `g.str` etc., if gear should count.
+- Gear v2: 5 slots, ownership in `g.have`; new gear must have a source (L/S/B/Q) in gear.ts. Boss/quest drops key off story flags or MB `done` (see `BOSS`). New non-boss foes get loot automatically via `kill()` → `rollKill`; a new boss kind must be added to `isBigBoss` in game.ts to get boss spoils.
+- Player text never says "ki"/"Gi". Use Glow/Kindle.
+- Damage/HP math must use `g.eStr/ePow/eEnd/eSpd` (gear-inclusive), not raw `g.str` etc., if gear should count.

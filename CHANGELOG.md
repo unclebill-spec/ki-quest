@@ -73,6 +73,9 @@
 ## W14
 - Renamed to **Kindle Quest** (Bill approved): page title, title-screen h1, webmanifest name/short_name/description, credits. Repo, `/ki-quest/` URL, save keys, `window.__ki` unchanged.
 - Music: husk-theme loops in The Husk Sun; finale-theme loops through the dawn epilogue and credits.
+- Pause menu with tabs (Status/Gear/Items/Shop/Lens/Map/Options/Save), 3 save slots, export/import codes, UI sounds.
+- Gear v2: 5 slots (Head/Garb/Hands/Feet/Charm), 33 items from levels, shops, bosses and quests, plus a new SPD stat.
+- Loot: coins and rare drops from foes, Glowcap Morsel / Kindleberry / Wellspring Tear, quick heal (H / RT / + button), revive prompt.
 ## W13b
 - Test: boss3 drowned-soldier check counts peak alive soldiers during P3 (companions could kill them during the P4 loop; flaky ~1 in 4).
 
