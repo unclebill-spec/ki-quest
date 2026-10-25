@@ -6,6 +6,7 @@
 - Screenshots: docs/bill/mini-{kettle,corvin,gilt,ombrelle}.png, docs/bill/pause-menu-phone.png.
 - gh-pages deploy held: minis.mjs Corvin echo-decoy check is flaky (failed once, 31/31 on reruns); Master Builder fixing.
 ## MB W17 — Mini-bosses
+- Test fix: boss4 P3 flake — test-only `forceTwinMove` hook + HP floor; twins gameplay unchanged (ready for game-qa).
 - Foreman Kettle mini-boss (Cinder Galleries): 3 phases, original sheet, sets kettleDown.
 - Reedwraith Corvin mini-boss (Sunken Meadow): guards the Ferry Bell, echo decoys, 3 phases, sets corvinDown.
 - Capmother Gilt mini-boss (Glowcap Ring): spores, brood, root cracks, sets capDone.
