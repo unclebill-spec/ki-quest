@@ -45,7 +45,7 @@
    "count": 2
   }
  },
- "layout": "row = anim x facing (anim order as listed, facings down,up,left,right), col = frame index; right = left mirrored; fly frames sit on the ground row (lift in code)",
+ "layout": "row = anim x facing (anim order as listed, facings down,up,left,right), col = frame index; right = explicit rows, left part map mirrored then re-shaded (light stays top-left)",
  "frames": [
   {
    "name": "mirela_idle_down_0",

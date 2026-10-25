@@ -13,6 +13,7 @@
 import { bark } from "./barks"; // MB hook: barks
 import type { Game } from "../../game";
 import type { Enemy } from "../enemies/types";
+import { roleOf } from "../enemies/types";
 import { moveBody, solidAt, TILE } from "../../world";
 import { CH_COMBAT, K_SPARK, K_RING, C_CYAN, C_WHITE, C_GOLD, C_VIOLET } from "../../vendor/particles";
 
@@ -109,7 +110,7 @@ function updateAlly(g: Game, a: Ally, dt: number) {
   if (g.onPad) a.hp = a.max;
   // threats on her: foe shots, brute lunges (hazards are handled in ai.ts)
   for (const s of g.shots) if (s.foe && s.life > 0 && Math.hypot(s.x - a.x, s.y - (a.y - 14)) < 9) { s.life = 0; hurtAlly(g, s.dmg * 0.8, s.x - s.vx, s.y - s.vy, a); }
-  for (const e of g.enemies) if (!e.dead && e.kind === "brute" && e.state === "act" && Math.hypot(e.x - a.x, e.y - a.y) < 14) hurtAlly(g, 6, e.x, e.y, a);
+  for (const e of g.enemies) if (!e.dead && roleOf(e.kind) === "brute" && e.state === "act" && Math.hypot(e.x - a.x, e.y - a.y) < 14) hurtAlly(g, 6, e.x, e.y, a);
   if (a.ko) return;
   const boss = g.enemies.find((e) => !e.dead && isBoss(e) && e.state === "tele") ?? g.enemies.find((e) => !e.dead && isBoss(e));
   // support: ward-heal pulse when the hero or a companion is hurt

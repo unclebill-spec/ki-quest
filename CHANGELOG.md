@@ -74,3 +74,8 @@
 - World side for four mini-bosses (fights coming from Master Builder): Foreman Kettle (quarry), Reedwraith Corvin + Lady Ombrelle (Hushwater), Capmother Gilt (Lanternmoss). Lead-in scenes at each arena, Odile's "Capmother's Ring" quest, new NPC lines. Test: tests/minibosses-story.mjs.
 ## W15 — Hero voice barks
 - 16 hero barks (attack/hurt/transform/victory for Rook, Mirela, Brann, Sable) with cooldowns, finisher-only attacks and music ducking on transform. New test barks.mjs.
+
+## W16 — Art pack 3
+- Hushwater now has its own foes: Reed Wraith, Witchlight Newt, Bog Sprout, Fen Warden, Mossback Snapper, Duskhound, Mossling and Hush Squire.
+- New ki blast, flight and transform effects drawn over the existing glow.
+- Heroes and Area 2 foes use hand-drawn right-facing frames instead of mirrored left ones.

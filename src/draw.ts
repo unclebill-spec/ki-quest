@@ -4,6 +4,7 @@ import { TILE, MW, MH } from "./world";
 import { tile, worldSprites, worldLights, worldGlow, areaMap } from "./areas/art";
 import { lightSprite, flickerStep, rgbCss, RGB } from "./vendor/light";
 import * as MB from "./game/combat/draw"; // MB hook
+import { roleOf } from "./game/enemies/types"; // MB hook: Area 2 foes share brute/wisp/warden roles
 import { buildAtlas, ATLAS_CELL, maskSize } from "./vendor/particles";
 
 export const W = 384, H = 216;
@@ -66,7 +67,7 @@ function foe(c: CanvasRenderingContext2D, e: Enemy, x: number, y: number, t: num
   x = Math.round(x); y = Math.round(y);
   c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, 8, 2.5, 0, 0, 7); c.fill();
   const f = e.flash > 0;
-  if (e.kind === "brute") {
+  if (roleOf(e.kind) === "brute") {
     const sq = e.state === "tele" ? 2 : 0;
     c.fillStyle = f ? "#fff" : "#4f5a46"; c.fillRect(x - 9, y - 18 + sq, 18, 17 - sq);
     c.fillStyle = f ? "#fff" : "#6b7a5c"; c.fillRect(x - 7, y - 21 + sq, 14, 5);
@@ -114,7 +115,7 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   MB.addLights(g, cx, cy, (x, y, r, col) => addLight(x, y, r, col, 0));
   addLight(p.x - cx, p.y - cy - 14, 48, g.shield ? [0.4, 0.8, 1] : [0.7, 0.66, 0.8], 0);
   for (const s of g.shots) addLight(s.x - cx, s.y - cy, 32, s.foe ? [0.8, 0.3, 0.9] : [0.4, 0.85, 1], 0);
-  for (const e of g.enemies) if (!e.dead && e.kind === "wisp" && e.state === "tele") addLight(e.x - cx, e.y - cy - 16, 32, [0.8, 0.3, 0.9], 0);
+  for (const e of g.enemies) if (!e.dead && roleOf(e.kind) === "wisp" && e.state === "tele") addLight(e.x - cx, e.y - cy - 16, 32, [0.8, 0.3, 0.9], 0);
   c.globalCompositeOperation = "multiply"; c.drawImage(light, 0, 0); c.globalCompositeOperation = "source-over";
   // emissives: additive (lighter)
   c.globalCompositeOperation = "lighter";
@@ -123,8 +124,8 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   glow(c, padX, padY, 16, "rgba(90,220,255,.5)", 0.6 + 0.3 * Math.sin(g.time * 3));
   for (const e of g.enemies) if (!e.dead) {
     const X = e.x - cx, Y = e.y - cy;
-    if (e.kind === "brute") { c.fillStyle = e.state === "tele" ? "#ffdd55" : "#ff3030"; c.fillRect(X - 5, Y - 15, 3, 2); c.fillRect(X + 2, Y - 15, 3, 2); }
-    else if (e.kind === "wisp") glow(c, X, Y - 16, e.state === "tele" ? 6 + (0.7 - e.t) * 18 : 6, "rgba(220,90,255,.9)");
+    if (roleOf(e.kind) === "brute") { c.fillStyle = e.state === "tele" ? "#ffdd55" : "#ff3030"; c.fillRect(X - 5, Y - 15, 3, 2); c.fillRect(X + 2, Y - 15, 3, 2); }
+    else if (roleOf(e.kind) === "wisp") glow(c, X, Y - 16, e.state === "tele" ? 6 + (0.7 - e.t) * 18 : 6, "rgba(220,90,255,.9)");
   }
   MB.drawAdditive(c, g, cx, cy);
   for (const s of g.shots) {
@@ -138,10 +139,10 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
   c.globalCompositeOperation = "source-over";
   MB.drawTelegraphs(c, g, cx, cy);
   // telegraphs (drawn over light so they always read)
-  for (const e of g.enemies) if (!e.dead && e.state === "tele" && (e.kind === "brute" || e.kind === "wisp")) {
+  for (const e of g.enemies) if (!e.dead && e.state === "tele" && (roleOf(e.kind) === "brute" || roleOf(e.kind) === "wisp")) {
     const X = Math.round(e.x - cx), Y = Math.round(e.y - cy);
     c.fillStyle = (g.frame >> 2) & 1 ? "#ffef6a" : "#ff5a3a"; c.fillRect(X - 1, Y - 34, 3, 7); c.fillRect(X - 1, Y - 25, 3, 2);
-    if (e.kind === "brute") { c.strokeStyle = "rgba(255,80,60,.8)"; c.lineWidth = 2; c.beginPath(); c.moveTo(X, Y - 4); c.lineTo(X + e.ax * 40, Y - 4 + e.ay * 40); c.stroke(); }
+    if (roleOf(e.kind) === "brute") { c.strokeStyle = "rgba(255,80,60,.8)"; c.lineWidth = 2; c.beginPath(); c.moveTo(X, Y - 4); c.lineTo(X + e.ax * 40, Y - 4 + e.ay * 40); c.stroke(); }
   }
   // block pose marker
   if (g.blocking && !g.shield) { c.strokeStyle = "#cfd8ff"; c.lineWidth = 2; c.beginPath(); c.arc(p.x - cx + p.fx * 8, p.y - cy - 14 + p.fy * 6, 9, Math.atan2(p.fy, p.fx) - 1, Math.atan2(p.fy, p.fx) + 1); c.stroke(); }

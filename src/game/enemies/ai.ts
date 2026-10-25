@@ -2,7 +2,7 @@
 import { barkParty } from "../combat/barks"; // MB hook: barks
 import { anyBossActive } from "../combat/companion";
 import type { Game } from "../../game";
-import { Enemy, FOE_INFO, makeEnemy, isBigBoss } from "./types";
+import { Enemy, FOE_INFO, makeEnemy, isBigBoss, roleOf, tuneOf } from "./types";
 import { moveBody, solidAt, TILE, Area } from "../../world";
 import { CH_COMBAT, K_SPARK, K_RING, K_DUST, C_GOLD, C_CYAN, C_DUST, C_RED } from "../../vendor/particles";
 import { meterGain, TF_HIT } from "../combat/powerup";
@@ -31,7 +31,7 @@ export function freeNear(a: Area, tx: number, ty: number) {
 export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, crit: boolean, pierce = false) {
   if ((e.kind === "boss" && g.mb.boss.lockT > 0) || (e.kind === "slag" && g.mb.boss2.lockT > 0) || (e.kind === "aurel" && g.mb.boss3.lockT > 0) || (e.kind === "morvant" && g.mb.boss5.lockT > 0) || (e.kind === "malachar" && g.mb.boss6.lockT > 0)) return { d: 0, kx: 0, ky: 0, blocked: true };
   if (twinShielded(g, e)) { twinsLog.shieldedHits++; return { d: 0, kx: 0, ky: 0, blocked: true }; }
-  if (e.kind === "warden" && e.guard) {
+  if (roleOf(e.kind) === "warden" && e.guard) {
     const n = Math.hypot(kx, ky) || 1, front = (kx / n) * e.ax + (ky / n) * e.ay < -0.2;
     if (front) {
       if (pierce || crit) { e.guard = false; e.state = "recover"; e.t = 1.3; g.say("Guard broken!", 0.8); g.stats.guardBreaks = (g.stats.guardBreaks ?? 0) + 1; }
@@ -82,7 +82,7 @@ export function updateFoes(g: Game, dt: number) {
     const dx = px - e.x, dy = py - e.y, dist = Math.hypot(dx, dy) || 1, ux = dx / dist, uy = dy / dist;
     let wx = 0, wy = 0;
     e.t -= dt;
-    if (e.hurt > 0) { e.hurt -= dt; if (e.state === "tele" && !isBigBoss(e.kind) && e.kind !== "warden") { e.state = "recover"; e.t = 0.3; } }
+    if (e.hurt > 0) { e.hurt -= dt; if (e.state === "tele" && !isBigBoss(e.kind) && roleOf(e.kind) !== "warden") { e.state = "recover"; e.t = 0.3; } }
     else if (e.kind === "boss") [wx, wy] = updateBoss(g, e, dt, ux, uy, dist);
     else if (e.kind === "slag") [wx, wy] = updateSlag(g, e, dt, ux, uy, dist);
     else if (e.kind === "aurel") [wx, wy] = updateAurel(g, e, dt, ux, uy, dist);
@@ -90,29 +90,32 @@ export function updateFoes(g: Game, dt: number) {
     else if (e.kind === "malachar") [wx, wy] = updateMalachar(g, e, dt, ux, uy, dist);
     else if (e.kind === "vey" || e.kind === "nell") [wx, wy] = updateTwin(g, e, dt, ux, uy, dist);
     else if (e.kind === "pylon") [wx, wy] = [0, 0];
-    else if (e.kind === "brute") {
-      // melee rusher: chase, "!" + lunge-line telegraph, lunge
+    else if (roleOf(e.kind) === "brute") {
+      // melee rusher: chase, "!" + lunge-line telegraph, lunge (per-kind tuning: Duskhound fast, Snapper heavy, Hush Squire long rapier lunge)
+      const T = tuneOf(e.kind);
       if (e.state === "idle") { e.wander += dt; wx = Math.cos(e.wander * 0.7) * 14; wy = Math.sin(e.wander * 0.5) * 14; if (dist < 120) e.state = "chase"; }
-      else if (e.state === "chase") { wx = ux * 46; wy = uy * 46; if (dist > 200) e.state = "idle"; if (dist < 30) { e.state = "tele"; e.t = 0.5; e.ax = ux; e.ay = uy; } }
-      else if (e.state === "tele") { if (e.t <= 0) { e.state = "act"; e.t = 0.22; } }
-      else if (e.state === "act") { wx = e.ax * 210; wy = e.ay * 210; if (Math.hypot(p.x - e.x, p.y - e.y) < 14) g.hurtHero(8, e.x, e.y); if (e.t <= 0) { e.state = "recover"; e.t = 0.6; } }
+      else if (e.state === "chase") { wx = ux * T.spd; wy = uy * T.spd; if (dist > 200) e.state = "idle"; if (dist < T.reach) { e.state = "tele"; e.t = T.tele; e.ax = ux; e.ay = uy; } }
+      else if (e.state === "tele") { if (e.t <= 0) { e.state = "act"; e.t = T.actT; } }
+      else if (e.state === "act") { wx = e.ax * T.lunge; wy = e.ay * T.lunge; if (Math.hypot(p.x - e.x, p.y - e.y) < 14) g.hurtHero(T.dmg, e.x, e.y); if (e.t <= 0) { e.state = "recover"; e.t = 0.6; } }
       else if (e.t <= 0) e.state = "chase";
-    } else if (e.kind === "wisp") {
-      // ranged shooter: keeps 80-110 px, strafes, charge-glow telegraph, orb shot
-      if (e.state === "idle") { e.wander += dt; wx = Math.cos(e.wander) * 18; wy = Math.sin(e.wander * 1.3) * 18; if (dist < 150) e.state = "chase"; }
+    } else if (roleOf(e.kind) === "wisp") {
+      // ranged shooter: keeps its distance band, strafes, charge-glow telegraph, orb shot (Reed Wraith casts a 3-bolt fan; Bog Sprout is rooted)
+      const T = tuneOf(e.kind);
+      if (e.state === "idle") { e.wander += dt; if (T.spd) { wx = Math.cos(e.wander) * 18; wy = Math.sin(e.wander * 1.3) * 18; } if (dist < 150) e.state = "chase"; }
       else if (e.state === "chase") {
-        const want = dist < 80 ? -1 : dist > 110 ? 1 : 0;
-        wx = ux * 36 * want - uy * 20; wy = uy * 36 * want + ux * 20;
+        const want = dist < T.keep[0] ? -1 : dist > T.keep[1] ? 1 : 0, sp = T.spd, sf = sp ? 20 : 0;
+        wx = ux * sp * want - uy * sf; wy = uy * sp * want + ux * sf;
         if (dist > 230) e.state = "idle";
-        if (e.t <= -1.4 && dist < 150) { e.state = "tele"; e.t = 0.7; }
-      } else if (e.state === "tele") { if (e.t <= 0) { shoot(g, e.x, e.y - 14, Math.atan2(uy, ux), 95, 6); e.state = "recover"; e.t = 0.5; } }
+        if (e.t <= -1.4 && dist < T.reach) { e.state = "tele"; e.t = T.tele; }
+      } else if (e.state === "tele") { if (e.t <= 0) { const a0 = Math.atan2(uy, ux); for (let k = 0; k < T.spread; k++) shoot(g, e.x, e.y - 14, a0 + (k - (T.spread - 1) / 2) * 0.28, T.shot, T.dmg); e.state = "recover"; e.t = 0.5; } }
       else if (e.t <= 0) { e.state = "chase"; e.t = 0; }
     } else {
       // tank/blocker: slow advance with a front shield; plants and slams (ring telegraph); shield drops while recovering
+      const T = tuneOf(e.kind);
       if (e.state !== "recover" && e.state !== "act") { e.ax += (ux - e.ax) * Math.min(1, dt * 3); e.ay += (uy - e.ay) * Math.min(1, dt * 3); const n = Math.hypot(e.ax, e.ay) || 1; e.ax /= n; e.ay /= n; }
       if (e.state === "idle") { if (dist < 130) e.state = "chase"; }
-      else if (e.state === "chase") { e.guard = true; wx = ux * 24; wy = uy * 24; if (dist > 220) e.state = "idle"; if (dist < 38) { e.state = "tele"; e.t = 0.85; g.mb.hazards.push({ x: e.x, y: e.y, r: 38, t: 0.85, max: 0.85, dmg: 12, foe: true }); } }
-      else if (e.state === "tele") { if (e.t <= 0) { e.state = "act"; e.t = 0.15; g.shake = 2; } }
+      else if (e.state === "chase") { e.guard = true; wx = ux * T.spd; wy = uy * T.spd; if (dist > 220) e.state = "idle"; if (dist < T.reach) { e.state = "tele"; e.t = T.tele; g.mb.hazards.push({ x: e.x, y: e.y, r: T.slamR, t: T.tele, max: T.tele, dmg: T.dmg, foe: true }); } }
+      else if (e.state === "tele") { if (e.t <= 0) { e.state = "act"; e.t = T.actT; g.shake = 2; } }
       else if (e.state === "act") { if (e.t <= 0) { e.state = "recover"; e.t = 1.1; e.guard = false; } }
       else if (e.t <= 0) { e.state = "chase"; e.guard = true; }
     }

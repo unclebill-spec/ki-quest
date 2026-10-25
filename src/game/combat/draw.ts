@@ -1,8 +1,9 @@
 /** Master Builder render hooks: sprites, telegraphs, orbs, aura, technique HUD, power meter, boss bar. */
 import type { Game, Shot } from "../../game";
 import type { Enemy } from "../enemies/types";
-import { FOE_INFO } from "../enemies/types";
+import { FOE_INFO, roleOf } from "../enemies/types";
 import { sheet, drawSprite, facingOf } from "./sprites";
+import { drawFxStrips, preloadFx } from "./fx";
 import { TECHS, BEAM_FULL } from "./techniques";
 import { ARENA, arenaCenter } from "../enemies/boss";
 import { ARENA2, arena2Center } from "../enemies/slagheart";
@@ -14,8 +15,9 @@ import { ARENA6, arena6Center } from "../enemies/malachar";
 
 export let HERO_SHEET = "rook";
 export function setHero(n: string) { HERO_SHEET = n; }
-const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "", morvant: "morvant", malachar: "malachar" };
-export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); sheet("brann"); sheet("sable"); Object.values(FOE_SHEET).filter(Boolean).forEach(sheet); }
+const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "", morvant: "morvant", malachar: "malachar",
+  reed_wraith: "reed_wraith", witchlight_newt: "witchlight_newt", fen_warden: "fen_warden", mossback_snapper: "mossback_snapper", duskhound: "duskhound", mossling: "mossling", hush_squire: "hush_squire", bog_sprout: "bog_sprout" };
+export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); sheet("brann"); sheet("sable"); Object.values(FOE_SHEET).filter(Boolean).forEach(sheet); preloadFx(); }
 
 function glow(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
   const g = c.createRadialGradient(x, y, 0, x, y, r);
@@ -91,14 +93,16 @@ export function drawFoeMB(c: CanvasRenderingContext2D, g: Game, e: Enemy, x: num
     else if (e.state === "tele" || e.state === "act") { anim = A[e.move] ?? "slam"; const n = anim === "slam" || anim === "dash" ? 3 : 2; i = e.state === "tele" ? 0 : Math.min(n - 1, 1 + (g.time * 8) % (n - 1)); }
     else if (e.state === "recover") { anim = "stand"; i = 0; }
     else i = g.time * (g.mb.boss4.phase >= 3 ? 7 : 5);
-  } else if (e.kind === "warden" && e.guard && e.state !== "tele") { anim = "block"; i = e.state === "chase" ? 0 : 1; }
+  } else if (roleOf(e.kind) === "warden" && e.guard && e.state !== "tele") { anim = "block"; i = e.state === "chase" ? 0 : 1; }
+  else if (e.state === "tele" && e.kind === "reed_wraith") { anim = "cast"; i = (1 - Math.max(0, e.t) / 0.9) * 3; }
+  else if (e.state === "tele" && e.kind === "hush_squire") { anim = "block"; i = 1; } // en-garde before the lunge
   else if (e.state === "tele") { anim = "attack"; i = 0; }
   else if (e.state === "act") { anim = "attack"; i = 1 + (g.time * 10) % 2; }
-  else if (e.state === "recover" || e.state === "idle" && e.kind !== "wisp") { anim = e.state === "idle" ? "walk" : "stand"; }
-  const bob = e.kind === "wisp" ? Math.sin(g.time * 4 + e.hx) * 2 : 0;
+  else if (e.state === "recover" || e.state === "idle" && roleOf(e.kind) !== "wisp") { anim = e.state === "idle" ? "walk" : "stand"; }
+  const bob = e.kind === "wisp" || e.kind === "reed_wraith" ? Math.sin(g.time * 4 + e.hx) * 2 : 0;
   c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" || e.kind === "morvant" || e.kind === "malachar" ? 18 : 8, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" || e.kind === "morvant" || e.kind === "malachar" ? 5 : 2.5, 0, 0, 7); c.fill();
   if (drawSprite(c, s, anim, f, i, x, y, { flash: fl, lift: -bob })) return true;
-  if (e.kind === "warden") {
+  if (roleOf(e.kind) === "warden") {
     c.fillStyle = fl ? "#fff" : "#4a4e5e"; c.fillRect(x - 10, y - 24, 20, 23); c.fillStyle = fl ? "#fff" : "#6a7088"; c.fillRect(x - 7, y - 28, 14, 6);
     if (e.guard) { c.fillStyle = "#8aa0c0"; c.fillRect(x + e.ax * 11 - 5, y - 20 + e.ay * 6, 10, 14); }
     return true;
@@ -251,6 +255,7 @@ export function drawShot(c: CanvasRenderingContext2D, s: Shot, X: number, Y: num
 
 /** Overlay telegraphs for boss moves (over the light). */
 export function drawTelegraphs(c: CanvasRenderingContext2D, g: Game, cx: number, cy: number) {
+  drawFxStrips(c, g, cx, cy); // art pack 3 strips over the glow
   for (const e of g.enemies) if (!e.dead && e.kind === "boss" && e.state === "tele") {
     const X = Math.round(e.x - cx), Y = Math.round(e.y - cy);
     c.fillStyle = (g.frame >> 2) & 1 ? "#ffef6a" : "#ff5a3a"; c.fillRect(X - 2, Y - 74, 4, 9); c.fillRect(X - 2, Y - 63, 4, 3);
@@ -277,7 +282,7 @@ export function drawTelegraphs(c: CanvasRenderingContext2D, g: Game, cx: number,
     if (e.move === "orbs") { const a = Math.atan2(e.ay, e.ax); c.strokeStyle = "rgba(200,110,255,.6)"; c.beginPath(); c.moveTo(X, Y - 16); c.arc(X, Y - 16, 50, a - 0.5, a + 0.5); c.closePath(); c.stroke(); }
     if (e.move === "swap" || e.move === "rage") { c.strokeStyle = "rgba(255,90,140,.8)"; c.lineWidth = 1; c.beginPath(); c.arc(X, Y - 22, 10 + (1 - Math.min(1, e.t)) * 30, 0, 7); c.stroke(); }
   }
-  for (const e of g.enemies) if (!e.dead && e.kind === "warden" && e.state === "tele") {
+  for (const e of g.enemies) if (!e.dead && roleOf(e.kind) === "warden" && e.state === "tele") {
     const X = Math.round(e.x - cx), Y = Math.round(e.y - cy);
     c.fillStyle = (g.frame >> 2) & 1 ? "#ffef6a" : "#ff5a3a"; c.fillRect(X - 1, Y - 40, 3, 7); c.fillRect(X - 1, Y - 31, 3, 2);
   }

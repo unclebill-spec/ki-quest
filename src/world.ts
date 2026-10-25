@@ -4,7 +4,10 @@ export const TILE = 16;
 export const MW = 48, MH = 34;
 export const T_FLOOR = 0, T_WALL = 1, T_MOSS = 2, T_PLAZA = 3, T_WATER = 4, T_PATH = 5, T_BOARD = 6, T_WARD = 7, T_HIDDEN = 8;
 export interface Lamp { x: number; y: number; c: readonly [number, number, number]; seed: number }
-export interface Spawn { kind: "brute" | "wisp"; x: number; y: number }
+import type { FoeKind } from "./game/enemies/types"; // MB hook
+export interface Spawn { kind: FoeKind; x: number; y: number }
+/** MB hook: Hushwater (Area 2) g/w markers cycle through the art-pack-3 foes (melee on g, ranged/guards on w). */
+const AREA2_G: FoeKind[] = ["mossling", "duskhound", "hush_squire"], AREA2_W: FoeKind[] = ["reed_wraith", "witchlight_newt", "bog_sprout", "fen_warden", "mossback_snapper", "reed_wraith"];
 export interface Prop { kind: "house" | "tree" | "grave" | "crystal"; x: number; y: number }
 export interface Npc { id: string; x: number; y: number }
 export interface Travel { x: number; y: number; to: string; label: string }
@@ -92,7 +95,8 @@ export function buildArea(id = "lanternmoss"): Area {
     else if (ch === "C") { props.push({ kind: "crystal", x: C(x), y: C(y) }); v = T_WALL; }
     else if (ch === "U") travel.push({ x: C(x), y: C(y), to: d.to, label: d.toLabel });
     else if (ch === "W") wards.push({ tx: x, ty: y, lvl: d.wardLvl });
-    else if (ch === "g" || ch === "w") spawns.push({ kind: ch === "g" ? "brute" : "wisp", x: C(x), y: C(y) });
+    else if (ch === "g" || ch === "w") { const a2 = d.id === "hushwater", n = spawns.filter((s) => (ch === "g") === (s.kind === "brute" || AREA2_G.includes(s.kind))).length; // MB hook
+      spawns.push({ kind: a2 ? (ch === "g" ? AREA2_G[n % AREA2_G.length] : AREA2_W[n % AREA2_W.length]) : ch === "g" ? "brute" : "wisp", x: C(x), y: C(y) }); }
     else if (/[a-z]/.test(ch) && ch !== "b") { npcs.push({ id: ch, x: C(x), y: C(y) }); v = T_PLAZA; }
     if (t[y * MW + x] !== T_WALL) t[y * MW + x] = v;
   }

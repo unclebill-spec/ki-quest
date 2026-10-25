@@ -1,6 +1,6 @@
 /**
  * Sprite sheets from public/art/chars/<name>.json (frame rects listed per anim x facing; anim names read from the JSON).
- * Missing "right" frames are drawn as "left" mirrored. Hero "fly" frames sit on the ground row, so we lift them in code.
+ * Explicit "right" rows are used when the sheet has them; otherwise "left" is mirrored (fallback, e.g. 48x64 boss sheets). Hero "fly" frames sit on the ground row, so we lift them in code.
  * Each sheet also gets a one-time palette-shifted copy (cyan/violet, brighter) for the transformation.
  * Owner: Master Builder.
  */
@@ -57,6 +57,7 @@ export function drawSprite(c: CanvasRenderingContext2D, s: Sheet | null, anim: s
   let r = s.rects.get(`${anim}_${f}_${i}`), flip = false;
   if (!r && f === "right") { r = s.rects.get(`${anim}_left_${i}`); flip = true; }
   if (!r) return false;
+  drawLog[s.name] = { key: flip ? `${anim}_left_${i}` : `${anim}_${f}_${i}`, flip };
   const src = opt.alt && s.alt ? s.alt : s.img;
   const X = Math.round(x - s.pivot[0]), Y = Math.round(y - s.pivot[1] - (opt.lift ?? 0));
   if (flip) { c.save(); c.translate(X * 2 + r.w, 0); c.scale(-1, 1); }
@@ -65,3 +66,8 @@ export function drawSprite(c: CanvasRenderingContext2D, s: Sheet | null, anim: s
   if (flip) c.restore();
   return true;
 }
+
+/** Last frame drawn per sheet (debug/tests): key = frame name used, flip = mirrored fallback. */
+export const drawLog: Record<string, { key: string; flip: boolean }> = {};
+const G = globalThis as unknown as { __kiMB?: Record<string, unknown> };
+G.__kiMB = { ...(G.__kiMB ?? {}), drawLog, sheet };

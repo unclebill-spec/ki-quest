@@ -148,3 +148,14 @@ Slots: Story suggested build order Kettle → Corvin → Capmother → Ombrelle;
 - src/game/combat/barks.ts: bark(g,hero,kind)/barkParty. Attack on finishers only (melee step 3; Sable's bolt; Rook every 3rd finisher), hurt 1.5 s cooldown per hero, transform = whole party + music duck -6 dB for clip length, victory on big-boss kill when no boss remains. One bark per hero at a time (busy for clip length). No RNG.
 - Hooks marked `// MB hook` in game.ts, companion.ts, powerup.ts, ai.ts, audio.ts (BARK_VOL -3 dB attack/hurt). ui-*.ogg untouched (Cozy).
 - Test: tests/barks.mjs (10 checks).
+
+## MB W16 — Art pack 3 (Area 2 foes, FX strips, right rows)
+- Sheets copied to public/art/chars: rook, mirela, brann (new explicit right rows; left/other frames pixel-identical) + 8 Area 2 foes (all with right rows). check_sheets: all pass. rook_town NOT copied: nothing in src draws a town sprite (the town hero uses rook.json), so it stays in staging.
+- sprites.ts already used an explicit `<anim>_right_<i>` frame when present and mirrors left only as fallback (48x64 boss sheets have no right rows and keep mirroring). Added `__kiMB.drawLog[sheet]` = last frame key + flip, for tests.
+- New FoeKinds (types.ts FOE_INFO): reed_wraith, witchlight_newt, bog_sprout, fen_warden, mossback_snapper, duskhound, mossling, hush_squire. `roleOf(kind)` maps them onto the brute/wisp/warden AI; `tuneOf(kind)` overrides speed/telegraph/reach/damage. brute/wisp/warden values are unchanged.
+  - Reed Wraith: caster, `cast` anim on telegraph, 3-bolt fan. Witchlight Newt: quick skirmisher. Bog Sprout: rooted spitter.
+  - Fen Warden: shield-block + slam (warden role, `block` anim). Mossback Snapper: heavy slow lunger. Duskhound: fast rusher. Mossling: basic melee.
+  - Hush Squire: en-garde (`block` pose) then a long rapier lunge from ~60 px.
+- Spawns: only on Hushwater's existing g/w markers (world.ts `// MB hook`): g → mossling, duskhound, hush_squire; w → reed_wraith, witchlight_newt, bog_sprout, fen_warden, mossback_snapper, reed_wraith. Other areas keep brute/wisp. (Ombrelle's arena (40,7) r3 covers the w at (42,8); the minis task clears it.)
+- FX (src/game/combat/fx.ts, public/art/fx/*): kiblast_charge (beam charge, on the hand), kiblast_projectile (Ki Bolt shots), kiblast_impact (where a player shot ends), flight_takeoff_dust (hover start), flight_trail (transformed + moving), transform_burst (on transform, then frames 4-7 as an aura). Drawn in the overlay pass on top of the procedural glow; draw-side only, no RNG, no damage/timing change. `__kiMB.fxLog`.
+- Test: tests/artpack3.mjs (14 checks, incl. hero facing right draws walk_right_N unmirrored). Screenshots: docs/artpack3_hero_right_{before,after,before_after}.png.
