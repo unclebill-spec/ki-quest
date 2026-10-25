@@ -43,6 +43,16 @@ export const MINIS: MiniSpec[] = [
     outro: "Then ring it. Ring it loud. I'm so tired of the quiet.",
     col: ["rgba(200,110,255,.85)", "rgba(140,255,210,.8)", "#e0a0ff", "#a0ffd0"], light: [0.75, 0.4, 1], pc: [C_VIOLET, C_CYAN],
     clear: [], reward: (g) => { g.pts += 2; return "The Ferry Bell is free · +2 stat points"; } },
+  { kind: "gilt", slot: "boss10", name: "CAPMOTHER GILT", area: "lanternmoss", tx: 39, ty: 27, r: 3, flag: "capDone",
+    gate: (f) => !!f.capQ && !f.capDone, phaseAt: [1, 0.6, 0.3], speed: 18,
+    moves: [["spores", "capring"], ["spores", "capring", "brood", "puff"], ["spores", "roots", "brood", "puff", "capring"]],
+    defs: { spores: { type: "rain", tele: 0.85, dmg: 8, n: 4, anim: "cast" }, capring: { type: "ring", tele: 0.8, dmg: 10, r: 42, anim: "slam" },
+      brood: { type: "summon", tele: 0.8, dmg: 0, n: 2, kind: "mossling", anim: "summon" }, puff: { type: "fan", tele: 0.7, dmg: 7, n: 5, spd: 110, anim: "cast" },
+      roots: { type: "crack", tele: 0.85, dmg: 10, n: 3, anim: "slam" } },
+    banners: ["CAPMOTHER GILT · THE RING CLOSES", "GILT CALLS HER BROOD", "THE ROOT IN HER HEART"], say: "Gilt's cap flares gold!",
+    outro: "(The root in her heart crumbles. The Capmother sighs, and lets a gold Glowcap crown fall.)",
+    col: ["rgba(255,200,80,.85)", "rgba(150,255,190,.8)", "#ffd070", "#9affc0"], light: [1, 0.8, 0.35], pc: [C_GOLD, C_CYAN],
+    clear: [], reward: (g) => { g.pts += 2; return "Glowcap crown · take it to Odile · +2 stat points"; } },
 ];
 export const miniLog = { starts: 0, moves: {} as Record<string, number>, phases: {} as Record<string, number>, decoys: 0, decoyKills: 0, kills: [] as string[] };
 const centers: Record<string, { x: number; y: number }> = {};

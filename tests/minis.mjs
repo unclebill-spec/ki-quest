@@ -13,6 +13,7 @@ const results = []; const ok = (n, c, d = "") => results.push([c ? "PASS" : "FAI
 const CASES = [
   ["kettle", "boss7", "kettleDown", { brannQ: true, kettleSeen: true }, { brannQ: true, heart: true, kettleSeen: true }, { boss1: true }],
   ["corvin", "boss8", "corvinDown", { reedQ: true, reedN: 2, corvinSeen: true }, { reedQ: true, bell: true, corvinSeen: true }, { boss1: true }],
+  ["gilt", "boss10", "capDone", { capQ: true, capSeen: true }, { capSeen: true }, {}],
 ].filter((c) => !process.env.KI_MINI || c[0] === process.env.KI_MINI);
 const browser = await chromium.launch();
 try {
