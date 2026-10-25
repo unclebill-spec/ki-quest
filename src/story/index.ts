@@ -158,6 +158,7 @@ export class Story {
     }
     for (const o of g.area.orbs) {
       const k = `orb_${g.area.id}_${o.i}`;
+      if (g.area.id === "hushwater" && this.flags.reedQ && !this.flags.corvinDown) continue; // MB hook: Corvin guards the Ferry Bell (minis.ts)
       if (!this.flags[k] && Math.hypot(o.x - g.p.x, o.y + 6 - g.p.y) < 14) {
         this.flags[k] = true;
         if (g.area.id === "stair") { if (!this.flags.crownShard) { this.flags.crownShard = true; g.gainExp(150); this.save(); g.say("Found a shard of the Sunwardens' crown · +150 EXP", 2.5); } continue; }

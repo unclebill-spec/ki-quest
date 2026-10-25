@@ -17,7 +17,7 @@ import { ARENA6, arena6Center } from "../enemies/malachar";
 export let HERO_SHEET = "rook";
 export function setHero(n: string) { HERO_SHEET = n; }
 const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "", morvant: "morvant", malachar: "malachar",
-  reed_wraith: "reed_wraith", witchlight_newt: "witchlight_newt", fen_warden: "fen_warden", mossback_snapper: "mossback_snapper", duskhound: "duskhound", mossling: "mossling", hush_squire: "hush_squire", bog_sprout: "bog_sprout", kettle: "kettle" };
+  reed_wraith: "reed_wraith", witchlight_newt: "witchlight_newt", fen_warden: "fen_warden", mossback_snapper: "mossback_snapper", duskhound: "duskhound", mossling: "mossling", hush_squire: "hush_squire", bog_sprout: "bog_sprout", kettle: "kettle", corvin: "corvin" };
 export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); sheet("brann"); sheet("sable"); Object.values(FOE_SHEET).filter(Boolean).forEach(sheet); preloadFx(); }
 
 function glow(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {

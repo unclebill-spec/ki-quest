@@ -8,7 +8,7 @@ import { CH_COMBAT, K_SPARK, K_RING, K_DUST, C_GOLD, C_CYAN, C_DUST, C_RED } fro
 import { meterGain, TF_HIT } from "../combat/powerup";
 import { updateBoss, bossKilled } from "./boss";
 import { updateSlag, slagKilled } from "./slagheart";
-import { updateMini, miniKilled, isMini, miniLocked } from "./minis";
+import { miniLog, updateMini, miniKilled, isMini, miniLocked } from "./minis";
 import { updateAurel, aurelKilled } from "./aurel";
 import { updateTwin, twinKilled, twinShielded, twinsLog } from "./twins";
 import { updateMorvant, morvantKilled } from "./morvant";
@@ -56,7 +56,7 @@ export function onFoeKill(g: Game, e: Enemy) {
   if (e.kind === "boss") bossKilled(g, e);
   if (e.kind === "slag") slagKilled(g, e);
   if (isMini(e.kind)) miniKilled(g, e);
-  if ((e as Enemy & { decoy?: boolean }).decoy) g.stats.kills--; // Corvin echo decoys do not count toward the Meadow (reedN)
+  if ((e as Enemy & { decoy?: boolean }).decoy) { g.stats.kills--; miniLog.decoyKills++; } // Corvin echo decoys do not count toward the Meadow (reedN)
   if (e.kind === "aurel") aurelKilled(g, e);
   if (e.kind === "morvant") morvantKilled(g, e);
   if (e.kind === "malachar") malacharKilled(g, e);

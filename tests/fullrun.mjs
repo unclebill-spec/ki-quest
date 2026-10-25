@@ -80,6 +80,8 @@ try {
   ok("Reed quest accepted", await E(() => window.__ki.story.flags.reedQ === true));
   for (let i = 0; i < 8; i++) { await E(() => window.__ki.game.stats.kills++); await p.waitForTimeout(60); }
   ok("meadow count 8", await E(() => window.__ki.story.flags.reedN === 8));
+  // Corvin guards the bell (orb guard in story/index.ts); his real fight is covered by tests/minis.mjs
+  await E(() => { window.__ki.story.flags.corvinDown = true; window.__ki.game.mb.boss8.done = true; });
   await E(() => { const g = window.__ki.game, o = g.area.orbs[0]; g.p.x = o.x; g.p.y = o.y + 6; }); await p.waitForTimeout(150);
   ok("ferry bell found", await E(() => window.__ki.story.flags.bell === true));
   await talk("f"); await talk("h"); await talk("m");

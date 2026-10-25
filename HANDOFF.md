@@ -156,6 +156,7 @@ Slots: Story suggested build order Kettle → Corvin → Capmother → Ombrelle;
 - Sheets: `python3 tools/art/build_minis.py <name>` (procedural, original, 48x64, check_sheets 28/28). PixelLab not used.
 - Test: `KI_PORT=4701 node tests/minis.mjs` (KI_MINI=<kind> for one). Each case: gate shut stays quiet, wake, telegraph+dodge, phase 3, real kill → flag+save+slot, stays down, no errors. Shots: docs/bill/mini-<kind>.png.
 - Kettle (boss7): emberquarry (26,12) r3, hp 380; shovel dash → steam ring → slag rain → boiling cracks. Clears w(26,10), g(22,14). +2 stat pts.
+- Corvin (boss8): hushwater (25,26) r3, hp 340; lantern fan + ferry blink → echo decoys (reed_wraith, 8 hp, `decoy`; their kills are subtracted from stats.kills so reedN never counts them; miniLog.decoyKills) → bell toll nova. Orb guard (story/index.ts `// MB hook`): hushwater bell not pickable while `reedQ && !corvinDown`. tests/world.mjs + fullrun.mjs set corvinDown (+boss8 done) before the bell step; the real fight is in tests/minis.mjs. Death line from npc_lines "Bosses" (spec `outro`).
 
 ## MB W16 — Art pack 3 (Area 2 foes, FX strips, right rows)
 - Sheets copied to public/art/chars: rook, mirela, brann (new explicit right rows; left/other frames pixel-identical) + 8 Area 2 foes (all with right rows). check_sheets: all pass. rook_town NOT copied: nothing in src draws a town sprite (the town hero uses rook.json), so it stays in staging.

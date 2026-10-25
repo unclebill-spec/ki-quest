@@ -12,6 +12,7 @@ const results = []; const ok = (n, c, d = "") => results.push([c ? "PASS" : "FAI
 // [kind, slot, flag, gate-open flags, gate-closed flags, mb done slots needed]
 const CASES = [
   ["kettle", "boss7", "kettleDown", { brannQ: true, kettleSeen: true }, { brannQ: true, heart: true, kettleSeen: true }, { boss1: true }],
+  ["corvin", "boss8", "corvinDown", { reedQ: true, reedN: 2, corvinSeen: true }, { reedQ: true, bell: true, corvinSeen: true }, { boss1: true }],
 ].filter((c) => !process.env.KI_MINI || c[0] === process.env.KI_MINI);
 const browser = await chromium.launch();
 try {
@@ -33,25 +34,38 @@ try {
     ok(`${kind}: ring stays quiet while the gate is shut`, !c0.boss && !c0.act, JSON.stringify(c0));
     const c1 = await go(FL);
     ok(`${kind}: wakes inside the ring when the gate is open`, c1.boss && c1.act, JSON.stringify(c1));
+    if (kind === "corvin") {
+      await E(() => { const g = window.__ki.game, o = g.area.orbs[0]; g.p.x = o.x; g.p.y = o.y + 6; }); await page.waitForTimeout(200);
+      const b = await E(() => !!window.__ki.story.flags.bell);
+      ok("corvin: the Ferry Bell can't be picked up while he stands", !b);
+    }
     await page.waitForTimeout(400); await page.screenshot({ path: `docs/bill/mini-${kind}.png` });
     const f = await E(({ kind, slot, flag }) => { const g = window.__ki.game, L = globalThis.__kiMB.miniLog; let n = 0, dodge = 0, tele = 0, haz = 0;
-      const t0 = Object.values(L.moves).reduce((a, b) => a + b, 0);
+      const k0 = g.stats.kills, t0 = Object.values(L.moves).reduce((a, b) => a + b, 0);
       for (; n < 60 * 200 && !window.__ki.story.flags[flag]; n++) {
         g.p.inv = 1; g.hp = g.maxHp; for (const a of g.mb.allies) if (a.joined) { a.hp = a.max; a.ko = false; }
         const e = g.enemies.find((e) => e.kind === kind && !e.dead);
         if (e && e.state === "tele") { tele++; if (g.mb.allies.some((a) => a.joined && a.state === "dodge")) dodge++; }
         haz = Math.max(haz, g.mb.hazards.length);
         if (e && n > 240 && n % 30 === 0 && e.state !== "tele") { g.mb[slot].lockT = 0; e.hurt = 0; g.damageFoe(e, Math.ceil(e.max / 30), 0, 0, false); }
+        const dq = g.enemies.find((q) => q.decoy && !q.dead); if (dq && n % 45 === 0) { dq.hurt = 0; g.damageFoe(dq, 99, 0, 0, false); } // hero swats an echo
         g.step(1 / 60);
       }
       return { n, down: !!window.__ki.story.flags[flag], phase: L.phases[kind] ?? 1, moves: Object.values(L.moves).reduce((a, b) => a + b, 0) - t0, tele, dodge, haz,
         done: g.mb[slot].done, saved: JSON.parse(localStorage.getItem("kiquest-mb-v1") || "{}")[slot] === true, story: JSON.parse(localStorage.getItem("kiquest.story.v1") || "{}")[flag] === true,
-        minions: g.enemies.filter((e) => e.minion && !e.dead).length, act: g.mb[slot].active }; }, { kind, slot, flag });
+        realKills: g.stats.kills - k0, minions: g.enemies.filter((e) => e.minion && !e.dead).length, act: g.mb[slot].active }; }, { kind, slot, flag });
     ok(`${kind}: telegraphs fire (moves, hazards) and companions dodge them`, f.moves >= 3 && f.tele > 0 && f.dodge > 0, JSON.stringify({ moves: f.moves, tele: f.tele, dodge: f.dodge, haz: f.haz }));
     ok(`${kind}: reaches its last phase`, f.phase >= 3, `phase ${f.phase}`);
     ok(`${kind}: REAL kill sets ${flag} (saved) and ${slot}`, f.down && f.story && f.done && f.saved && !f.act && f.minions === 0, JSON.stringify(f));
     const r = await E(({ kind }) => { const g = window.__ki.game; for (let i = 0; i < 60; i++) g.step(1 / 60); return !g.enemies.some((e) => e.kind === kind && !e.dead); }, { kind });
     ok(`${kind}: stays down`, r);
+    if (kind === "corvin") {
+      await E(() => { const g = window.__ki.game, o = g.area.orbs[0]; g.p.x = o.x; g.p.y = o.y + 6; }); await page.waitForTimeout(200);
+      const d = await E(() => { const s = window.__ki.story, L = globalThis.__kiMB.miniLog; return { decoys: L.decoys, decoyKills: L.decoyKills, reedN: s.flags.reedN, bell: !!s.flags.bell }; });
+      // reedN may rise from real meadow foes the allies fell; it must never include the echo decoys
+      ok("corvin: echo decoys are killed but never count toward reedN", d.decoyKills > 0 && d.reedN - 2 === f.realKills, JSON.stringify({ ...d, realKills: f.realKills }));
+      ok("corvin: bell is pickable once he falls", d.bell);
+    }
     ok(`${kind}: no page errors`, errs.length === 0, errs.slice(0, 3).join(" | "));
     await page.close();
   }

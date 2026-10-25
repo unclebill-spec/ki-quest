@@ -20,7 +20,7 @@ export interface Move { type: "dash" | "ring" | "rain" | "crack" | "fan" | "nova
 export interface MiniSpec {
   kind: FoeKind; slot: MiniSlot; name: string; area: string; tx: number; ty: number; r: number; flag: string;
   gate: (f: Flags, g: Game) => boolean; phaseAt: number[]; moves: string[][]; defs: Record<string, Move>;
-  banners: string[]; say: string; reward: (g: Game) => string; col: string[]; light: [number, number, number]; /** particle colours (vendor/particles C_*) */ pc: [number, number];
+  banners: string[]; /** phase-change line (one per phase index, or one for all) */ say: string | string[]; /** death line (staging npc_lines "Bosses") */ outro?: string; reward: (g: Game) => string; col: string[]; light: [number, number, number]; /** particle colours (vendor/particles C_*) */ pc: [number, number];
   /** spawn markers (tile x,y) cleared for good: they sit inside the ring */ clear: [number, number][]; speed: number;
 }
 const st = () => (window as unknown as { __ki?: { story?: { flags: Flags; save(): void; box?: unknown } } }).__ki?.story;
@@ -34,8 +34,17 @@ export const MINIS: MiniSpec[] = [
     banners: ["FOREMAN KETTLE · SHIFT'S NOT OVER", "KETTLE BUILDS PRESSURE", "KETTLE BOILS OVER"], say: "Kettle's rivets hiss!",
     col: ["rgba(255,150,60,.85)", "rgba(120,240,255,.8)", "#ffb04a", "#8af0ff"], light: [1, 0.55, 0.25], pc: [C_GOLD, C_CYAN],
     clear: [[26, 10], [22, 14]], reward: (g) => { g.pts += 2; return "Kettle's gauge: +2 stat points"; } },
+  { kind: "corvin", slot: "boss8", name: "REEDWRAITH CORVIN", area: "hushwater", tx: 25, ty: 26, r: 3, flag: "corvinDown",
+    gate: (f) => !!f.reedQ && !f.bell && !f.corvinDown, phaseAt: [1, 0.65, 0.3], speed: 24,
+    moves: [["lantern", "ferry"], ["lantern", "ferry", "echo"], ["lantern", "toll", "echo", "ferry"]],
+    defs: { lantern: { type: "fan", tele: 0.7, dmg: 8, n: 3, spd: 125, anim: "cast" }, ferry: { type: "blink", tele: 0.8, dmg: 9, r: 28, anim: "summon" },
+      echo: { type: "decoy", tele: 0.8, dmg: 0, n: 2, kind: "reed_wraith", anim: "summon" }, toll: { type: "nova", tele: 0.9, dmg: 8, n: 12, spd: 105, anim: "slam" } },
+    banners: ["REEDWRAITH CORVIN · THE BELL SLEEPS", "CORVIN CALLS HIS ECHOES", "THE BELL TOLLS"], say: "Corvin's lantern flares violet!",
+    outro: "Then ring it. Ring it loud. I'm so tired of the quiet.",
+    col: ["rgba(200,110,255,.85)", "rgba(140,255,210,.8)", "#e0a0ff", "#a0ffd0"], light: [0.75, 0.4, 1], pc: [C_VIOLET, C_CYAN],
+    clear: [], reward: (g) => { g.pts += 2; return "The Ferry Bell is free · +2 stat points"; } },
 ];
-export const miniLog = { starts: 0, moves: {} as Record<string, number>, phases: {} as Record<string, number>, decoys: 0, kills: [] as string[] };
+export const miniLog = { starts: 0, moves: {} as Record<string, number>, phases: {} as Record<string, number>, decoys: 0, decoyKills: 0, kills: [] as string[] };
 const centers: Record<string, { x: number; y: number }> = {};
 export const specOf = (k: string) => MINIS.find((m) => m.kind === k);
 export const isMini = (k: string) => !!specOf(k);
@@ -120,7 +129,7 @@ export function updateMini(g: Game, e: Enemy, dt: number, ux: number, uy: number
   let want = 1; for (let i = 1; i < s.phaseAt.length; i++) if (f <= s.phaseAt[i]) want = i + 1;
   if (want > b.phase) {
     b.phase = want; b.lockT = 1; e.state = "recover"; e.t = 1.1; e.move = ""; miniLog.phases[s.kind] = want;
-    g.banner = s.banners[want - 1] ?? s.name; g.bannerT = 1.6; g.say(s.say, 1.4);
+    g.banner = s.banners[want - 1] ?? s.name; g.bannerT = 1.6; g.say(Array.isArray(s.say) ? s.say[want - 1] ?? s.say[0] : s.say, Array.isArray(s.say) ? 3 : 1.4);
     g.mb.hazards.push({ x: e.x, y: e.y, r: 34, t: 0.45, max: 0.45, dmg: 6, foe: true }); sparkle(g, s, e.x, e.y - 18, 14, 150);
     return [0, 0];
   }
@@ -167,7 +176,7 @@ export function miniKilled(g: Game, e: Enemy) {
   const msg = s.reward(g); g.hp = g.maxHp; g.ep = g.maxEp; g.shake = 5;
   for (const m of g.enemies) if (m.minion && !m.dead) { m.dead = true; m.respawn = Infinity; }
   g.mb.hazards.length = 0; g.shots = g.shots.filter((q) => !q.foe);
-  g.banner = `${s.name} FALLS`; g.bannerT = 2.6; g.say(msg, 3.5);
+  g.banner = `${s.name} FALLS`; g.bannerT = 2.6; g.say(s.outro ? `"${s.outro}" · ${msg}` : msg, s.outro ? 5 : 3.5);
   g.stats.bossKills = (g.stats.bossKills ?? 0) + 1;
   sparkle(g, s, e.x, e.y - 20, 16, 160);
 }
