@@ -143,3 +143,8 @@ Slots: Story suggested build order Kettle → Corvin → Capmother → Ombrelle;
 - **UI sounds**: public/audio/ui-*.ogg (staging/sound, CC0) are played through `__ki.audio.play` from menu.ts `sfx()`, with ui-move rate-limited. The pad save still plays `levelup` (audio.ts, untouched), so ui-save is used only for slot saves and imports. No volume entries were added to audio.ts VOL (N64's file), so they play at gain 1.
 - PWA: sw-plugin already precaches all of public/, so nothing changed.
 - Test: `KI_PORT=4520 node tests/menus.mjs [--shots]` (42 checks; `--shots` writes docs/menus-*.png and docs/menus-phone-{portrait,landscape}-*.png). Hook: `window.__kiMenu`.
+
+## MB W15 — Hero voice barks
+- src/game/combat/barks.ts: bark(g,hero,kind)/barkParty. Attack on finishers only (melee step 3; Sable's bolt; Rook every 3rd finisher), hurt 1.5 s cooldown per hero, transform = whole party + music duck -6 dB for clip length, victory on big-boss kill when no boss remains. One bark per hero at a time (busy for clip length). No RNG.
+- Hooks marked `// MB hook` in game.ts, companion.ts, powerup.ts, ai.ts, audio.ts (BARK_VOL -3 dB attack/hurt). ui-*.ogg untouched (Cozy).
+- Test: tests/barks.mjs (10 checks).

@@ -10,6 +10,7 @@
  * the hero when far or stuck, retreat when low, step back from boss telegraphs, are knocked out at 0 HP and revive once the
  * fight is over or on a save pad. Damage stays modest. Owner: Master Builder.
  */
+import { bark } from "./barks"; // MB hook: barks
 import type { Game } from "../../game";
 import type { Enemy } from "../enemies/types";
 import { moveBody, solidAt, TILE } from "../../world";
@@ -73,7 +74,8 @@ function nearestFoe(g: Game, a: Ally, r: number) {
 }
 export function hurtAlly(g: Game, d: number, fx: number, fy: number, a: Ally = g.mb.ally) {
   if (!a.joined || a.ko || a.inv > 0) return;
-  d *= ROLES[a.id].armor; a.hp -= d; a.inv = 0.5; const ang = Math.atan2(a.y - fy, a.x - fx); a.kx = Math.cos(ang) * 140; a.ky = Math.sin(ang) * 140;
+  d *= ROLES[a.id].armor; a.hp -= d; bark(g, a.id, "hurt"); // MB hook: barks
+  a.inv = 0.5; const ang = Math.atan2(a.y - fy, a.x - fx); a.kx = Math.cos(ang) * 140; a.ky = Math.sin(ang) * 140;
   g.num(a.x, a.y - 34, d, "#ffc0e0");
   if (a.hp <= 0) { a.hp = 0; a.ko = true; a.kos++; a.calmT = 0; a.atk = 0; g.say(`${a.name} is down!`, 1.5); }
 }
@@ -142,13 +144,14 @@ function updateAlly(g: Game, a: Ally, dt: number) {
       if (n) { a.tauntCd = TAUNT_CD; a.taunts++; g.parts.emit(CH_COMBAT, K_RING, a.x, a.y - 16, 0, 0, 0.45, C_GOLD); g.nums.push({ x: a.x, y: a.y - 40, txt: "TAUNT!", col: "#ffb02a", t: 0.9, big: false }); }
     }
     if (R.bolt && a.boltCd <= 0 && (R.caster ? d > 28 : d > 40 && Math.random() < 0.04)) {
-      a.boltCd = R.caster ? 1.5 + Math.random() * 0.6 : 3.5 + Math.random() * 2; a.bolts++; a.atk = 0.3; a.atkStep = 4;
+      a.boltCd = R.caster ? 1.5 + Math.random() * 0.6 : 3.5 + Math.random() * 2; a.bolts++; a.atk = 0.3; a.atkStep = 4; if (R.caster) bark(g, a.id, "attack"); // MB hook: barks (caster's bolt is her finisher)
       g.shots.push({ x: a.x + a.fx * 8, y: a.y - 14, vx: a.fx * 200, vy: a.fy * 200, life: R.caster ? 0.9 : 0.8, foe: false, dmg: allyBolt(g) * (R.caster ? 0.8 : 1), tech: 0 });
     }
     if (R.caster) { tx = foe.x - (dx / d) * CASTER_RANGE; ty = foe.y - (dy / d) * CASTER_RANGE; if (isDoorway(g, tx, ty) || !free(g, tx, ty)) { tx = a.x; ty = a.y; } }
     else { tx = foe.x - (dx / d) * 16; ty = foe.y - (dy / d) * 4; }
     if (d < R.reach && a.atkT <= 0) {
-      a.atkT = R.atkCd; a.atk = 0.28; a.atkStep = a.atkStep % 3 + 1; a.hits++;
+      a.atkT = R.atkCd; a.atk = 0.28; a.atkStep = a.atkStep % 3 + 1; a.hits++; if (a.atkStep === 3) bark(g, a.id, "attack"); // MB hook: barks
+
       const crit = Math.random() < 0.08;
       g.damageFoe(foe, allyMelee(g, a) * (crit ? 1.6 : 1), a.fx * (R.taunt ? 90 : 40), a.fy * (R.taunt ? 90 : 40), crit);
       if (R.taunt) g.shake = Math.max(g.shake, 1);

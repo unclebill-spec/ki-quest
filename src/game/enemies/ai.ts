@@ -1,4 +1,6 @@
 /** Enemy AI, hit reactions, EXP orb drops and hazards. Owner: Master Builder. */
+import { barkParty } from "../combat/barks"; // MB hook: barks
+import { anyBossActive } from "../combat/companion";
 import type { Game } from "../../game";
 import { Enemy, FOE_INFO, makeEnemy, isBigBoss } from "./types";
 import { moveBody, solidAt, TILE, Area } from "../../world";
@@ -56,6 +58,7 @@ export function onFoeKill(g: Game, e: Enemy) {
   if (e.kind === "morvant") morvantKilled(g, e);
   if (e.kind === "malachar") malacharKilled(g, e);
   if (e.kind === "vey" || e.kind === "nell" || e.kind === "pylon") twinKilled(g, e);
+  if (isBigBoss(e.kind) && !anyBossActive(g)) barkParty(g, "victory"); // MB hook: barks (boss fight won)
 }
 
 function shoot(g: Game, x: number, y: number, ang: number, sp: number, dmg: number, life = 2.4) {

@@ -9,6 +9,8 @@ const BASE = import.meta.env.BASE_URL + "audio/";
 const VOL: Record<string, number> = { "punch-light": 0.7, "block": 0.7, "blast-charge": 0.7, "shield": 0.7, "exp-pickup": 0.5,
   "kiblast-charge-full": 0.7, "flight-takeoff": 0.7, "flight-land": 0.7, "kiblast-charge-loop": 0.5, "flight-loop": 0.5 };
 const KEY = "kiquest.mute.v1";
+// MB hook: voice barks. attack/hurt -3 dB; transform/victory 0 dB and duck music 6 dB while the clip plays (staging README).
+const BARK_VOL = 0.708, isBark = (n: string) => n.startsWith("bark-"), barkDucks = (n: string) => /^bark-.*-(transform|victory)$/.test(n);
 
 export class Audio {
   ctx: AudioContext | null = null; music!: GainNode; sfx!: GainNode;
@@ -45,7 +47,8 @@ export class Audio {
     if (!this.ctx) return;
     const b = this.bufs.get(n); if (!b) { this.load(n); return; }
     const s = this.ctx.createBufferSource(), g = this.ctx.createGain();
-    s.buffer = b; g.gain.value = VOL[n] ?? 1; s.connect(g).connect(this.sfx); s.start();
+    s.buffer = b; g.gain.value = isBark(n) ? (barkDucks(n) ? 1 : BARK_VOL) : VOL[n] ?? 1; s.connect(g).connect(this.sfx); s.start();
+    if (barkDucks(n)) this.duckFor(b.duration); // MB hook: barks
     if (n === "levelup" || n === "transform" || n === "transform-powerup") this.duck();
   }
   loops = new Map<string, { s: AudioBufferSourceNode; g: GainNode }>();
@@ -59,6 +62,9 @@ export class Audio {
     s.buffer = b; s.loop = true; g.gain.value = VOL[n] ?? 1; s.connect(g).connect(this.sfx); s.start();
     this.loops.set(n, { s, g });
   }
+  /** Hold music at -6 dB for `dur` s, then ramp back. */
+  duckFor(dur: number) { if (!this.ctx || this.muted) return; const t = this.ctx.currentTime, g = this.music.gain; g.cancelScheduledValues(t); g.setValueAtTime(0.45 * 0.501, t); g.setValueAtTime(0.45 * 0.501, t + dur); g.linearRampToValueAtTime(0.45, t + dur + 0.4); this.duckUntil = t + dur; }
+  duckUntil = 0;
   private duck() { if (!this.ctx || this.muted) return; const t = this.ctx.currentTime, g = this.music.gain; g.cancelScheduledValues(t); g.setValueAtTime(0.22, t); g.linearRampToValueAtTime(0.45, t + 2); }
   /** Tracks shipped in public/audio. An area's `music` may list candidates "a|b|c"; the first shipped one plays.
    *  Add a name here when the sound team delivers it (e.g. area3-theme, area4-theme, quarry-theme, undertide-theme). */

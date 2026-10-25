@@ -1,4 +1,5 @@
 /** Ki Quest simulation: hero, combat, enemies, EXP/levels, save pad. No drawing here. */
+import { bark } from "./game/combat/barks"; // MB hook: barks
 import { Input } from "./input";
 import { Area, buildArea, moveBody, solidAt } from "./world";
 import { ParticlePool, CH_COMBAT, K_SPARK, K_RING, K_DUST, C_GOLD, C_WHITE, C_RED, C_DUST } from "./vendor/particles";
@@ -131,7 +132,7 @@ export class Game {
     const sw = this.swing;
     if (sw.step) {
       sw.t += dt;
-      if (sw.t > 0.07 && sw.t < 0.16 && sw.hitId === 0) { sw.hitId = this.hitSerial++; this.meleeHit(); }
+      if (sw.t > 0.07 && sw.t < 0.16 && sw.hitId === 0) { sw.hitId = this.hitSerial++; this.meleeHit(); if (sw.step === 3) bark(this, "rook", "attack"); /* MB hook: barks */ }
       if (inp.pressed("melee") && sw.t > 0.1 && sw.step < 3) sw.queued = true;
       if (sw.t >= (sw.step === 3 ? 0.32 : 0.24)) {
         if (sw.queued) { sw.step++; sw.t = 0; sw.queued = false; sw.hitId = 0; }
@@ -218,7 +219,7 @@ export class Game {
     if (this.shield) { this.stats.shieldBlocks++; this.num(p.x, p.y - 34, 0, "#9fe8ff"); p.inv = 0.2; return; }
     if (this.blocking) d *= 0.3;
     d *= 1 - this.defense;
-    this.hp -= d; p.inv = 0.6; meterGain(this, TF_HURT); // MB hook this.stats.hurt++; this.shake = 2;
+    this.hp -= d; p.inv = 0.6; bark(this, "rook", "hurt"); /* MB hook: barks */ meterGain(this, TF_HURT); // MB hook this.stats.hurt++; this.shake = 2;
     p.kx = Math.cos(a) * (this.blocking ? 60 : 160); p.ky = Math.sin(a) * (this.blocking ? 60 : 160);
     this.num(p.x, p.y - 34, d, "#ff9a9a");
     if (this.hp <= 0) {

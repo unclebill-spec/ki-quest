@@ -1,4 +1,5 @@
 /** Power-up meter (g.tf, 0..100) and the timed transformation. Owner: Master Builder. */
+import { barkParty } from "./barks"; // MB hook: barks
 import type { Game } from "../../game";
 import { CH_HUB, K_SPARK, K_RING, C_CYAN, C_VIOLET, C_GOLD } from "../../vendor/particles";
 
@@ -13,7 +14,8 @@ export function meterGain(g: Game, v: number) { if (!g.mb.tfOn) g.tf = Math.min(
 
 export function transform(g: Game) {
   if (g.mb.tfOn || g.tf < 100) return false;
-  g.mb.tfOn = true; g.mb.tfT = TF_TIME; g.shake = 4; g.stats.transforms = (g.stats.transforms ?? 0) + 1; g.mb.sfx.push("transform-powerup");
+  g.mb.tfOn = true; g.mb.tfT = TF_TIME; g.shake = 4; g.stats.transforms = (g.stats.transforms ?? 0) + 1; g.mb.sfx.push("transform-powerup"); barkParty(g, "transform"); // MB hook: barks
+ 
   g.hp = Math.min(g.maxHp, g.hp + g.maxHp * 0.25); g.ep = g.maxEp;
   for (let i = 0; i < 12; i++) g.parts.emit(CH_HUB, K_SPARK, g.p.x, g.p.y - 14, Math.cos(i / 1.9) * 110, Math.sin(i / 1.9) * 110, 0.5, i & 1 ? C_CYAN : C_VIOLET, 0, 2);
   g.say("AWAKENED! Power, speed and guard up", 2);
@@ -43,3 +45,4 @@ export function updatePowerup(g: Game, dt: number) {
   else if (!hover && m.hover && m.tfOn) m.sfx.push("flight-land");
   m.hover = hover;
 }
+const GP = globalThis as unknown as { __kiMB?: Record<string, unknown> }; GP.__kiMB = { ...(GP.__kiMB ?? {}), transform }; // MB hook: test access
