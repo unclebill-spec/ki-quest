@@ -25,3 +25,9 @@ Publishing needs Bill's approval.
 - NPC/idle animation phases must come from time + stable ids, never screen coords (see npcBob in src/areas/art.ts; tests/npc-bob.mjs).
 - Player-facing name is **Kindle Quest** (index.html title/h1, webmanifest, credits). Internal ids stay ki/kiquest/ki-quest (saves, tests, URL).
 - Music: `Audio.HAVE` lists shipped tracks; `audio.watch(game, finale)`: main.ts passes finale=true during the dawn epilogue (husk, malacharDown, before/while the dawn dialog) and credits -> finale-theme.
+- Mini-bosses: specs (area, arena, gate flag, done flag) live in HANDOFF.md "Mini-boss specs". Lead-ins are one-shot `B("<x>Seen")` beats in story/index.ts; fights are Master Builder's.
+
+## HD2D W14 (menus/gear/saves) notes
+- Pause menu lives in src/menu.ts (HD-2D Cozy Builder). Hook new tabs there, not in draw.ts `pauseMenu` (legacy, unused). `MENU_ROWS` is deliberately off-canvas.
+- Save record is v2. Anything reading saves should go through `parseSave`/`migrate` in save.ts. New fields must be optional, and `mirela`/`brann` must be kept.
+- Damage/HP math must use `g.eStr/ePow/eEnd` (gear-inclusive), not raw `g.str` etc., if gear should count.

@@ -1,4 +1,8 @@
 # Changelog
+## 0.3.7 — 2026-10-24 (HD-2D Cozy Builder: menus, gear, save slots)
+- Tabbed pause menu (Status/Gear/Lens/Map/Options/Save), keyboard + gamepad + touch; UI sounds.
+- Gear: 3 slots, 12 items, compare with stat deltas.
+- 3 save slots with preview (area, level, playtime), autosave kept, export/import code or file, v1→v2 migration (mirela/brann kept). tests/menus.mjs.
 ## 0.3.6 — 2026-10-24 (Master Builder: Malachar Vesh, the Last Dusk)
 - Final boss Malachar in HUSK_ARENA (24,15 r8; src/game/enemies/malachar.ts): 1200 HP, 5 phases (80/60/40/20%): slash+cast fan → +prism beams → CROWN OF THORNS (rain, spirals, 7-bolt fans) → NIGHTFALL (darkening, nova, dusk flood with safe ring) → THE LAST LIGHT (8 prism beams, 6-arm spirals, gold/white sparkle storm). Phase banners, shockwave + 1.2 s shield per change, red/violet/cyan/green additive glow, 4 orbiting spring motes, 5-tick boss bar; companions dodge all telegraphs.
 - Defeat: `malacharDown` set+saved, boss6 saved, +8 pts, full heal, "THE LAST DUSK ENDS" + Sunheart toast; story then runs the Wellsprings → Malachar Vesh → Rook ending (dawn + credits).
@@ -65,3 +69,6 @@
 - Music: husk-theme loops in The Husk Sun; finale-theme loops through the dawn epilogue and credits.
 ## W13b
 - Test: boss3 drowned-soldier check counts peak alive soldiers during P3 (companions could kill them during the P4 loop; flaky ~1 in 4).
+
+## W15
+- World side for four mini-bosses (fights coming from Master Builder): Foreman Kettle (quarry), Reedwraith Corvin + Lady Ombrelle (Hushwater), Capmother Gilt (Lanternmoss). Lead-in scenes at each arena, Odile's "Capmother's Ring" quest, new NPC lines. Test: tests/minibosses-story.mjs.

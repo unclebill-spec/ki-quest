@@ -98,6 +98,12 @@ export class Story {
       return true;
     }
     const F = this.flags, B = (k: string, who: string, lines: string[], exp = 0) => { F[k] = true; this.save(); if (exp) g.gainExp(exp); this.say(who, lines); return true; };
+    // Mini-boss lead-ins (W15, world side only; fights are Master Builder's, see HANDOFF "Mini-boss specs"). One-shot, fires on entering the arena ring once its gate is open.
+    const at = (a: string, tx: number, ty: number, r: number) => g.area.id === a && Math.hypot(g.p.x - (tx * 16 + 8), g.p.y - (ty * 16 + 8)) < (r + 1) * 16 && !this.box;
+    if (F.capQ && !F.capDone && !F.capSeen && at("lanternmoss", 39, 27, 3)) return B("capSeen", "Glowcap Ring", ["(The big caps lean in. Spores drift up like slow snow.)", "Something under the moss is breathing. It sounds annoyed.", "Odile said the Capmother hasn't been nice in weeks."]);
+    if (F.reedQ && !F.bell && !F.corvinDown && !F.corvinSeen && at("hushwater", 25, 25, 1)) return B("corvinSeen", "Reedwraith Corvin", ["(A tall shape in a boatman's coat stands in the reeds, violet lantern-eyes half shut.)", "Shh. The bell sleeps. If it rings, the fog parts... and then she'll see you. So will He."]);
+    if (F.oath && g.mb.boss.done && !F.ombrelleDown && !F.ombrelleSeen && at("hushwater", 40, 7, 3)) return B("ombrelleSeen", "Mirela", ["(The graves hum. Cold blue light leaks up between the stones.)", "Something is under my graves. Drinking. The wraiths won't say her name.", "Little lamplighter. Little grave-girl... (the voice comes from below) ...come down to my dark?"]);
+    if (F.brannQ && !F.heart && !F.kettleDown && !F.kettleSeen && at("emberquarry", 26, 12, 3)) return B("kettleSeen", "Foreman Kettle", ["(A boiler-bellied stone golem in a canvas apron turns from the lava pool. Steam hisses from its rivets.)", "SHIFT'S NOT OVER. NOBODY TAKES THE EMBER. NOBODY CLOCKS OUT."]);
     // Act II close: the Archive (after Count Aurel falls) and Malachar's projection
     if (g.area.id === "drowned" && F.tideBossDown && !F.twist && !this.box) {
       F.twist = true; this.save(); g.gainExp(300);
@@ -177,6 +183,7 @@ export class Story {
     const st = g.stats as Record<string, number>; st.talks = (st.talks ?? 0) + 1;
     this.say(def.name, def.lines(this.flags), () => {
       if (id === "a") this.flags.metAma = true;
+      if (id === "o" && g.area.id === "lanternmoss" && this.flags.metAma && !this.flags.capQ) { this.flags.capQ = true; g.say("Quest: The Capmother's Ring", 2.5); }
       if (id === "m") this.flags.metMirela = true;
       if (id === "n") this.flags.metNeri = true;
       const F = this.flags;
