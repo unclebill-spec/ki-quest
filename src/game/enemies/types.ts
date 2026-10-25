@@ -1,11 +1,11 @@
 /** Enemy data. Kinds: brute = melee rusher, wisp = ranged shooter, warden = tank/blocker, boss = area boss. Owner: Master Builder. */
 export type FoeKind = "brute" | "wisp" | "warden" | "boss" | "slag" | "aurel" | "vey" | "nell" | "pylon" | "morvant" | "malachar"
   | "reed_wraith" | "witchlight_newt" | "fen_warden" | "mossback_snapper" | "duskhound" | "mossling" | "hush_squire" | "bog_sprout"
-  | "kettle" | "corvin" | "gilt";
+  | "kettle" | "corvin" | "gilt" | "ombrelle";
 /** Arena bosses (big body, boss bar, companions dodge their telegraphs). */
 export const isBigBoss = (k: string) => k === "boss" || k === "slag" || k === "aurel" || k === "vey" || k === "nell" || k === "morvant" || k === "malachar" || MINI_KINDS.has(k);
 /** Mini-bosses (src/game/enemies/minis.ts). */
-export const MINI_KINDS = new Set<string>(["kettle", "corvin", "gilt"]);
+export const MINI_KINDS = new Set<string>(["kettle", "corvin", "gilt", "ombrelle"]);
 export type FoeState = "idle" | "chase" | "tele" | "act" | "recover";
 export interface Enemy {
   kind: FoeKind; x: number; y: number; vx: number; vy: number; hp: number; max: number;
@@ -27,6 +27,7 @@ export const FOE_INFO: Record<FoeKind, { name: string; hp: number; exp: number; 
   wisp: { name: "Glimmer Wisp", hp: 18, exp: 8, heavy: 1.2, respawn: 25 },
   warden: { name: "Stoneward", hp: 70, exp: 14, heavy: 0.35, respawn: 35 },
   boss: { name: "Warden Rune", hp: 420, exp: 80, heavy: 0.08, respawn: Infinity },
+  ombrelle: { name: "Lady Ombrelle", hp: 420, exp: 130, heavy: 0.2, respawn: Infinity },
   gilt: { name: "Capmother Gilt", hp: 360, exp: 80, heavy: 0, respawn: Infinity },
   slag: { name: "Slagheart", hp: 620, exp: 140, heavy: 0.05, respawn: Infinity },
   aurel: { name: "Count Aurel", hp: 760, exp: 180, heavy: 0.05, respawn: Infinity },

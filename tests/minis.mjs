@@ -14,6 +14,7 @@ const CASES = [
   ["kettle", "boss7", "kettleDown", { brannQ: true, kettleSeen: true }, { brannQ: true, heart: true, kettleSeen: true }, { boss1: true }],
   ["corvin", "boss8", "corvinDown", { reedQ: true, reedN: 2, corvinSeen: true }, { reedQ: true, bell: true, corvinSeen: true }, { boss1: true }],
   ["gilt", "boss10", "capDone", { capQ: true, capSeen: true }, { capSeen: true }, {}],
+  ["ombrelle", "boss9", "ombrelleDown", { oath: true, ombrelleSeen: true }, { oath: true, ombrelleDown: false, ombrelleSeen: true, _noBoss1: true }, { boss1: true }],
 ].filter((c) => !process.env.KI_MINI || c[0] === process.env.KI_MINI);
 const browser = await chromium.launch();
 try {
@@ -29,12 +30,15 @@ try {
       for (const k of Object.keys(s.flags)) if (!["introSeen", "metAma"].includes(k)) delete s.flags[k]; Object.assign(s.flags, fl);
       s.enter(S.area); s.box = null; g.p.x = S.tx * 16 + 8; g.p.y = S.ty * 16 + 8;
       g.mb.allies.forEach((a, i) => { if (i < 2) { a.joined = true; a.ko = false; a.hp = a.max; a.x = g.p.x - 10 + i * 20; a.y = g.p.y + 10; } });
+      const bd = g.mb.boss.done; if (fl._noBoss1) g.mb.boss.done = false; // Ombrelle's gate also needs Area 1's boss
       for (let i = 0; i < 90; i++) { s.box = null; g.p.inv = 1; g.hp = g.maxHp; g.step(1 / 60); }
-      const e = g.enemies.find((e) => e.kind === kind && !e.dead); return { area: g.area.id, boss: !!e, act: g.mb[S.slot].active }; }, { kind, fl });
+      g.mb.boss.done = bd;
+      const e = g.enemies.find((e) => e.kind === kind && !e.dead); const cl = S.clear.filter(([tx, ty]) => g.enemies.some((f) => !f.dead && !f.minion && f.kind !== kind && Math.abs(f.hx - tx * 16 - 8) < 9 && Math.abs(f.hy - ty * 16 - 8) < 9)).length;
+      return { area: g.area.id, boss: !!e, act: g.mb[S.slot].active, cleared: S.clear.length - cl, of: S.clear.length }; }, { kind, fl });
     const c0 = await go(CLOSED);
     ok(`${kind}: ring stays quiet while the gate is shut`, !c0.boss && !c0.act, JSON.stringify(c0));
     const c1 = await go(FL);
-    ok(`${kind}: wakes inside the ring when the gate is open`, c1.boss && c1.act, JSON.stringify(c1));
+    ok(`${kind}: wakes inside the ring when the gate is open (in-ring spawns cleared)`, c1.boss && c1.act && c1.cleared === c1.of, JSON.stringify(c1));
     if (kind === "corvin") {
       await E(() => { const g = window.__ki.game, o = g.area.orbs[0]; g.p.x = o.x; g.p.y = o.y + 6; }); await page.waitForTimeout(200);
       const b = await E(() => !!window.__ki.story.flags.bell);

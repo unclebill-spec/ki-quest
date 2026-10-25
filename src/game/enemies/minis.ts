@@ -53,6 +53,17 @@ export const MINIS: MiniSpec[] = [
     outro: "(The root in her heart crumbles. The Capmother sighs, and lets a gold Glowcap crown fall.)",
     col: ["rgba(255,200,80,.85)", "rgba(150,255,190,.8)", "#ffd070", "#9affc0"], light: [1, 0.8, 0.35], pc: [C_GOLD, C_CYAN],
     clear: [], reward: (g) => { g.pts += 2; return "Glowcap crown · take it to Odile · +2 stat points"; } },
+  { kind: "ombrelle", slot: "boss9", name: "LADY OMBRELLE", area: "hushwater", tx: 40, ty: 7, r: 3, flag: "ombrelleDown",
+    gate: (f, g) => !!f.oath && !!g.mb.boss.done && !f.ombrelleDown, phaseAt: [1, 0.65, 0.3], speed: 22,
+    moves: [["veil", "drift"], ["veil", "graves", "requiem", "drift"], ["candles", "graves3", "requiem", "veil", "drift"]],
+    defs: { veil: { type: "fan", tele: 0.7, dmg: 8, n: 3, spd: 135, anim: "cast" }, drift: { type: "blink", tele: 0.75, dmg: 9, r: 26, anim: "summon" },
+      graves: { type: "crack", tele: 0.85, dmg: 10, n: 2, anim: "slam" }, graves3: { type: "crack", tele: 0.8, dmg: 10, n: 3, anim: "slam" },
+      requiem: { type: "nova", tele: 0.9, dmg: 8, n: 12, spd: 100, anim: "cast" }, candles: { type: "rain", tele: 0.8, dmg: 9, n: 4, anim: "cast" } },
+    banners: ["LADY OMBRELLE · KNEEL, LAMPLIGHTER", "OMBRELLE REMEMBERS", "THE CANDLES GUTTER"],
+    say: ["Ombrelle's parasol snaps open!", "Do you know what he was, before? No. You know nothing. He held the whole sky once!", "Cold candle-light pours from the graves!"],
+    outro: "It's... cold. Tell him... I kept the light warm for him.",
+    col: ["rgba(130,230,255,.85)", "rgba(200,170,255,.8)", "#9ae8ff", "#d0b0ff"], light: [0.5, 0.85, 1], pc: [C_CYAN, C_VIOLET],
+    clear: [[42, 8]], reward: (g) => { g.pts += 3; return "The graves go quiet · +3 stat points"; } },
 ];
 export const miniLog = { starts: 0, moves: {} as Record<string, number>, phases: {} as Record<string, number>, decoys: 0, decoyKills: 0, kills: [] as string[] };
 const centers: Record<string, { x: number; y: number }> = {};

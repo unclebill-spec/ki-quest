@@ -158,6 +158,8 @@ Slots: Story suggested build order Kettle → Corvin → Capmother → Ombrelle;
 - Kettle (boss7): emberquarry (26,12) r3, hp 380; shovel dash → steam ring → slag rain → boiling cracks. Clears w(26,10), g(22,14). +2 stat pts.
 - Corvin (boss8): hushwater (25,26) r3, hp 340; lantern fan + ferry blink → echo decoys (reed_wraith, 8 hp, `decoy`; their kills are subtracted from stats.kills so reedN never counts them; miniLog.decoyKills) → bell toll nova. Orb guard (story/index.ts `// MB hook`): hushwater bell not pickable while `reedQ && !corvinDown`. tests/world.mjs + fullrun.mjs set corvinDown (+boss8 done) before the bell step; the real fight is in tests/minis.mjs. Death line from npc_lines "Bosses" (spec `outro`).
 - Capmother Gilt (boss10): lanternmoss (39,27) r3, hp 360; spore rain + cap ring → mossling brood + spore fan → root cracks. Sets `capDone` + 2 pts; the boots stay Cozy's (gear.ts / Odile's capDone line). w(43,27) is outside the ring, nothing cleared.
+- Ombrelle (boss9): hushwater (40,7) r3 (graves are walls), hp 420; parasol fan + drift blink → grave cracks + requiem nova → candle rain + 3-way cracks. Gate needs `oath` and Area 1 boss done. Clears w(42,8). Phase-2 and death lines from npc_lines "Bosses". Sets `ombrelleDown` + 3 pts; the Sable `ombrelleBeat` that follows is Story's.
+- tests/minis.mjs: 31 checks (4 bosses + Corvin bell/decoy checks + in-ring spawn clearing). fullrun 57/57 (rebuild dist first: ground.mjs leaves a different build in dist).
 - Known: boss4 "P3 enraged survivor" failed once under the parallel suite load (15/16), then 3/3 alone on 4731-4733.
 
 ## MB W16 — Art pack 3 (Area 2 foes, FX strips, right rows)
