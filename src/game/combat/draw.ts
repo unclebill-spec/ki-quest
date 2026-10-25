@@ -1,7 +1,8 @@
 /** Master Builder render hooks: sprites, telegraphs, orbs, aura, technique HUD, power meter, boss bar. */
 import type { Game, Shot } from "../../game";
 import type { Enemy } from "../enemies/types";
-import { FOE_INFO, roleOf } from "../enemies/types";
+import { FOE_INFO, roleOf, isBigBoss } from "../enemies/types";
+import { isMini, miniAnim, miniState, drawMiniTele, drawMiniGlow, specOf } from "../enemies/minis";
 import { sheet, drawSprite, facingOf } from "./sprites";
 import { drawFxStrips, preloadFx } from "./fx";
 import { TECHS, BEAM_FULL } from "./techniques";
@@ -16,7 +17,7 @@ import { ARENA6, arena6Center } from "../enemies/malachar";
 export let HERO_SHEET = "rook";
 export function setHero(n: string) { HERO_SHEET = n; }
 const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "", morvant: "morvant", malachar: "malachar",
-  reed_wraith: "reed_wraith", witchlight_newt: "witchlight_newt", fen_warden: "fen_warden", mossback_snapper: "mossback_snapper", duskhound: "duskhound", mossling: "mossling", hush_squire: "hush_squire", bog_sprout: "bog_sprout" };
+  reed_wraith: "reed_wraith", witchlight_newt: "witchlight_newt", fen_warden: "fen_warden", mossback_snapper: "mossback_snapper", duskhound: "duskhound", mossling: "mossling", hush_squire: "hush_squire", bog_sprout: "bog_sprout", kettle: "kettle" };
 export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); sheet("brann"); sheet("sable"); Object.values(FOE_SHEET).filter(Boolean).forEach(sheet); preloadFx(); }
 
 function glow(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
@@ -63,6 +64,8 @@ export function drawFoeMB(c: CanvasRenderingContext2D, g: Game, e: Enemy, x: num
     else if (e.move.startsWith("slam")) anim = "stomp", i = e.state === "tele" ? 0 : 2;
     else if (e.state === "tele" || e.state === "act") { anim = e.move.startsWith("dash") ? "attack" : "beam"; i = e.state === "tele" ? 0 : 1 + (g.time * 8) % 2; }
     else if (e.state === "recover") { anim = "stand"; i = 0; }
+  } else if (isMini(e.kind)) {
+    const r = miniAnim(g, e); if (r) [anim, i] = r; else { anim = "walk"; i = g.time * 5; }
   } else if (e.kind === "slag") {
     const A: Record<string, string> = { charge: "charge", rain: "rain", crack: "slam", crack3: "slam", summon: "summon" };
     if (g.mb.boss2.lockT > 0) { anim = "hurt"; i = 0; }
@@ -100,7 +103,7 @@ export function drawFoeMB(c: CanvasRenderingContext2D, g: Game, e: Enemy, x: num
   else if (e.state === "act") { anim = "attack"; i = 1 + (g.time * 10) % 2; }
   else if (e.state === "recover" || e.state === "idle" && roleOf(e.kind) !== "wisp") { anim = e.state === "idle" ? "walk" : "stand"; }
   const bob = e.kind === "wisp" || e.kind === "reed_wraith" ? Math.sin(g.time * 4 + e.hx) * 2 : 0;
-  c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" || e.kind === "morvant" || e.kind === "malachar" ? 18 : 8, e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "vey" || e.kind === "nell" || e.kind === "morvant" || e.kind === "malachar" ? 5 : 2.5, 0, 0, 7); c.fill();
+  c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, isBigBoss(e.kind) ? 18 : 8, isBigBoss(e.kind) ? 5 : 2.5, 0, 0, 7); c.fill();
   if (drawSprite(c, s, anim, f, i, x, y, { flash: fl, lift: -bob })) return true;
   if (roleOf(e.kind) === "warden") {
     c.fillStyle = fl ? "#fff" : "#4a4e5e"; c.fillRect(x - 10, y - 24, 20, 23); c.fillStyle = fl ? "#fff" : "#6a7088"; c.fillRect(x - 7, y - 28, 14, 6);
@@ -178,6 +181,7 @@ export function addLights(g: Game, cx: number, cy: number, add: (x: number, y: n
   for (const e of g.enemies) if (!e.dead && e.kind === "morvant") add(e.x - cx, e.y - cy - 26, 70, g.mb.boss5.phase >= 3 ? [1, 0.8, 0.35] : [0.75, 0.4, 1]);
   for (const e of g.enemies) if (!e.dead && e.kind === "malachar") { const L6: [number, number, number][] = [[1, 0.25, 0.3], [1, 0.25, 0.3], [0.8, 0.4, 1], [0.4, 0.95, 1], [0.5, 1, 0.6], [1, 0.95, 0.8]]; add(e.x - cx, e.y - cy - 28, 80, L6[g.mb.boss6.phase] ?? L6[1]); }
   for (const e of g.enemies) if (!e.dead && e.kind === "pylon") add(e.x - cx, e.y - cy - 20, 30, [1, 0.25, 0.35]);
+  for (const e of g.enemies) { const s = !e.dead ? specOf(e.kind) : undefined; if (s) add(e.x - cx, e.y - cy - 22, 52, s.light); }
   for (const e of g.enemies) if (!e.dead && e.kind === "slag") add(e.x - cx, e.y - cy - 22, 64, [1, 0.5 - g.mb.boss2.phase * 0.08, 0.2]);
 }
 
@@ -239,6 +243,7 @@ export function drawAdditive(c: CanvasRenderingContext2D, g: Game, cx: number, c
     }
   }
   for (const e of g.enemies) if (!e.dead && e.kind === "pylon") glow(c, e.x - cx, e.y - cy - 20, 10 + Math.sin(g.time * 8) * 2, "rgba(255,60,90,.8)");
+  drawMiniGlow(g, cx, cy, (x, y, r, col) => glow(c, x, y, r, col));
   for (const e of g.enemies) if (!e.dead && e.kind === "slag") {
     const hot = e.state === "tele" ? 1 : 0.6;
     glow(c, e.x - cx, e.y - cy - 30, 14 + hot * 6 + Math.sin(g.time * 12) * 2, m.boss2.phase === 3 ? "rgba(255,70,30,.85)" : "rgba(255,150,50,.75)");
@@ -255,6 +260,7 @@ export function drawShot(c: CanvasRenderingContext2D, s: Shot, X: number, Y: num
 
 /** Overlay telegraphs for boss moves (over the light). */
 export function drawTelegraphs(c: CanvasRenderingContext2D, g: Game, cx: number, cy: number) {
+  drawMiniTele(c, g, cx, cy);
   drawFxStrips(c, g, cx, cy); // art pack 3 strips over the glow
   for (const e of g.enemies) if (!e.dead && e.kind === "boss" && e.state === "tele") {
     const X = Math.round(e.x - cx), Y = Math.round(e.y - cy);
@@ -314,9 +320,9 @@ export function drawHudMB(c: CanvasRenderingContext2D, g: Game, W: number) {
     return;
   }
   // boss bar
-  const b = g.enemies.find((e) => (e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "morvant" || e.kind === "malachar") && !e.dead);
+  const b = g.enemies.find((e) => (e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "morvant" || e.kind === "malachar" || isMini(e.kind)) && !e.dead);
   if (b) {
-    const st = b.kind === "slag" ? g.mb.boss2 : b.kind === "aurel" ? g.mb.boss3 : b.kind === "morvant" ? g.mb.boss5 : b.kind === "malachar" ? g.mb.boss6 : g.mb.boss, fin = b.kind === "malachar", hot = b.kind === "slag", tide = b.kind === "aurel", ecl = b.kind === "morvant";
+    const st = miniState(g, b.kind) ?? (b.kind === "slag" ? g.mb.boss2 : b.kind === "aurel" ? g.mb.boss3 : b.kind === "morvant" ? g.mb.boss5 : b.kind === "malachar" ? g.mb.boss6 : g.mb.boss), fin = b.kind === "malachar", hot = b.kind === "slag", tide = b.kind === "aurel", ecl = b.kind === "morvant";
     const w = 200, x = W / 2 - w / 2, y = 202;
     c.fillStyle = "#000c"; c.fillRect(x - 2, y - 9, w + 4, 15);
     c.font = "bold 6px monospace"; c.textAlign = "center"; c.fillStyle = fin ? "#ffd0e0" : ecl ? "#ffe8a0" : tide ? "#c8fff8" : hot ? "#ffe0b0" : "#ffd0e8"; c.fillText(`${FOE_INFO[b.kind].name} · PHASE ${st.phase}`, W / 2, y - 2);

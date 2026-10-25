@@ -149,6 +149,14 @@ Slots: Story suggested build order Kettle → Corvin → Capmother → Ombrelle;
 - Hooks marked `// MB hook` in game.ts, companion.ts, powerup.ts, ai.ts, audio.ts (BARK_VOL -3 dB attack/hurt). ui-*.ogg untouched (Cozy).
 - Test: tests/barks.mjs (10 checks).
 
+## MB W17 — Mini-bosses (data-driven, src/game/enemies/minis.ts)
+- One engine, one `MiniSpec` per boss (area, arena tx/ty/r, gate(flags,g), slot, phaseAt, moves per phase, banners/says, reward, colours, spawns to clear). Move types: dash, ring, rain, crack, fan, nova, summon, blink, decoy. Telegraphs are hazards (companions dodge them like other boss hazards) plus drawMiniTele; glow via addLights/drawMiniGlow.
+- Wakes only when gate true, no story box open, hero inside r*16 of the arena; leash r*16+32; KO aborts (respawns on re-entry). Death: slot done (writeBossDone), `__ki.story.flags[flag]=true` + story save, minions/hazards/foe shots cleared.
+- Hooks (`// MB hook`): game.ts (update, bossActive, reset keeps done, KO abort), companion.ts (anyBossActive, isBoss), ai.ts (dispatch, kill, decoys don't count kills), draw.ts (sheet, anim, tele, glow, HUD bar), state.ts (slots).
+- Sheets: `python3 tools/art/build_minis.py <name>` (procedural, original, 48x64, check_sheets 28/28). PixelLab not used.
+- Test: `KI_PORT=4701 node tests/minis.mjs` (KI_MINI=<kind> for one). Each case: gate shut stays quiet, wake, telegraph+dodge, phase 3, real kill → flag+save+slot, stays down, no errors. Shots: docs/bill/mini-<kind>.png.
+- Kettle (boss7): emberquarry (26,12) r3, hp 380; shovel dash → steam ring → slag rain → boiling cracks. Clears w(26,10), g(22,14). +2 stat pts.
+
 ## MB W16 — Art pack 3 (Area 2 foes, FX strips, right rows)
 - Sheets copied to public/art/chars: rook, mirela, brann (new explicit right rows; left/other frames pixel-identical) + 8 Area 2 foes (all with right rows). check_sheets: all pass. rook_town NOT copied: nothing in src draws a town sprite (the town hero uses rook.json), so it stays in staging.
 - sprites.ts already used an explicit `<anim>_right_<i>` frame when present and mirrors left only as fallback (48x64 boss sheets have no right rows and keep mirroring). Added `__kiMB.drawLog[sheet]` = last frame key + flip, for tests.

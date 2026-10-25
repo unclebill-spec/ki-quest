@@ -1,4 +1,7 @@
 # Changelog
+## MB W17 — Mini-bosses
+- Foreman Kettle mini-boss (Cinder Galleries): 3 phases, original sheet, sets kettleDown.
+
 ## 0.3.7 — 2026-10-24 (HD-2D Cozy Builder: menus, gear, save slots)
 - Tabbed pause menu (Status/Gear/Lens/Map/Options/Save), keyboard + gamepad + touch; UI sounds.
 - Gear: 3 slots, 12 items, compare with stat deltas.

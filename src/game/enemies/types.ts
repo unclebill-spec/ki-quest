@@ -1,8 +1,11 @@
 /** Enemy data. Kinds: brute = melee rusher, wisp = ranged shooter, warden = tank/blocker, boss = area boss. Owner: Master Builder. */
 export type FoeKind = "brute" | "wisp" | "warden" | "boss" | "slag" | "aurel" | "vey" | "nell" | "pylon" | "morvant" | "malachar"
-  | "reed_wraith" | "witchlight_newt" | "fen_warden" | "mossback_snapper" | "duskhound" | "mossling" | "hush_squire" | "bog_sprout";
+  | "reed_wraith" | "witchlight_newt" | "fen_warden" | "mossback_snapper" | "duskhound" | "mossling" | "hush_squire" | "bog_sprout"
+  | "kettle";
 /** Arena bosses (big body, boss bar, companions dodge their telegraphs). */
-export const isBigBoss = (k: string) => k === "boss" || k === "slag" || k === "aurel" || k === "vey" || k === "nell" || k === "morvant" || k === "malachar";
+export const isBigBoss = (k: string) => k === "boss" || k === "slag" || k === "aurel" || k === "vey" || k === "nell" || k === "morvant" || k === "malachar" || MINI_KINDS.has(k);
+/** Mini-bosses (src/game/enemies/minis.ts). */
+export const MINI_KINDS = new Set<string>(["kettle"]);
 export type FoeState = "idle" | "chase" | "tele" | "act" | "recover";
 export interface Enemy {
   kind: FoeKind; x: number; y: number; vx: number; vy: number; hp: number; max: number;
@@ -30,6 +33,7 @@ export const FOE_INFO: Record<FoeKind, { name: string; hp: number; exp: number; 
   malachar: { name: "Malachar Vesh, the Last Dusk", hp: 1200, exp: 400, heavy: 0, respawn: Infinity },
   vey: { name: "Vey of the Cage", hp: 430, exp: 110, heavy: 0.08, respawn: Infinity },
   nell: { name: "Nell of the Cage", hp: 400, exp: 110, heavy: 0.08, respawn: Infinity },
+  kettle: { name: "Foreman Kettle", hp: 380, exp: 90, heavy: 0.1, respawn: Infinity },
   pylon: { name: "Cage Pylon", hp: 60, exp: 6, heavy: 0, respawn: Infinity },
   // Area 2 (Hushwater) foes, art pack 3
   reed_wraith: { name: "Reed Wraith", hp: 22, exp: 10, heavy: 1.1, respawn: 28 },

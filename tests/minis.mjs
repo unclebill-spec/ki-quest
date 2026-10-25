@@ -1,0 +1,60 @@
+// Mini-bosses (src/game/enemies/minis.ts): node tests/minis.mjs (after npm run build). KI_PORT to change port. KI_MINI=kettle to run one.
+// Per boss: gate closed -> no wake; gate open + hero inside the r3 ring -> fight; telegraphs fire and companions dodge;
+// phases advance; REAL kill through g.damageFoe sets the story flag (saved) and the boss slot; per-boss extras (guards, decoys).
+import { createRequire } from "node:module";
+import { spawn } from "node:child_process";
+const require = createRequire("/workspace/tools/game/node/");
+const { chromium } = require("playwright");
+const PORT = Number(process.env.KI_PORT || 4495);
+const srv = spawn("npx", ["vite", "preview", "--port", String(PORT), "--strictPort"], { stdio: "ignore" });
+await new Promise((r) => setTimeout(r, 1500));
+const results = []; const ok = (n, c, d = "") => results.push([c ? "PASS" : "FAIL", n, d]);
+// [kind, slot, flag, gate-open flags, gate-closed flags, mb done slots needed]
+const CASES = [
+  ["kettle", "boss7", "kettleDown", { brannQ: true, kettleSeen: true }, { brannQ: true, heart: true, kettleSeen: true }, { boss1: true }],
+].filter((c) => !process.env.KI_MINI || c[0] === process.env.KI_MINI);
+const browser = await chromium.launch();
+try {
+  for (const [kind, slot, flag, FL, CLOSED, MBD] of CASES) {
+    const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
+    const errs = []; page.on("pageerror", (e) => errs.push(String(e))); page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
+    await page.goto(`http://localhost:${PORT}/ki-quest/`);
+    await page.evaluate(({ FL, MBD }) => { localStorage.clear(); localStorage.setItem("kiquest-mb-v1", JSON.stringify(MBD)); localStorage.setItem("kiquest.story.v1", JSON.stringify({ introSeen: true, metAma: true, ...FL })); }, { FL, MBD });
+    await page.reload(); await page.click("#startBtn"); await page.waitForTimeout(600);
+    const E = (f, a) => page.evaluate(f, a);
+    await E(() => { let sd = 2718; Math.random = () => ((sd = (sd * 1103515245 + 12345) >>> 0) / 4294967296); });
+    const go = (fl) => E(({ kind, fl }) => { const g = window.__ki.game, s = window.__ki.story, S = globalThis.__kiMB.MINIS.find((m) => m.kind === kind);
+      for (const k of Object.keys(s.flags)) if (!["introSeen", "metAma"].includes(k)) delete s.flags[k]; Object.assign(s.flags, fl);
+      s.enter(S.area); s.box = null; g.p.x = S.tx * 16 + 8; g.p.y = S.ty * 16 + 8;
+      g.mb.allies.forEach((a, i) => { if (i < 2) { a.joined = true; a.ko = false; a.hp = a.max; a.x = g.p.x - 10 + i * 20; a.y = g.p.y + 10; } });
+      for (let i = 0; i < 90; i++) { s.box = null; g.p.inv = 1; g.hp = g.maxHp; g.step(1 / 60); }
+      const e = g.enemies.find((e) => e.kind === kind && !e.dead); return { area: g.area.id, boss: !!e, act: g.mb[S.slot].active }; }, { kind, fl });
+    const c0 = await go(CLOSED);
+    ok(`${kind}: ring stays quiet while the gate is shut`, !c0.boss && !c0.act, JSON.stringify(c0));
+    const c1 = await go(FL);
+    ok(`${kind}: wakes inside the ring when the gate is open`, c1.boss && c1.act, JSON.stringify(c1));
+    await page.waitForTimeout(400); await page.screenshot({ path: `docs/bill/mini-${kind}.png` });
+    const f = await E(({ kind, slot, flag }) => { const g = window.__ki.game, L = globalThis.__kiMB.miniLog; let n = 0, dodge = 0, tele = 0, haz = 0;
+      const t0 = Object.values(L.moves).reduce((a, b) => a + b, 0);
+      for (; n < 60 * 200 && !window.__ki.story.flags[flag]; n++) {
+        g.p.inv = 1; g.hp = g.maxHp; for (const a of g.mb.allies) if (a.joined) { a.hp = a.max; a.ko = false; }
+        const e = g.enemies.find((e) => e.kind === kind && !e.dead);
+        if (e && e.state === "tele") { tele++; if (g.mb.allies.some((a) => a.joined && a.state === "dodge")) dodge++; }
+        haz = Math.max(haz, g.mb.hazards.length);
+        if (e && n > 240 && n % 30 === 0 && e.state !== "tele") { g.mb[slot].lockT = 0; e.hurt = 0; g.damageFoe(e, Math.ceil(e.max / 30), 0, 0, false); }
+        g.step(1 / 60);
+      }
+      return { n, down: !!window.__ki.story.flags[flag], phase: L.phases[kind] ?? 1, moves: Object.values(L.moves).reduce((a, b) => a + b, 0) - t0, tele, dodge, haz,
+        done: g.mb[slot].done, saved: JSON.parse(localStorage.getItem("kiquest-mb-v1") || "{}")[slot] === true, story: JSON.parse(localStorage.getItem("kiquest.story.v1") || "{}")[flag] === true,
+        minions: g.enemies.filter((e) => e.minion && !e.dead).length, act: g.mb[slot].active }; }, { kind, slot, flag });
+    ok(`${kind}: telegraphs fire (moves, hazards) and companions dodge them`, f.moves >= 3 && f.tele > 0 && f.dodge > 0, JSON.stringify({ moves: f.moves, tele: f.tele, dodge: f.dodge, haz: f.haz }));
+    ok(`${kind}: reaches its last phase`, f.phase >= 3, `phase ${f.phase}`);
+    ok(`${kind}: REAL kill sets ${flag} (saved) and ${slot}`, f.down && f.story && f.done && f.saved && !f.act && f.minions === 0, JSON.stringify(f));
+    const r = await E(({ kind }) => { const g = window.__ki.game; for (let i = 0; i < 60; i++) g.step(1 / 60); return !g.enemies.some((e) => e.kind === kind && !e.dead); }, { kind });
+    ok(`${kind}: stays down`, r);
+    ok(`${kind}: no page errors`, errs.length === 0, errs.slice(0, 3).join(" | "));
+    await page.close();
+  }
+} finally { await browser.close(); srv.kill(); }
+for (const [s, n, d] of results) console.log(`${s}  ${n}  ${d}`);
+const pass = results.filter((r) => r[0] === "PASS").length; console.log(`${pass}/${results.length} passed`); process.exit(pass === results.length ? 0 : 1);
