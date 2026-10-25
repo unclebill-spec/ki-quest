@@ -85,6 +85,9 @@ function begin(g: Game, e: Enemy, mv: string, ux: number, uy: number, spd: numbe
   void p;
 }
 
+/** Test hook only (__kiMB.forceTwinMove): the twin's next move pick uses this move once (if it is in the phase's list). Never set by gameplay. */
+const forced4: Record<string, string> = {};
+export const forceTwinMove = (kind: string, move: string) => { forced4[kind] = move; };
 export function updateTwin(g: Game, e: Enemy, dt: number, ux: number, uy: number, dist: number): [number, number] {
   const b = g.mb.boss4, p = g.p, o = other(g, e);
   const spd = b.phase >= 3 ? 1.35 : 1; if (b.phase >= 3) twinsLog.rageSpeed = spd;
@@ -94,6 +97,7 @@ export function updateTwin(g: Game, e: Enemy, dt: number, ux: number, uy: number
     if (e.t <= 0 && !partnerBusy && b.lockT <= 0) {
       const list = MOVES4[e.kind][b.phase - 1];
       let mv = list[Math.floor(Math.random() * list.length)];
+      const fm = forced4[e.kind]; if (fm && list.includes(fm)) { delete forced4[e.kind]; mv = fm; } // test hook only
       if ((mv === "swap" || mv === "cross") && !o) mv = e.kind === "vey" ? "chain" : "orbs";
       if (mv === "swap" || mv === "cross") {
         // linked move: both twins telegraph together
@@ -154,4 +158,4 @@ export function twinKilled(g: Game, e: Enemy) {
 }
 
 const G = globalThis as unknown as { __kiMB?: Record<string, unknown> };
-G.__kiMB = { ...(G.__kiMB ?? {}), startTwins, twinsLog, ARENA4, MOVES4, PYLON_TILES, twinsOf, pylonsOf };
+G.__kiMB = { ...(G.__kiMB ?? {}), startTwins, twinsLog, ARENA4, MOVES4, PYLON_TILES, twinsOf, pylonsOf, forceTwinMove };

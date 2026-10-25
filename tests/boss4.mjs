@@ -57,7 +57,10 @@ try {
   const p3 = await E(() => { const g = window.__ki.game, M = globalThis.__kiMB, B = g.mb.boss4, T = M.twinsOf(g), n = T.find((e) => e.kind === "nell"), v = T.find((e) => e.kind === "vey"); const s0 = M.twinsLog.shocks;
     B.lockT = 0; n.hurt = 0; g.damageFoe(n, n.hp + 5, 0, 0, false); for (let i = 0; i < 3; i++) g.step(1 / 60);
     const phase = B.phase, en = M.twinsLog.enraged, shocks = M.twinsLog.shocks - s0, moves = new Set();
-    for (let i = 0; i < 60 * 30 && !(moves.has("rage") && moves.has("orbs") && moves.has("chain")); i++) { g.p.inv = 1; g.hp = g.maxHp; v.hp = v.max * 0.6; g.step(1 / 60); if (v.state === "tele") moves.add(v.move); }
+    for (let i = 0; i < 60 * 30 && !(moves.has("rage") && moves.has("orbs") && moves.has("chain")); i++) { g.p.inv = 1; g.hp = g.maxHp; v.hp = Math.max(v.hp, v.max * 0.6);
+      // force the next missing P3 move (test hook) so the check doesn't wait on the RNG; HP floor keeps allies from finishing Vey first
+      if (v.state === "chase" || v.state === "idle") { const miss = ["rage", "orbs", "chain"].find((m) => !moves.has(m)); if (miss) M.forceTwinMove("vey", miss); }
+      g.step(1 / 60); if (v.state === "tele") moves.add(v.move); }
     return { phase, en, shocks, moves: [...moves].sort().join(), spd: M.twinsLog.rageSpeed, alive: M.twinsOf(g).length, active: B.active }; });
   ok("one twin falls → survivor enrages (phase 3, shockwave, x1.35 speed)", p3.phase === 3 && p3.en === "vey" && p3.shocks === 1 && p3.spd > 1.3 && p3.alive === 1 && p3.active, JSON.stringify(p3));
   ok("P3: enraged survivor uses both kits + rage spiral", /rage/.test(p3.moves) && /orbs/.test(p3.moves) && /chain/.test(p3.moves), JSON.stringify(p3));
