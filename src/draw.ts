@@ -5,6 +5,8 @@ import { tile, worldSprites, worldLights, worldGlow, areaMap } from "./areas/art
 import { lightSprite, flickerStep, rgbCss, RGB } from "./vendor/light";
 import * as MB from "./game/combat/draw"; // MB hook
 import { roleOf } from "./game/enemies/types"; // MB hook: Area 2 foes share brute/wisp/warden roles
+import { drawMenu } from "./menu"; // HD2D W14
+import { drawDrops, drawLootHud, drawRevive } from "./loot"; // HD2D W14
 import { buildAtlas, ATLAS_CELL, maskSize } from "./vendor/particles";
 
 export const W = 384, H = 216;
@@ -82,7 +84,8 @@ function foe(c: CanvasRenderingContext2D, e: Enemy, x: number, y: number, t: num
 export function render(c: CanvasRenderingContext2D, g: Game) {
   if (!light) { light = document.createElement("canvas"); light.width = W; light.height = H; lctx = light.getContext("2d")!; atlas = buildAtlas(); }
   const p = g.p;
-  const shx = g.shake ? (Math.random() - 0.5) * g.shake : 0, shy = g.shake ? (Math.random() - 0.5) * g.shake : 0;
+  const shk = g.shakeOff ? 0 : g.shake; // HD2D W14 option
+  const shx = shk ? (Math.random() - 0.5) * shk : 0, shy = shk ? (Math.random() - 0.5) * shk : 0;
   const cx = Math.round(Math.max(0, Math.min(MW * TILE - W, p.x - W / 2)) + shx), cy = Math.round(Math.max(0, Math.min(MH * TILE - H, p.y - 16 - H / 2)) + shy);
   c.imageSmoothingEnabled = false;
   c.fillStyle = "#0d0b14"; c.fillRect(0, 0, W, H);
@@ -162,8 +165,10 @@ export function render(c: CanvasRenderingContext2D, g: Game) {
     const X = Math.round(n.x - cx), Y = Math.round(n.y - cy);
     c.fillStyle = "#000"; c.fillText(n.txt, X + 1, Y + 1); c.fillStyle = n.col; c.fillText(n.big ? n.txt + "!" : n.txt, X, Y);
   }
-  hud(c, g); MB.drawHudMB(c, g, W);
-  if (g.mode === "pause") pauseMenu(c, g);
+  drawDrops(c, g, cx, cy); // HD2D W14
+  hud(c, g); MB.drawHudMB(c, g, W); drawLootHud(c, g, 30, 35);
+  if (g.mode === "revive") drawRevive(c, g);
+  if (g.mode === "pause") drawMenu(c, g); // HD2D W14 (old pauseMenu kept below, unused)
   if (g.mode === "map") mapView(c, g);
 }
 
@@ -187,8 +192,9 @@ function hud(c: CanvasRenderingContext2D, g: Game) {
   if (g.toastT > 0) { c.font = "8px monospace"; const w = c.measureText(g.toast).width + 12; c.fillStyle = "#000c"; c.fillRect(W / 2 - w / 2, H - 22, w, 13); c.fillStyle = "#fff"; c.fillText(g.toast, W / 2, H - 12); }
   if (g.levelT > 0) { c.font = "bold 14px monospace"; c.fillStyle = "#ffe14a"; c.fillText("LEVEL UP!", W / 2, 80); }
 }
-export const MENU_ROWS = { x: 120, y: 78, h: 18, w: 144 };
-function pauseMenu(c: CanvasRenderingContext2D, g: Game) {
+/** Legacy status rows. Moved off-canvas in HD2D W14 so main.ts's old tap handler never fires; menu.ts handles taps. */
+export const MENU_ROWS = { x: -9999, y: 78, h: 18, w: 144 };
+export function pauseMenu(c: CanvasRenderingContext2D, g: Game) {
   c.fillStyle = "rgba(6,4,12,.82)"; c.fillRect(0, 0, W, H);
   c.textAlign = "center"; c.font = "bold 12px monospace"; c.fillStyle = "#cfe8ff"; c.fillText("STATUS", W / 2, 24);
   c.font = "8px monospace"; c.fillStyle = "#b8b0d0";

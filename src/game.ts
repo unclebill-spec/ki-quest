@@ -3,7 +3,10 @@ import { bark } from "./game/combat/barks"; // MB hook: barks
 import { Input } from "./input";
 import { Area, buildArea, moveBody, solidAt } from "./world";
 import { ParticlePool, CH_COMBAT, K_SPARK, K_RING, K_DUST, C_GOLD, C_WHITE, C_RED, C_DUST } from "./vendor/particles";
-import { SaveRecord, readSave, writeSave } from "./save";
+import { SaveRecord, readSave, writeSave, SAVE_VERSION } from "./save";
+import { DEFAULT_GEAR, gearBonus, gearById, GEAR, earned, hasPerk, price, OLD_IDS, SLOT_ORDER, type Equip } from "./gear"; // HD2D W14
+import { newItems, rollKill, updateDrops, quickInput, reviveStep, ITEMS, ITEM_IDS, addHealButton, type Drop } from "./loot"; // HD2D W14
+import { menuStep, openMenu, bindMenuTouch, sfx } from "./menu"; // HD2D W14
 // MB hook: combat + enemy systems (src/game/combat, src/game/enemies)
 import { Enemy, makeEnemy as mbMakeEnemy, FoeKind } from "./game/enemies/types";
 import { updateFoes, onFoeHit, onFoeKill, extraSpawns } from "./game/enemies/ai";
@@ -21,7 +24,7 @@ import { updateMinis, miniActive, miniAbort, miniDone, miniRestore } from "./gam
 import { isBigBoss } from "./game/enemies/types";
 export type { Enemy } from "./game/enemies/types";
 
-export type Mode = "title" | "play" | "pause" | "map";
+export type Mode = "title" | "play" | "pause" | "map" | "revive";
 export interface Shot { x: number; y: number; vx: number; vy: number; life: number; foe: boolean; dmg: number; pierce?: boolean; r?: number; tech?: number; hit?: Enemy[] }
 export interface Num { x: number; y: number; txt: string; col: string; t: number; big: boolean }
 
@@ -40,6 +43,10 @@ export class Game {
   enemies: Enemy[] = []; shots: Shot[] = []; nums: Num[] = [];
   toast = ""; toastT = 0; banner = ""; bannerT = 0; levelT = 0;
   menuSel = 0; onPad = false; shake = 0;
+  /** HD2D W14: equipped gear ids, playtime (s), screen-shake option. */
+  gear: Equip = { ...DEFAULT_GEAR }; play = 0;
+  /** Gear v2 + loot: owned gear ids (L/B/Q are re-synced from level/flags), coins, consumables, world drops, use cooldown, hit-stun. */
+  have: string[] = GEAR.filter((x) => x.src === "L" && x.lvl <= 1).map((x) => x.id); coins = 0; items = newItems(); drops: Drop[] = []; useCd = 0; stunT = 0; syncT = 0; shakeOff = (() => { try { return localStorage.getItem("kiquest-opt-noshake") === "1"; } catch { return false; } })();
   parts = new ParticlePool();
   stats = { crits: 0, normals: 0, blasts: 0, kills: 0, saves: 0, levelUps: 0, shieldBlocks: 0, hurt: 0, transforms: 0, guarded: 0, guardBreaks: 0, bossKills: 0, foeShots: 0 };
   mb = makeMB();
@@ -48,13 +55,55 @@ export class Game {
 
   constructor(public input: Input) { this.reset(); }
 
-  get maxHp() { return 60 + this.end * 8; }
-  get maxEp() { return 40 + this.pow * 4; }
-  get meleeDmg() { return (3 + this.str * 1.5) * tfMul(this).melee; }
-  get blastDmg() { return (6 + this.pow * 2.5) * tfMul(this).blast; }
-  get defense() { return Math.min(0.6, this.end * 0.03) + tfMul(this).def; }
+  /** Stats with gear bonuses (base str/pow/end stay what points bought). */
+  get eStr() { return Math.max(0, this.str + gearBonus(this.gear).str); }
+  get eSpd() { return gearBonus(this.gear).spd; }
+  get ePow() { return Math.max(0, this.pow + gearBonus(this.gear).pow); }
+  get eEnd() { return Math.max(0, this.end + gearBonus(this.gear).end); }
+  get maxHp() { return 60 + this.eEnd * 8; }
+  get maxEp() { return 40 + this.ePow * 4; }
+  get meleeDmg() { return (3 + this.eStr * 1.5) * tfMul(this).melee; }
+  get blastDmg() { return (6 + this.ePow * 2.5) * tfMul(this).blast * (hasPerk(this.gear, "c6") ? 1.15 : 1); }
+  get defense() { return Math.min(0.6, this.eEnd * 0.03) + tfMul(this).def; }
+  equip(id: string) {
+    const it = gearById(id); if (!it || !this.have.includes(id)) return false;
+    this.gear = { ...this.gear, [it.slot]: id };
+    this.hp = Math.min(this.hp, this.maxHp); this.ep = Math.min(this.ep, this.maxEp);
+    return true;
+  }
 
+  /** Add every gear item earned by level / boss flag / quest flag. */
+  syncGear() {
+    const st = (globalThis as unknown as { __ki?: { story?: { flags: Record<string, unknown> } } }).__ki?.story;
+    for (const it of GEAR) if (!this.have.includes(it.id) && earned(it, this.lvl, st?.flags ?? {}, this.mb as unknown as Record<string, unknown>)) {
+      this.have.push(it.id); if (this.mode === "play" && it.src !== "L") this.say(`New gear: ${it.name}`, 2);
+    }
+  }
+  buy(id: string) {
+    const it = gearById(id); if (!it || it.src !== "S" || it.at !== this.area.id) return "not sold here";
+    if (this.have.includes(id)) return "owned"; if (this.lvl < it.lvl) return `needs Lv ${it.lvl}`; if (this.coins < price(it)) return "not enough coins";
+    this.coins -= price(it); this.have.push(id); return "";
+  }
+  buyItem(id: keyof typeof ITEMS) {
+    const I = ITEMS[id]; if (id === "tear" && this.area.id === "lanternmoss") return "not sold here";
+    if (this.items[id] >= I.max) return "pocket full"; if (this.coins < I.price) return "not enough coins";
+    this.coins -= I.price; this.items[id]++; return "";
+  }
+  /** Normal knock-out: back at the save pad (the last spring), bosses reset. */
+  faint() {
+    const p = this.p;
+    this.hp = this.maxHp; this.ep = this.maxEp; p.x = this.area.start.x; p.y = this.area.start.y; p.kx = p.ky = 0;
+    this.say("Knocked out! Back at the save pad.", 2.5);
+    if (this.mb.boss.active) { this.enemies = this.enemies.filter((e) => e.kind !== "boss"); this.mb.boss.active = false; this.mb.hazards.length = 0; }
+    miniAbort(this); // MB hook
+    if (this.mb.boss2.active) { this.enemies = this.enemies.filter((e) => e.kind !== "slag" && !e.minion); this.mb.boss2.active = false; this.mb.hazards.length = 0; }
+    if (this.mb.boss3.active) { this.enemies = this.enemies.filter((e) => e.kind !== "aurel" && !e.minion); this.mb.boss3.active = false; this.mb.hazards.length = 0; } // MB hook
+    if (this.mb.boss4.active) { this.enemies = this.enemies.filter((e) => e.kind !== "vey" && e.kind !== "nell" && e.kind !== "pylon" && !e.minion); this.mb.boss4.active = false; this.mb.hazards.length = 0; } // MB hook
+    if (this.mb.boss6.active) { this.enemies = this.enemies.filter((e) => e.kind !== "malachar"); this.mb.boss6.active = false; this.mb.hazards.length = 0; this.shots = this.shots.filter((s) => !s.foe); } // MB hook
+    if (this.mb.boss5.active) { this.enemies = this.enemies.filter((e) => e.kind !== "morvant"); this.mb.boss5.active = false; this.mb.hazards.length = 0; this.shots = this.shots.filter((s) => !s.foe); } // MB hook
+  }
   reset() {
+    this.drops = []; this.useCd = 0; this.stunT = 0;
     Object.assign(this.p, { x: this.area.start.x, y: this.area.start.y });
     this.hp = this.maxHp; this.ep = this.maxEp;
     const mdone = miniDone(this); const done = this.mb.boss.done, done2 = this.mb.boss2.done, done3 = this.mb.boss3.done, done4 = this.mb.boss4.done, done5 = this.mb.boss5.done, done6 = this.mb.boss6.done; this.mb = makeMB(); this.mb.boss.done = done; this.mb.boss2.done = done2; this.mb.boss3.done = done3; this.mb.boss4.done = done4; this.mb.boss5.done = done5; this.mb.boss6.done = done6; miniRestore(this, mdone); this.tf = 0;
@@ -62,10 +111,19 @@ export class Game {
   }
   makeEnemy(kind: FoeKind, x: number, y: number): Enemy { return mbMakeEnemy(kind, x, y); }
   record(): SaveRecord {
-    return { v: 1, at: Date.now(), area: this.area.name, x: this.p.x, y: this.p.y, lvl: this.lvl, exp: this.exp, pts: this.pts, str: this.str, pow: this.pow, end: this.end, hp: this.hp, ep: this.ep, tf: this.tf, mirela: this.mb.allies[0].joined, brann: this.mb.allies[1].joined }; // MB hook: companions
+    return { v: SAVE_VERSION as 2, at: Date.now(), area: this.area.name, areaId: this.area.id, play: Math.round(this.play), gear: { ...this.gear }, gv: 2, have: [...this.have], coins: this.coins, items: { ...this.items }, x: this.p.x, y: this.p.y, lvl: this.lvl, exp: this.exp, pts: this.pts, str: this.str, pow: this.pow, end: this.end, hp: this.hp, ep: this.ep, tf: this.tf, mirela: this.mb.allies[0].joined, brann: this.mb.allies[1].joined }; // MB hook: companions
   }
   load(r: SaveRecord) {
     Object.assign(this, { lvl: r.lvl, exp: r.exp, pts: r.pts, str: r.str, pow: r.pow, end: r.end, tf: r.tf });
+    this.play = r.play ?? 0; this.gear = { ...DEFAULT_GEAR }; this.drops = [];
+    // Gear v2: old saves (no gv) used 12-item ids; remap by name and keep them owned. h/f default to h0/f0.
+    const old = r.gv !== 2, map = (id: string) => (old ? OLD_IDS[id] : id);
+    this.have = (Array.isArray(r.have) ? r.have.filter((x) => typeof x === "string" && gearById(x)) : []);
+    for (const s of SLOT_ORDER) { const id = r.gear?.[s] && map(r.gear[s]!); if (id && gearById(id)?.slot === s) { if (old && !this.have.includes(id)) this.have.push(id); this.gear[s] = id; } }
+    this.coins = typeof r.coins === "number" && r.coins >= 0 ? Math.floor(r.coins) : 0;
+    this.items = newItems(); for (const k of ITEM_IDS) { const n = r.items?.[k]; if (typeof n === "number" && n > 0) this.items[k] = Math.min(ITEMS[k].max, Math.floor(n)); }
+    this.syncGear();
+    for (const s of SLOT_ORDER) if (!this.have.includes(this.gear[s])) this.gear[s] = DEFAULT_GEAR[s];
     this.hp = Math.min(this.maxHp, r.hp); this.ep = Math.min(this.maxEp, r.ep);
     if (!solidAt(this.area, r.x, r.y)) { this.p.x = r.x; this.p.y = r.y; }
     if (r.mirela === true) this.mb.allies[0].joined = true; if (r.brann === true) this.mb.allies[1].joined = true; // MB hook: old saves lack the fields
@@ -85,12 +143,19 @@ export class Game {
     inp.poll();
     this.time += dt; this.frame++;
     if (this.mode === "title") return;
-    if (inp.pressed("pause")) { this.mode = this.mode === "pause" ? "play" : "pause"; this.menuSel = 0; return; }
+    bindMenuTouch(this); addHealButton();
+    if (this.mode === "revive") { reviveStep(this); return; }
+    if (this.mode === "play") this.play += dt;
+    if (inp.pressed("pause")) { this.mode = this.mode === "pause" ? "play" : "pause"; this.menuSel = 0; if (this.mode === "pause") openMenu(); else sfx("ui-close"); return; }
     if (inp.pressed("map")) { this.mode = this.mode === "map" ? "play" : "map"; return; }
     if (this.mode === "pause") return this.menu();
     if (this.mode === "map") { if (inp.pressed("melee") || inp.pressed("blast")) this.mode = "play"; return; }
     this.toastT -= dt; this.bannerT -= dt; this.levelT -= dt; this.shake = Math.max(0, this.shake - dt * 20);
     this.hero(dt);
+    updateDrops(this, dt); quickInput(this, dt);
+    if ((this.syncT -= dt) <= 0) { this.syncT = 0.5; this.syncGear(); }
+    if (hasPerk(this.gear, "c2")) this.hp = Math.min(this.maxHp, this.hp + 0.5 * dt); // Linnet's Locket
+    if (hasPerk(this.gear, "c4")) this.ep = Math.min(this.maxEp, this.ep + 2 * dt); // Wellspring Drop
     updatePowerup(this, dt); updateArena(this, dt); updateArena2(this, dt); updateArena3(this, dt); updateArena4(this, dt); updateArena5(this, dt); updateArena6(this, dt); updateMinis(this, dt); // MB hook
     updateFoes(this, dt);
     updateAllies(this, dt); // MB hook: companions (Mirela, Brann)
@@ -101,7 +166,9 @@ export class Game {
   }
 
   private menuLast = 0;
-  menu() {
+  menu() { menuStep(this); }
+  /** Pre-W14 single-list status menu (unused; kept for reference/tests). */
+  menuLegacy() {
     const inp = this.input;
     const rows = 4;
     const v = inp.my > 0.5 ? 1 : inp.my < -0.5 ? -1 : 0;
@@ -114,7 +181,7 @@ export class Game {
   menuPick(i: number) {
     this.menuSel = i;
     if (i === 3) { this.mode = "play"; return; }
-    if (this.pts <= 0) { this.say("No points to spend"); return; }
+    if (this.pts <= 0) { this.say("No points to spend"); sfx("ui-error"); return; }
     const k = (["str", "pow", "end"] as const)[i];
     const hpWas = this.maxHp, epWas = this.maxEp;
     this[k]++; this.pts--;
@@ -155,7 +222,7 @@ export class Game {
       p.dir8 = ((Math.round(a / (Math.PI / 4)) % 8) + 8) % 8;
       if (!sw.step) { p.fx = DIRS8[p.dir8][0]; p.fy = DIRS8[p.dir8][1]; }
     }
-    let sp = (p.running ? 125 : 72) * tfMul(this).speed;
+    let sp = (p.running ? 125 : 72) * tfMul(this).speed * (1 + 0.04 * this.eSpd); // HD2D W14: SPD, 4% per point
     if (this.blocking) sp *= 0.3;
     if (sw.step) sp *= 0.25;
     p.walk += dt * (p.moving ? (p.running ? 14 : 9) : 0);
@@ -201,6 +268,7 @@ export class Game {
   kill(e: Enemy) {
     e.dead = true; this.stats.kills++;
     onFoeKill(this, e); // MB hook: EXP orbs, boss reward
+    if (e.kind !== "nell") rollKill(this, e.x, e.y, isBigBoss(e.kind) && !e.minion); // twins: Vey carries the pair's spoils // HD2D W14: coins, gear + item drops
     this.parts.emit(CH_COMBAT, K_RING, e.x, e.y - 8, 0, -6, 0.35, C_WHITE);
     for (let i = 0; i < 8; i++) this.parts.emit(CH_COMBAT, K_SPARK, e.x, e.y - 8, Math.cos(i) * 70, Math.sin(i) * 70, 0.4, C_GOLD, 120, 1);
   }
@@ -220,20 +288,10 @@ export class Game {
     if (this.shield) { this.stats.shieldBlocks++; this.num(p.x, p.y - 34, 0, "#9fe8ff"); p.inv = 0.2; return; }
     if (this.blocking) d *= 0.3;
     d *= 1 - this.defense;
-    this.hp -= d; p.inv = 0.6; bark(this, "rook", "hurt"); /* MB hook: barks */ meterGain(this, TF_HURT); // MB hook this.stats.hurt++; this.shake = 2;
+    this.hp -= d; p.inv = 0.6; this.stunT = 0.4; bark(this, "rook", "hurt"); /* MB hook: barks */ meterGain(this, TF_HURT); // MB hook this.stats.hurt++; this.shake = 2;
     p.kx = Math.cos(a) * (this.blocking ? 60 : 160); p.ky = Math.sin(a) * (this.blocking ? 60 : 160);
     this.num(p.x, p.y - 34, d, "#ff9a9a");
-    if (this.hp <= 0) {
-      this.hp = this.maxHp; this.ep = this.maxEp; p.x = this.area.start.x; p.y = this.area.start.y; p.kx = p.ky = 0;
-      this.say("Knocked out! Back at the save pad.", 2.5);
-      if (this.mb.boss.active) { this.enemies = this.enemies.filter((e) => e.kind !== "boss"); this.mb.boss.active = false; this.mb.hazards.length = 0; }
-      miniAbort(this); // MB hook
-      if (this.mb.boss2.active) { this.enemies = this.enemies.filter((e) => e.kind !== "slag" && !e.minion); this.mb.boss2.active = false; this.mb.hazards.length = 0; }
-      if (this.mb.boss3.active) { this.enemies = this.enemies.filter((e) => e.kind !== "aurel" && !e.minion); this.mb.boss3.active = false; this.mb.hazards.length = 0; } // MB hook
-      if (this.mb.boss4.active) { this.enemies = this.enemies.filter((e) => e.kind !== "vey" && e.kind !== "nell" && e.kind !== "pylon" && !e.minion); this.mb.boss4.active = false; this.mb.hazards.length = 0; } // MB hook
-      if (this.mb.boss6.active) { this.enemies = this.enemies.filter((e) => e.kind !== "malachar"); this.mb.boss6.active = false; this.mb.hazards.length = 0; this.shots = this.shots.filter((s) => !s.foe); } // MB hook
-      if (this.mb.boss5.active) { this.enemies = this.enemies.filter((e) => e.kind !== "morvant"); this.mb.boss5.active = false; this.mb.hazards.length = 0; this.shots = this.shots.filter((s) => !s.foe); } // MB hook
-    }
+    if (this.hp <= 0) { if (this.items.tear > 0) { this.hp = 0; this.mode = "revive"; } else this.faint(); }
   }
 
   projectiles(dt: number) {

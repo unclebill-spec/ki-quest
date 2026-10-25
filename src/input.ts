@@ -5,16 +5,16 @@
  */
 import { readStick, readPad, PAD, STICK_CAP } from "./vendor/screen";
 
-export type Btn = "melee" | "blast" | "block" | "cycle" | "pause" | "map" | "run" | "up" | "down" | "confirm" | "transform";
+export type Btn = "melee" | "blast" | "block" | "cycle" | "pause" | "map" | "run" | "up" | "down" | "confirm" | "transform" | "heal" | "berry";
 const KEYMAP: Record<string, Btn> = {
   KeyJ: "melee", KeyK: "blast", ShiftLeft: "block", ShiftRight: "block", KeyQ: "cycle", Escape: "pause", KeyM: "map", KeyT: "transform", KeyL: "transform",
-  Enter: "confirm", Space: "confirm", ArrowUp: "up", ArrowDown: "down",
+  KeyH: "heal", KeyG: "berry", Enter: "confirm", Space: "confirm", ArrowUp: "up", ArrowDown: "down",
 };
-const PADMAP: [number, Btn][] = [[PAD.A, "melee"], [PAD.B, "blast"], [PAD.X, "run"], [PAD.LB, "cycle"], [PAD.RB, "block"], [PAD.Start, "pause"], [PAD.Back, "map"], [PAD.Y, "transform"], [PAD.Up, "up"], [PAD.Down, "down"]];
+const PADMAP: [number, Btn][] = [[PAD.A, "melee"], [PAD.B, "blast"], [PAD.X, "run"], [PAD.LB, "cycle"], [PAD.RB, "block"], [PAD.Start, "pause"], [PAD.Back, "map"], [PAD.Y, "transform"], [PAD.Up, "up"], [PAD.Down, "down"], [PAD.RT, "heal"], [PAD.LT, "berry"]]; // HD2D W14: RT/LT were unbound
 const DIRKEYS: Record<string, [number, number]> = { KeyW: [0, -1], KeyS: [0, 1], KeyA: [-1, 0], KeyD: [1, 0], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
 
 export class Input {
-  mx = 0; my = 0; running = false;
+  mx = 0; my = 0; running = false; tapX = 0; tapY = 0;
   private held = new Set<Btn>();
   private prev = new Set<Btn>();
   private now = new Set<Btn>();
@@ -110,6 +110,9 @@ export class Input {
     for (const k of this.keys) if (KEYMAP[k]) this.now.add(KEYMAP[k]);
     for (const k of this.fresh) if (KEYMAP[k]) this.now.add(KEYMAP[k]);
     this.freshBtn.forEach((b) => this.now.add(b));
+    // HD2D W14: direction keys tapped since the last poll (a press+release inside one frame), for menu navigation.
+    this.tapX = 0; this.tapY = 0;
+    for (const k of this.fresh) if (DIRKEYS[k]) { this.tapX += DIRKEYS[k][0]; this.tapY += DIRKEYS[k][1]; }
     this.fresh.clear(); this.freshBtn.clear();
     this.touchBtns.forEach((b) => this.now.add(b));
     this.padBtns.forEach((b) => this.now.add(b));
@@ -124,6 +127,7 @@ export class Input {
     this.mx = x; this.my = y; this.running = run && m > 0.1;
   }
   down(b: Btn) { return this.held.has(b); }
+  isHeld(b: Btn) { return this.now.has(b) || this.touchBtns.has(b); }
   pressed(b: Btn) { return this.now.has(b) && !this.prev.has(b); }
   /** Test hook: simulate a key press/release. */
   key(code: string, on: boolean) { if (on) this.keys.add(code); else this.keys.delete(code); }
