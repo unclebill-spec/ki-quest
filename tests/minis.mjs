@@ -53,6 +53,9 @@ try {
         if (e && e.state === "tele") { tele++; if (g.mb.allies.some((a) => a.joined && a.state === "dodge")) dodge++; }
         haz = Math.max(haz, g.mb.hazards.length);
         if (e && n > 240 && n % 30 === 0 && e.state !== "tele") { g.mb[slot].lockT = 0; e.hurt = 0; g.damageFoe(e, Math.ceil(e.max / 30), 0, 0, false); }
+        // Corvin: hold him above the P3 line until an echo decoy has been killed (companions can't finish him early),
+        // and from P2 on force the echo move (test hook) instead of waiting for the RNG to pick it.
+        if (kind === "corvin" && e && L.decoyKills === 0) { e.hp = Math.max(e.hp, Math.ceil(e.max * 0.4)); if (g.mb[slot].phase >= 2 && e.state !== "tele" && !g.enemies.some((q) => q.decoy && !q.dead)) globalThis.__kiMB.forceMiniMove("corvin", "echo"); }
         const dq = g.enemies.find((q) => q.decoy && !q.dead); if (dq && n % 45 === 0) { dq.hurt = 0; g.damageFoe(dq, 99, 0, 0, false); } // hero swats an echo
         g.step(1 / 60);
       }

@@ -66,6 +66,9 @@ export const MINIS: MiniSpec[] = [
     clear: [[42, 8]], reward: (g) => { g.pts += 3; return "The graves go quiet · +3 stat points"; } },
 ];
 export const miniLog = { starts: 0, moves: {} as Record<string, number>, phases: {} as Record<string, number>, decoys: 0, decoyKills: 0, kills: [] as string[] };
+/** Test hook only (__kiMB.forceMiniMove): the next move pick uses this move once. Never set by gameplay. */
+const forced: Record<string, string> = {};
+export const forceMiniMove = (kind: string, move: string) => { forced[kind] = move; };
 const centers: Record<string, { x: number; y: number }> = {};
 export const specOf = (k: string) => MINIS.find((m) => m.kind === k);
 export const isMini = (k: string) => !!specOf(k);
@@ -159,7 +162,7 @@ export function updateMini(g: Game, e: Enemy, dt: number, ux: number, uy: number
     e.state = "chase";
     if (e.t <= 0) {
       const list = s.moves[b.phase - 1], minions = g.enemies.filter((q) => q.minion && !q.dead).length;
-      let k = 0; do e.move = list[Math.floor(Math.random() * list.length)]; while (++k < 8 && (s.defs[e.move].type === "summon" || s.defs[e.move].type === "decoy") && minions >= 3);
+      let k = 0; const fm = forced[s.kind]; if (fm && s.defs[fm]) { delete forced[s.kind]; e.move = fm; } else do e.move = list[Math.floor(Math.random() * list.length)]; while (++k < 8 && (s.defs[e.move].type === "summon" || s.defs[e.move].type === "decoy") && minions >= 3);
       const m = s.defs[e.move]; e.state = "tele"; e.t = m.tele / spd; e.ax = ux; e.ay = uy; e.n = 0;
       miniLog.moves[e.move] = (miniLog.moves[e.move] ?? 0) + 1;
       telegraph(g, s, e, m, ux, uy);
@@ -237,4 +240,4 @@ export function miniAnim(g: Game, e: Enemy): [string, number] | null {
 }
 
 const G = globalThis as unknown as { __kiMB?: Record<string, unknown> };
-G.__kiMB = { ...(G.__kiMB ?? {}), startMini, miniLog, MINIS };
+G.__kiMB = { ...(G.__kiMB ?? {}), startMini, miniLog, MINIS, forceMiniMove };

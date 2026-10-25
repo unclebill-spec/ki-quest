@@ -10,6 +10,7 @@
 - Reedwraith Corvin mini-boss (Sunken Meadow): guards the Ferry Bell, echo decoys, 3 phases, sets corvinDown.
 - Capmother Gilt mini-boss (Glowcap Ring): spores, brood, root cracks, sets capDone.
 - Lady Ombrelle mini-boss (Lantern Graveyard): parasol, graves, requiem, sets ombrelleDown.
+- tests/minis.mjs: Corvin echo-decoy check is deterministic (forceMiniMove test hook, HP hold until a decoy dies).
 
 ## 0.3.7 — 2026-10-24 (HD-2D Cozy Builder: menus, gear, save slots)
 - Tabbed pause menu (Status/Gear/Lens/Map/Options/Save), keyboard + gamepad + touch; UI sounds.
