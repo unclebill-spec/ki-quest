@@ -33,3 +33,8 @@ Publishing needs Bill's approval.
 - Gear v2: 5 slots, ownership in `g.have`; new gear must have a source (L/S/B/Q) in gear.ts. Boss/quest drops key off story flags or MB `done` (see `BOSS`). New non-boss foes get loot automatically via `kill()` → `rollKill`; a new boss kind must be added to `isBigBoss` in game.ts to get boss spoils.
 - Player text never says "ki"/"Gi". Use Glow/Kindle.
 - Damage/HP math must use `g.eStr/ePow/eEnd/eSpd` (gear-inclusive), not raw `g.str` etc., if gear should count.
+
+## W16 notes (2026-10-24)
+- Story flags: `ombrelleBeat` (Sable, hushwater, after `ombrelleDown`). Ombrelle gear needs `ombrelleDown` only.
+- Drowned Vesper shopkeeper Marlo Quayle = NPC `s` on DROWNED (5,3); `KEEPERS.drowned.npc = "s"` in menu.ts.
+- Known flake: minis.mjs "corvin: echo decoys..." can see decoys:0 (MB to fix) — deploy waits on it. Rule 19: game-qa by another bot before telling Bill a build is done.
