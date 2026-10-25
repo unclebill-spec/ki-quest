@@ -37,4 +37,4 @@ Publishing needs Bill's approval.
 ## W16 notes (2026-10-24)
 - Story flags: `ombrelleBeat` (Sable, hushwater, after `ombrelleDown`). Ombrelle gear needs `ombrelleDown` only.
 - Drowned Vesper shopkeeper Marlo Quayle = NPC `s` on DROWNED (5,3); `KEEPERS.drowned.npc = "s"` in menu.ts.
-- Known flake: minis.mjs "corvin: echo decoys..." can see decoys:0 (MB to fix) — deploy waits on it. Rule 19: game-qa by another bot before telling Bill a build is done.
+- W16 is LIVE (2026-10-25). Corvin/boss4 flakes fixed by MB via test hooks (forceMiniMove, forceTwinMove). Rule 19: game-qa by another bot before telling Bill a build is done.

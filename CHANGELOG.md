@@ -1,10 +1,10 @@
 # Changelog
-## W16 — 2026-10-24 (Kindle Quest: mini-boss story wrap-up, not deployed yet)
+## W16 — 2026-10-25 (Kindle Quest: mini-boss story wrap-up, LIVE)
 - Sable Kestrel's crypt-stair beat after Ombrelle falls (`ombrelleBeat`, hushwater).
 - Ombrelle's gear unlocks only on `ombrelleDown` (lead-in `ombrelleSeen` fallback removed from gear.ts BOSS).
 - Marlo Quayle placed in Drowned Vesper (NPC `s`, tile 5,3 by the save pad); the Drowned shop opens at her. tests/minibosses-story.mjs 9/9.
 - Screenshots: docs/bill/mini-{kettle,corvin,gilt,ombrelle}.png, docs/bill/pause-menu-phone.png.
-- gh-pages deploy held: minis.mjs Corvin echo-decoy check is flaky (failed once, 31/31 on reruns); Master Builder fixing.
+- Deployed 2026-10-25 after MB's flake fixes (Corvin d6759a9, boss4 860d724); full serial suite 427/427 + ground + fullrun 57/57. Live title shot docs/bill/live-title-w16.png. Awaiting game-qa by another bot (rule 19).
 ## MB W17 — Mini-bosses
 - Test fix: boss4 P3 flake — test-only `forceTwinMove` hook + HP floor; twins gameplay unchanged (ready for game-qa).
 - Foreman Kettle mini-boss (Cinder Galleries): 3 phases, original sheet, sets kettleDown.
