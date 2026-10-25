@@ -51,7 +51,7 @@ export const SHOP_NAMES: Record<string, string> = { lanternmoss: "Wickhaven", hu
 export const BOSS: Record<string, { name: string; flag?: string; mb?: string; /** TODO(MB): lead-in/quest flag used until the mini-boss fight exists; then drop it. */ alt?: string }> = {
   rune: { name: "Warden Rune", mb: "boss" }, slag: { name: "Slagheart", flag: "quarryBossDown", mb: "boss2" }, aurel: { name: "Count Aurel", flag: "tideBossDown", mb: "boss3" },
   twins: { name: "Cageward Twins", flag: "cageDone", mb: "boss4" }, morvant: { name: "Morvant", flag: "morvantDown", mb: "boss5" }, malachar: { name: "Malachar", flag: "malacharDown", mb: "boss6" },
-  corvin: { name: "Reedwraith Corvin", flag: "corvinDown", alt: "corvinSeen" }, kettle: { name: "Foreman Kettle", flag: "kettleDown" }, ombrelle: { name: "Lady Ombrelle", flag: "ombrelleDown", alt: "ombrelleSeen" }, capmother: { name: "Capmother Gilt", flag: "capDone", alt: "capSeen" },
+  corvin: { name: "Reedwraith Corvin", flag: "corvinDown" }, kettle: { name: "Foreman Kettle", flag: "kettleDown" }, ombrelle: { name: "Lady Ombrelle", flag: "ombrelleDown", alt: "ombrelleSeen" }, capmother: { name: "Capmother Gilt", flag: "capDone" },
 };
 export const price = (g: Gear) => g.lvl * 15;
 export const gearById = (id: string) => GEAR.find((g) => g.id === id);
