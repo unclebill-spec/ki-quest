@@ -61,7 +61,7 @@ function loop(now: number) {
     if (!story.update(DT)) { game.step(DT); story.after(); } acc -= DT;
     if (game.mode === "title" && (input.pressed("melee") || input.pressed("pause")) && !title.hidden) begin();
   }
-  audio.watch(game as never);
+  { const F = story.flags as Record<string, unknown>; audio.watch(game as never, story.credits > 0 || (game.area.id === "husk" && !!F.malacharDown && (!F.dawn || !!story.box))); } // dawn epilogue + credits -> finale-theme
   if (game.mode !== "title") { render(ctx, game); storyOverlay(ctx, game, story, W, H); }
   requestAnimationFrame(loop);
 }

@@ -62,7 +62,7 @@ export class Audio {
   private duck() { if (!this.ctx || this.muted) return; const t = this.ctx.currentTime, g = this.music.gain; g.cancelScheduledValues(t); g.setValueAtTime(0.22, t); g.linearRampToValueAtTime(0.45, t + 2); }
   /** Tracks shipped in public/audio. An area's `music` may list candidates "a|b|c"; the first shipped one plays.
    *  Add a name here when the sound team delivers it (e.g. area3-theme, area4-theme, quarry-theme, undertide-theme). */
-  static HAVE = new Set(["area1-theme", "area2-theme", "boss-theme", "boss2-theme", "kilnreach-theme", "kilnreach-quarry", "drowned-vesper"]);
+  static HAVE = new Set(["area1-theme", "area2-theme", "boss-theme", "boss2-theme", "kilnreach-theme", "kilnreach-quarry", "drowned-vesper", "husk-theme", "finale-theme"]);
   static pick(m: string) { return m.split("|").find((n) => Audio.HAVE.has(n)) ?? "area1-theme"; }
   setMusic(n: string) {
     if (n === this.cur) return;
@@ -75,7 +75,8 @@ export class Audio {
     const s = this.ctx.createBufferSource(); s.buffer = b; s.loop = true; s.connect(this.music); s.start(); this.src = s;
   }
   /** Per-frame: turn state changes into sounds. */
-  watch(g: G) {
+  /** finale: dawn epilogue / credits are playing (main.ts) -> finale-theme loops over everything else. */
+  watch(g: G, finale = false) {
     const S = g.stats, P = this.prev, d = (k: string) => (S[k] ?? 0) - (P[k] ?? 0);
     if (P.crits !== undefined) {
       if (d("crits") > 0) this.play("crit-hit");
@@ -101,6 +102,6 @@ export class Audio {
     this.prevShield = g.shield;
     if (g.tf >= 100 && this.prevTf < 100) this.play("transform");
     this.prevTf = g.tf;
-    this.setMusic(g.mode === "title" ? "" : g.bossActive ? Audio.pick(g.area.bossMusic ?? "boss-theme") : Audio.pick(g.area.music ?? "area1-theme"));
+    this.setMusic(g.mode === "title" ? "" : finale ? Audio.pick("finale-theme") : g.bossActive ? Audio.pick(g.area.bossMusic ?? "boss-theme") : Audio.pick(g.area.music ?? "area1-theme"));
   }
 }

@@ -23,3 +23,5 @@ Publishing needs Bill's approval.
 - Nintendo 64 Style owns deploy (gh-pages). Master Builder pushes to main only.
 
 - NPC/idle animation phases must come from time + stable ids, never screen coords (see npcBob in src/areas/art.ts; tests/npc-bob.mjs).
+- Player-facing name is **Kindle Quest** (index.html title/h1, webmanifest, credits). Internal ids stay ki/kiquest/ki-quest (saves, tests, URL).
+- Music: `Audio.HAVE` lists shipped tracks; `audio.watch(game, finale)`: main.ts passes finale=true during the dawn epilogue (husk, malacharDown, before/while the dawn dialog) and credits -> finale-theme.

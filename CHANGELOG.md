@@ -59,3 +59,7 @@
 ## W13
 - Fix: town NPCs no longer bounce faster when you walk toward them (idle bob uses clock time, not screen position).
 - Test: tests/npc-bob.mjs.
+
+## W14
+- Renamed to **Kindle Quest** (Bill approved): page title, title-screen h1, webmanifest name/short_name/description, credits. Repo, `/ki-quest/` URL, save keys, `window.__ki` unchanged.
+- Music: husk-theme loops in The Husk Sun; finale-theme loops through the dawn epilogue and credits.
