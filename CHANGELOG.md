@@ -63,3 +63,5 @@
 ## W14
 - Renamed to **Kindle Quest** (Bill approved): page title, title-screen h1, webmanifest name/short_name/description, credits. Repo, `/ki-quest/` URL, save keys, `window.__ki` unchanged.
 - Music: husk-theme loops in The Husk Sun; finale-theme loops through the dawn epilogue and credits.
+## W13b
+- Test: boss3 drowned-soldier check counts peak alive soldiers during P3 (companions could kill them during the P4 loop; flaky ~1 in 4).

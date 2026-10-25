@@ -41,13 +41,14 @@ try {
     return { tele, dodge, joined: g.mb.allies.map((a) => a.joined).join() }; });
   ok("companions dodge Aurel's telegraphs", cp.tele > 0 && cp.dodge / cp.tele > 0.5, JSON.stringify(cp));
   // phases 1→2→3→4, a shockwave each; later phases bring their own moves
-  const ph = await E(() => { const g = window.__ki.game, M = globalThis.__kiMB, B = g.mb.boss3, b = g.enemies.find((e) => e.kind === "aurel" && !e.dead); const s0 = M.aurelLog.shocks, phases = [B.phase], moves = new Set(); M.aurelLog.summons = 0;
+  // drowned soldiers: peak alive during P3 (companions may legitimately kill them during the long P4 loop)
+  const ph = await E(() => { const g = window.__ki.game, M = globalThis.__kiMB, B = g.mb.boss3, b = g.enemies.find((e) => e.kind === "aurel" && !e.dead); const s0 = M.aurelLog.shocks, phases = [B.phase], moves = new Set(); let maxMin = 0; M.aurelLog.summons = 0;
     const need = { 2: ["2:whirl"], 3: ["3:summon", "3:sweep2", "3:lunge4"], 4: ["4:ring"] };
     for (const [f, want] of [[0.7, 2], [0.45, 3], [0.2, 4]]) { B.lockT = 0; b.hurt = 0; g.damageFoe(b, b.hp - b.max * f, 0, 0, false);
-      for (let i = 0; i < 9000 && !(need[want].every((m) => moves.has(m)) && b.state !== "tele" && (want !== 3 || M.aurelLog.summons > 0)); i++) { g.p.inv = 1; g.hp = g.maxHp; b.hp = b.max * f; g.step(1 / 60); window.__watch(); if (b.state === "tele") moves.add(B.phase + ":" + b.move); }
+      for (let i = 0; i < 9000 && !(need[want].every((m) => moves.has(m)) && b.state !== "tele" && (want !== 3 || M.aurelLog.summons > 0)); i++) { g.p.inv = 1; g.hp = g.maxHp; b.hp = b.max * f; g.step(1 / 60); window.__watch(); if (B.phase === 3) maxMin = Math.max(maxMin, g.enemies.filter((e) => e.minion && !e.dead).length); if (b.state === "tele") moves.add(B.phase + ":" + b.move); }
       phases.push(B.phase); }
     const minions = g.enemies.filter((e) => e.minion && !e.dead).length;
-    return { phases: phases.join(">"), shocks: M.aurelLog.shocks - s0, moves: [...moves].sort().join(","), minions, summons: M.aurelLog.summons }; });
+    return { phases: phases.join(">"), shocks: M.aurelLog.shocks - s0, moves: [...moves].sort().join(","), minions: maxMin, minionsEnd: minions, summons: M.aurelLog.summons }; });
   ok("four phases, each change fires a shockwave", ph.phases === "1>2>3>4" && ph.shocks === 3, JSON.stringify(ph));
   ok("P2 whirlpools, P3 double wave + 4-lunge chain + drowned soldiers (≤4), P4 rising-water ring", /2:whirl/.test(ph.moves) && /3:sweep2/.test(ph.moves) && /3:lunge4/.test(ph.moves) && /3:summon/.test(ph.moves) && /4:ring/.test(ph.moves) && ph.summons > 0 && ph.minions > 0 && ph.minions <= 4, JSON.stringify(ph));
   const spr = await E(() => ({ ...window.__spr, R: globalThis.__kiMB.SPRING_R, placed: globalThis.__kiMB.aurelLog.hazards, minHaz: Math.round(globalThis.__kiMB.aurelLog.minHazD), minBoss: Math.round(globalThis.__kiMB.aurelLog.minBossD) }));

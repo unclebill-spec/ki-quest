@@ -118,3 +118,7 @@ Final boss in src/game/enemies/malachar.ts (trigger: huskIn, !malacharDown, no s
 - src/areas/art.ts `npc()`: idle bob now `npcBob(id, t)` (g.time + per-id phase). It used to use **screen x**, so camera scroll sped up/jittered the bob while walking. Shared NPC code: don't feed screen coords into animation phases. Last bob is mirrored to `globalThis.__kiNpcBob[id]` (+`id@x`) for tests.
 - tests/npc-bob.mjs: still vs walking flips/s must match (old code: 1.25 vs 24.25/s).
 - Audio: kilnreach-theme, kilnreach-quarry, drowned-vesper, boss2-theme were already in public/audio, Audio.HAVE and world.ts (kilnreach, emberquarry, drowned/undertide/stair, boss2 for quarry+). Byte-identical to staging, <=1MB, 128k, loop=true, seams checked. No change.
+
+## MB W13b: boss3 "P3 drowned soldiers" flake fixed
+- Cause: the P3 loop stops as soon as the first summon fires (summons>0), then the P4 loop runs up to 9000 more frames with companions fighting; they kill the 20 HP soldiers, and `minions` was only counted after P4 → minions:0, summons:1 (~1 in 4 runs, depends on how many summons happened before exit). Not Aurel gameplay.
+- Fix (tests/boss3.mjs only): `minions` = peak soldiers alive during phase 3 (still must be 1..4); `minionsEnd` reported for info. boss3 10/10 on ports 4521-4530.
