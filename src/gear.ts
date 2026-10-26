@@ -49,8 +49,9 @@ export const SLOT_NAMES: Record<GearSlot, string> = { h: "Head", a: "Garb", w: "
 export type Equip = Record<GearSlot, string>;
 export const DEFAULT_GEAR: Equip = { h: "h0", a: "a0", w: "w0", f: "f0", c: "c0" };
 export const SHOP_NAMES: Record<string, string> = { lanternmoss: "Wickhaven", hushwater: "Hushwater", drowned: "Drowned Vesper", kilnreach: "Kilnreach" };
-/** Boss key -> (story flags, mb boss keys). "slag" covers both Slagheart and the spec's "Ashmaw/quarry" (no separate Ashmaw boss in game). */
+/** Boss key -> (story flags, mb boss keys). "slag" = Slagheart (quarry). Ashmaw is the grotto boss (key "rune"). */
 export const BOSS: Record<string, { name: string; flag?: string; mb?: string; /** TODO(MB): lead-in/quest flag used until the mini-boss fight exists; then drop it. */ alt?: string }> = {
+  /* Key `rune` = Ashmaw (grotto boss), NOT Warden Rune: kept for save compatibility (Will, Oct 26; see CANON.md). Warden Rune = `wardenrune`. */
   rune: { name: "Ashmaw", mb: "boss" }, /* MB hook (W17) */ hollowmere: { name: "Hollowmere", flag: "hollowmereDown", mb: "boss11" }, wardenrune: { name: "Warden Rune", flag: "runeDown", mb: "boss12" }, slag: { name: "Slagheart", flag: "quarryBossDown", mb: "boss2" }, aurel: { name: "Count Aurel", flag: "tideBossDown", mb: "boss3" },
   twins: { name: "Cageward Twins", flag: "cageDone", mb: "boss4" }, morvant: { name: "Morvant", flag: "morvantDown", mb: "boss5" }, malachar: { name: "Malachar", flag: "malacharDown", mb: "boss6" },
   corvin: { name: "Reedwraith Corvin", flag: "corvinDown" }, kettle: { name: "Foreman Kettle", flag: "kettleDown" }, ombrelle: { name: "Lady Ombrelle", flag: "ombrelleDown" }, capmother: { name: "Capmother Gilt", flag: "capDone" },
