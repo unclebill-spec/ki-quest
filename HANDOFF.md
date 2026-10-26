@@ -1,4 +1,32 @@
-# HANDOFF: Kindle Quest (team build, 2026-10-23)
+# HANDOFF: Kindle Quest (team build, updated 2026-10-26)
+## RESUME HERE (executor, W17d v1 push, 2026-10-26 ~5 PM ET)
+- **Shipped:**
+  - all-boss retune (`Game.TUNE` in src/game.ts; numbers and times in BALANCE.md)
+  - grotto gate plus anti-trap
+  - banner queue (no stacking, none over dialogue)
+  - hint audit
+  - Lv<8 EXP x0.5
+  - finale/epilogue/credits/THE END
+  - New Game button
+  - ?qa=ashmaw|hollowmere|warden|ending
+- **Rollback:** ROLLBACK_PLACEHOLDER
+- **Open items:**
+  - Slagheart, Aurel, Twins and Morvant fight times aren't measured yet (no warps). The Twins only have poise.
+  - Pre-existing: tests/artpack3 "Hush Squire lunges" fails 13/14. I didn't touch it.
+  - A stale kiquest-mb-v1 with no main save is only cleared by the title New Game button.
+  - Perks are flavor text only.
+  - The Husk Sun orb epilogue scene needs malacharFade. That's kept, since the fade is canon.
+- **Linnet's Letters (staging/story/linnets_letters.md): NOT built.**
+  - The epilogue scene is skipped unless lettersDone is set.
+  - Open questions from the file:
+    1. Where Linnet fades: during the quest or at dawn?
+    2. Coordinates for the 3 letter tiles and the hidden spring K tile.
+    3. NPC id `l` and how she stays hidden until linnetWoke.
+    4. Does she need Mirela in the party, or just the oath?
+    5. Does Orrin's branch order keep the Hollowmere hint reachable?
+    6. Should there be a glow orb at the spring after dawn?
+    7. Lens radar pings for the letters?
+    8. Linnet's Lens bio and sprite art.
 ## Claims (check before working; pull before push)
 - **Master Builder:** src/game/combat/, src/game/enemies/, public/art/chars/ (combat, techniques, power-up/transform, enemies + bosses, hero/enemy sprites incl. staging rook/mirela/brann).
 - **Cozy Builder:** menus (tabs, gear), save/load, input, PWA, test suite (starts after Gravewake ships).

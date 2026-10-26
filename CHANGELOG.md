@@ -1,4 +1,10 @@
 # Changelog
+## W17d v1 push — 2026-10-26 (executor)
+- Boss retune for all 8 bosses: poise anti-mash, per-phase minimum time and boss damage x1.4–x3. HP is unchanged. Numbers and fight times are in BALANCE.md. Ashmaw: Lv 8 mash went from 16 s to ~45 s. Malachar: 14 s to ~49 s. Rune: 16 s to ~58 s and is the hardest.
+- The grotto is gated on the oath, and the barrier can't trap the player when no boss is present. Banners no longer stack: minor text waits behind a fresh boss banner, and nothing draws over dialogue.
+- Quest hints name the real next step: grotto, Kilnreach stone, "Lv X/8" training, quarry lift. Below Lv 8 the EXP curve is x0.5.
+- Finale: Rune's defeat beat, an epilogue slideshow (Linnet only with lettersDone), Burning Bush credits plus a THE END card, and the title with Continue/New Game after the credits.
+- Fixes: New Game button, autosave on save, the stub perks renamed (flavor only), the Kilnreach orb text, and ?qa=ending added. The ?qa=hollowmere warp is now realistic (Lv 11).
 ## W17c.1 QA warp fixes — 2026-10-26
 - ?qa=ashmaw: Lv 14 + Tidebreaker/Slagplate/Kiln/Wellspring gear and pre-Grotto quest flags (metAma, metMirela, bell/reed done, oath); keys fight ~60 s to reach PHASE 2 and ENRAGED. ?qa=hollowmere also gets the Hushwater quest flags. qa-keys-hollowmere ends in Gear > Charm with the Stillwater Charm highlighted (it is granted on defeat, not a floor pickup). qa-warps asserts the quest line is not stuck.
 ## W17c QA warps — 2026-10-26
