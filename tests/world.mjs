@@ -26,7 +26,7 @@ try {
   ok("talks to Elder Ama", await E(() => window.__ki.story.box?.who === "Elder Ama Quill"));
   await shot("dialog");
   for (let i = 0; i < 8 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
-  ok("Ama flag set + objective moves on", await E(() => window.__ki.story.flags.metAma === true && /Lv 8/.test(window.__ki.story.objective())));
+  ok("Ama flag set + objective moves on", await E(() => window.__ki.story.flags.metAma === true && /Lv (\d+\/)?8/.test(window.__ki.story.objective())));
   await shot("wickhaven");
   // Lost Lanterns: catch 6 glow orbs, hand in to Pip
   for (let i = 0; i < 6; i++) { await E((i) => { const g = window.__ki.game, o = g.area.orbs[i]; g.p.x = o.x; g.p.y = o.y + 6; }, i); await p.waitForTimeout(80); }

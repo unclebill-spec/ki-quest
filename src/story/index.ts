@@ -23,7 +23,7 @@ export class Story {
   constructor(public g: Game, public input: Input) {
     try { this.flags = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch { this.flags = {}; }
   }
-  save() { try { localStorage.setItem(KEY, JSON.stringify(this.flags)); } catch { /* full */ } if (this.g.mode === "play") this.g.autosave(); } // W17d: autosave with flags so a crash can't leave flags ahead of level/gear
+  save() { try { localStorage.setItem(KEY, JSON.stringify(this.flags)); } catch { /* full */ } } // W17d: autosave with flags so a crash can't leave flags ahead of level/gear
   get active() { return this.credits > 0 || !!this.box || this.intro >= 0 || this.fly > 0; }
 
   /** Called after game.start(). New game: reset story, show intro. Continue: restore area. */
@@ -97,7 +97,7 @@ export class Story {
       this.say("Updraft stone", [`The rune slab hums. Ride the updraft to ${s.label}?`, "(Melee to fly. Step off to stay.)"], () => { this.fly = 3.2; this.flyTo = s.to; this.flyFrom = g.area.id; });
       return true;
     }
-    const F = this.flags, B = (k: string, who: string, lines: string[], exp = 0) => { F[k] = true; this.save(); if (exp) g.gainExp(exp); this.say(who, lines); return true; };
+    const F = this.flags, B = (k: string, who: string, lines: string[], exp = 0) => { F[k] = true; this.save(); if (exp) g.gainExp(exp); if (g.mode === "play") g.autosave(); /* W17d: beat flags + hero state saved together (crash flag drift); not in save() so begin() cannot outdate a loaded save */ this.say(who, lines); return true; };
     // Mini-boss lead-ins (W15, world side only; fights are Master Builder's, see HANDOFF "Mini-boss specs"). One-shot, fires on entering the arena ring once its gate is open.
     const at = (a: string, tx: number, ty: number, r: number) => g.area.id === a && Math.hypot(g.p.x - (tx * 16 + 8), g.p.y - (ty * 16 + 8)) < (r + 1) * 16 && !this.box;
     // W17 Ashmaw lines (staging/story/w17.md). Lead-in fires just outside the grotto ring (ARENA r=104px); defeat lines play once (ashmawBeat) after boss.ts sets ashmawDown.
