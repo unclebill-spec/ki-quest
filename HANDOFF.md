@@ -1,5 +1,5 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W17d v1 push, 2026-10-26 ~5 PM ET)
+## RESUME HERE (executor, W17e round 2, 2026-10-26 ~5:20 PM ET)
 - **Shipped:**
   - all-boss retune (`Game.TUNE` in src/game.ts; numbers and times in BALANCE.md)
   - grotto gate plus anti-trap
@@ -8,11 +8,11 @@
   - Lv<8 EXP x0.5
   - finale/epilogue/credits/THE END
   - New Game button
-  - ?qa=ashmaw|hollowmere|warden|ending
-- **Rollback:** `git -C /workspace/games/ki-rpg push -f origin 7c7c834e870a:gh-pages` (gh-pages before the W17d deploy of main@3f5b253, 4:49 PM ET)
+  - ?qa=ashmaw|hollowmere|slagheart|aurel|twins|morvant|warden|ending (W17e added 4 warps + keys)
+  - W17e: all 8 bosses mash-timed 43–68 s with real HP cost; Twins 50%/14 s hold
+- **Rollback:** `git -C /workspace/games/ki-rpg push -f origin ecad18bffae4:gh-pages` (gh-pages before the W17e deploy of main@072cbd2, ~5:19 PM ET). Older W17d rollback: `... 7c7c834e870a:gh-pages`
 - **Open items:**
-  - Slagheart, Aurel, Twins and Morvant fight times aren't measured yet (no warps). The Twins only have poise.
-  - Pre-existing: tests/artpack3 "Hush Squire lunges" fails 13/14. I didn't touch it.
+  - artpack3 was broken by my W17d autosave-in-save(); fixed in 99d00ae (14/14).
   - A stale kiquest-mb-v1 with no main save is only cleared by the title New Game button.
   - Perks are flavor text only.
   - The Husk Sun orb epilogue scene needs malacharFade. That's kept, since the fade is canon.
