@@ -1,4 +1,8 @@
 # Changelog
+## W17e round 2 — 2026-10-26 (executor)
+- New `?qa=slagheart|aurel|twins|morvant` warps (isolated save, Lv 12/15/18/19 with matching gear) and qa-keys-*.json files for them. tests/qa-warps.mjs now runs 11 checks.
+- Retune: Slagheart 20 s hold / x1.5, Aurel 14 s hold, Twins each held at 50% HP for 14 s / x1.8 (anti-mash), Morvant 13 s hold / x3.2. All 8 bosses take 43–68 s to mash and cost real HP (see BALANCE.md).
+- Fix: autosave moved out of story.save() and into story beats, so begin() no longer overwrites a loaded save (artpack3 lunge tests pass again). The world test now accepts the "Lv n/8" hint.
 ## W17d v1 push — 2026-10-26 (executor)
 - Boss retune for all 8 bosses: poise anti-mash, per-phase minimum time and boss damage x1.4–x3. HP is unchanged. Numbers and fight times are in BALANCE.md. Ashmaw: Lv 8 mash went from 16 s to ~45 s. Malachar: 14 s to ~49 s. Rune: 16 s to ~58 s and is the hardest.
 - The grotto is gated on the oath, and the barrier can't trap the player when no boss is present. Banners no longer stack: minor text waits behind a fresh boss banner, and nothing draws over dialogue.
