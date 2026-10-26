@@ -1,5 +1,26 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W17e round 2, 2026-10-26 ~5:20 PM ET)
+## RESUME HERE (executor, W17g balance fix, 2026-10-26 ~6:28 PM ET)
+- **Live:** main@8adc334 deployed at 6:28 PM ET (bundle index-DzEnKzFO.js). **Rollback:** `git -C /workspace/games/ki-rpg push -f origin f253695f7385:gh-pages` (the W17e build that QA checked).
+- **W17g:**
+  - Twins: 3 phase holds (75/50/25%, 13 s) and x2.2 damage.
+  - New `?qa=malachar` warp.
+  - Per-boss no-Escape mash keys.
+  - qa-keys-ending.json: 15 Enters, then 75 s idle, so the credits play through to the title.
+  - Honest no-pause times for all 8 bosses: 50–85 s (BALANCE.md).
+- **Root cause of the "10 s" flag:** no boss dies in 10 s. QA's scratch keys run about 59 s of input, and the fights are 46–58 s inside that window. Warp stats equal normal progression (3L+6 points). Holds and poise engage. The one real gap was the Twins at 33 s, now fixed.
+- **QA, all 9 warps:** `cd /workspace/games/ki-rpg && for b in ashmaw hollowmere slagheart aurel twins morvant malachar warden ending; do game-qa "https://unclebill-spec.github.io/ki-quest/?qa=$b" --keys qa-keys-$b.json --name kq-$b; done`
+- **Linnet's Letters:** built and tested (tests/letters.mjs, 17/17) on branch `linnet-letters` (e25f8ec). Not merged and not deployed. It needs a rebase onto main first.
+  - Game Director, the defaults I chose:
+    1. Linnet fades at dawn, in the epilogue.
+    2. Letters at Hushwater (14,22) and (33,24) in the meadow, and (44,11) on the east boardwalk. The spring K is at Lanternmoss (2,32), and Linnet stands at (5,31).
+    3. NpcDef `show`/`at` spawn hiding.
+    4. Needs the oath only.
+    5. Orrin's branches yield to the bell/Corvin hint.
+    6. No glow orb after dawn.
+    7. No Lens ping; the hints name the places instead.
+    8. Placeholder recoloured sprite. Final art is still needed.
+  - Rewards: Mirela reading the letters gives +100 EXP, Linnet gives +250 EXP plus Linnet's Locket (c2).
+## (previous) RESUME HERE (executor, W17e round 2, 2026-10-26 ~5:20 PM ET)
 - **Shipped:**
   - all-boss retune (`Game.TUNE` in src/game.ts; numbers and times in BALANCE.md)
   - grotto gate plus anti-trap

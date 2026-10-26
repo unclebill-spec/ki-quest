@@ -1,4 +1,8 @@
 # Changelog
+## W17g balance fix — 2026-10-26 (executor)
+- The Cageward Twins now hold at 75/50/25% (13 s each) with x2.2 damage. The no-pause mash went from 33 s to 61–85 s.
+- New `?qa=malachar` warp and per-boss no-Escape keys files. The ending keys now let the credits run to the title.
+- Honest no-pause times for all 8 bosses are in BALANCE.md (50–85 s, real HP lost).
 ## W17e round 2 — 2026-10-26 (executor)
 - New `?qa=slagheart|aurel|twins|morvant` warps (isolated save, Lv 12/15/18/19 with matching gear) and qa-keys-*.json files for them. tests/qa-warps.mjs now runs 11 checks.
 - Retune: Slagheart 20 s hold / x1.5, Aurel 14 s hold, Twins each held at 50% HP for 14 s / x1.8 (anti-mash), Morvant 13 s hold / x3.2. All 8 bosses take 43–68 s to mash and cost real HP (see BALANCE.md).
