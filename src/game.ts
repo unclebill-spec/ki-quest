@@ -1,4 +1,4 @@
-/** Ki Quest simulation: hero, combat, enemies, EXP/levels, save pad. No drawing here. */
+/** Kindle Quest simulation: hero, combat, enemies, EXP/levels, save pad. No drawing here. */
 import { bark } from "./game/combat/barks"; // MB hook: barks
 import { Input } from "./input";
 import { Area, buildArea, moveBody, solidAt } from "./world";

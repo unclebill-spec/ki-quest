@@ -1,4 +1,4 @@
-# Ki Quest (working title)
+# Kindle Quest (working title)
 
 **Play:** https://unclebill-spec.github.io/ki-quest/ · Repo: https://github.com/unclebill-spec/ki-quest
 

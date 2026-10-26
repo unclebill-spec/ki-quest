@@ -1,4 +1,4 @@
-"""Undertide boss sheet: COUNT AUREL, a drowned tide general (Ki Quest, Master Builder).
+"""Undertide boss sheet: COUNT AUREL, a drowned tide general (Kindle Quest, Master Builder).
 Same approach as build_slag_golem.py / staging build_enemies.py: drawn part-by-part on the 24x32 grid with build_sprites.py
 (auto shading, 1 px #120e1c ink outline, hard alpha), nearest 2x to 48x64. Rows = anim x facing (down, up, left, right);
 right = left mirrored. Gloom-and-glow teal / cyan / violet neon: barnacled admiral's coat, cold crown, glowing rapier.

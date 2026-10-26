@@ -1,4 +1,4 @@
-# AGENTS.md: Ki Quest
+# AGENTS.md: Kindle Quest
 - Owner: Bill Weathersbee. **Never publish, push or create a GitHub repo without Bill's approval.**
 - Stack: TypeScript + Vite + plain canvas (no React). Internal resolution 384x216, 16:9 landscape.
 - Original IP only: no Dragon Ball names, assets, characters or traced art. Hero: placeholder ~24x32, real top + belt waist + pants.

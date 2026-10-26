@@ -56,9 +56,9 @@ export const FX_PALETTE = [
   "#8f2d3a", // 7 potion red
   "#e07a2f", // 8 ember
   "#8a6844", // 9 dirt brown
-  "#7ff0ff", // 10 ki cyan (Ki Quest addition)
-  "#d070ff", // 11 ki violet (Ki Quest addition)
-  "#7aff9a", // 12 wellspring green (Ki Quest addition: Malachar)
+  "#7ff0ff", // 10 ki cyan (Kindle Quest addition)
+  "#d070ff", // 11 ki violet (Kindle Quest addition)
+  "#7aff9a", // 12 wellspring green (Kindle Quest addition: Malachar)
 ] as const;
 export const C_GOLD = 0;
 export const C_BONE = 1;

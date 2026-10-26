@@ -1,4 +1,4 @@
-"""Mini-boss sheets (Ki Quest, Master Builder). Original designs, same pipeline as build_morvant.py: drawn part-by-part on
+"""Mini-boss sheets (Kindle Quest, Master Builder). Original designs, same pipeline as build_morvant.py: drawn part-by-part on
 the 24x32 grid with build_sprites.py (auto shading, 1 px ink outline, hard alpha), nearest 2x to 48x64 (shared boss grid,
 pivot = feet). Rows = anim x facing (down, up, left, right); right = left mirrored. Anims shared by every mini:
 stand 1, walk 4, dash 3, cast 3, slam 3, summon 2, hurt 1 (src/game/enemies/minis.ts maps moves onto these).

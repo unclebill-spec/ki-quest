@@ -1,4 +1,4 @@
-"""Stair top-ring boss sheet: MORVANT, THE ECLIPSE GOLEM (Ki Quest, Master Builder). Original design.
+"""Stair top-ring boss sheet: MORVANT, THE ECLIPSE GOLEM (Kindle Quest, Master Builder). Original design.
 Same pipeline as build_count_aurel.py: drawn part-by-part on the 24x32 grid with build_sprites.py (auto shading, 1 px ink
 outline, hard alpha), nearest 2x to 48x64. Rows = anim x facing (down, up, left, right); right = left mirrored.
 Look: hulking basalt-violet golem, a dead-sun eclipse disc set in its chest (black core, gold corona), gold crescent halo

@@ -1,4 +1,4 @@
-"""Stair boss sheets: THE CAGEWARD TWINS, Vey (red, chain-hook) and Nell (violet, cage-lantern) (Ki Quest, Master Builder).
+"""Stair boss sheets: THE CAGEWARD TWINS, Vey (red, chain-hook) and Nell (violet, cage-lantern) (Kindle Quest, Master Builder).
 Same approach as build_count_aurel.py: drawn part-by-part on the 24x32 grid with staging build_sprites.py (auto shading,
 1 px #120e1c ink outline, hard alpha), nearest 2x to 48x64. Rows = anim x facing (down, up, left, right); right = left mirrored.
 Jailers in riveted iron hoods with a slit of red/violet light, long chain-hung coats; one shared body, swapped palette + weapon.

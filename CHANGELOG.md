@@ -1,4 +1,8 @@
 # Changelog
+## W17 plan — 2026-10-26 (plan + cleanup, not deployed)
+- docs/BOSS_PLAN_W17.md: Ashmaw = grotto boss (re-skin), Hollowmere = Hushwater boss (new), Warden Rune = true final boss after Malachar (Will's call, 2026-10-26).
+- Canon names: /workspace/masters/kindle-quest/CANON.md.
+- "Ki Quest" -> "Kindle Quest" in docs, comments and art-script headers (ids, URLs and file names unchanged).
 ## W16 — 2026-10-25 (Kindle Quest: mini-boss story wrap-up, LIVE)
 - Sable Kestrel's crypt-stair beat after Ombrelle falls (`ombrelleBeat`, hushwater).
 - Ombrelle's gear unlocks only on `ombrelleDown` (lead-in `ombrelleSeen` fallback removed from gear.ts BOSS).

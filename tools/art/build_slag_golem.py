@@ -1,4 +1,4 @@
-"""Kilnreach quarry boss sheet: Slagheart, a basalt slag golem with a molten core (Ki Quest, Master Builder).
+"""Kilnreach quarry boss sheet: Slagheart, a basalt slag golem with a molten core (Kindle Quest, Master Builder).
 Same approach as staging/art/tools/build_enemies.py: drawn part-by-part on the 24x32 design grid with build_sprites.py
 (Canvas, auto top-left shading, 1 px #120e1c ink outline, enclosed pockets -> ink, hard alpha), then nearest 2x to 48x64
 (like warden_rune). Rows = anim x facing (down, up, left, right); right rows = left mirrored. Gloom-and-glow ember neon.

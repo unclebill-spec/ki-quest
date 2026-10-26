@@ -1,4 +1,4 @@
-"""Finale boss sheet: MALACHAR VESH, THE LAST DUSK (Ki Quest, Master Builder). Original design.
+"""Finale boss sheet: MALACHAR VESH, THE LAST DUSK (Kindle Quest, Master Builder). Original design.
 Same pipeline as build_morvant.py: drawn part-by-part on the 24x32 grid with build_sprites.py (auto shading, 1 px ink
 outline, hard alpha), nearest 2x to 48x64. Rows = anim x facing (down, up, left, right); right = left mirrored.
 Look: the fallen Sunwarden in black-and-crimson plate, a floating crown of red spikes, a tattered dusk cape, and the four

@@ -1,4 +1,4 @@
-"""Sable Kestrel, 4th companion (Ki Quest, Master Builder): 24x32 hero sheet from the staging build_sprites.py hero generator
+"""Sable Kestrel, 4th companion (Kindle Quest, Master Builder): 24x32 hero sheet from the staging build_sprites.py hero generator
 (same body/anim set as Mirela and Brann: base body + outfit layers, auto shading, #120e1c outline, hard alpha, right = left mirrored).
 Black riding coat with violet lining, ash-plum long hair, silver clasp. The violet sash is drawn in game (draw.ts) like the others.
 Usage: python3 tools/art/build_sable.py -> public/art/chars/sable.png/.json"""

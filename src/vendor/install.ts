@@ -1,4 +1,4 @@
-/* Copied from Gravewake src/pwa/install.ts (2026-10-23); React hooks removed for Ki Quest. */
+/* Copied from Gravewake src/pwa/install.ts (2026-10-23); React hooks removed for Kindle Quest. */
 /**
  * install1 (OWNER-APPROVED 2026-10-01 22:14 ET): install Gravewake as an app, in one tap.
  *

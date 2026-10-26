@@ -1,4 +1,4 @@
-# HANDOFF: Ki Quest (team build, 2026-10-23)
+# HANDOFF: Kindle Quest (team build, 2026-10-23)
 ## Claims (check before working; pull before push)
 - **Master Builder:** src/game/combat/, src/game/enemies/, public/art/chars/ (combat, techniques, power-up/transform, enemies + bosses, hero/enemy sprites incl. staging rook/mirela/brann).
 - **Cozy Builder:** menus (tabs, gear), save/load, input, PWA, test suite (starts after Gravewake ships).
@@ -189,3 +189,5 @@ Slots: Story suggested build order Kettle → Corvin → Capmother → Ombrelle;
 - Spawns: only on Hushwater's existing g/w markers (world.ts `// MB hook`): g → mossling, duskhound, hush_squire; w → reed_wraith, witchlight_newt, bog_sprout, fen_warden, mossback_snapper, reed_wraith. Other areas keep brute/wisp. (Ombrelle's arena (40,7) r3 covers the w at (42,8); the minis task clears it.)
 - FX (src/game/combat/fx.ts, public/art/fx/*): kiblast_charge (beam charge, on the hand), kiblast_projectile (Ki Bolt shots), kiblast_impact (where a player shot ends), flight_takeoff_dust (hover start), flight_trail (transformed + moving), transform_burst (on transform, then frames 4-7 as an aura). Drawn in the overlay pass on top of the procedural glow; draw-side only, no RNG, no damage/timing change. `__kiMB.fxLog`.
 - Test: tests/artpack3.mjs (14 checks, incl. hero facing right draws walk_right_N unmirrored). Screenshots: docs/artpack3_hero_right_{before,after,before_after}.png.
+
+- 2026-10-26 W17: boss plan in docs/BOSS_PLAN_W17.md (Ashmaw grotto re-skin, Hollowmere Hushwater boss, Warden Rune final). Canon names: /workspace/masters/kindle-quest/CANON.md. No boss code yet.
