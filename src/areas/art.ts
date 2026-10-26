@@ -18,8 +18,17 @@ const PAL = {
 const GPAL = { moss: { spore: "#6ad8ff", plaza: "#544c5a" }, marsh: { spore: "#b48aff", plaza: "#4c4652" }, ember: { spore: "#ff8a4a", plaza: "#6a5650" }, tide: { spore: "#7affe0", plaza: "#4e5e60" }, violet: { spore: "#d4a0ff", plaza: "#6e6284" }, husk: { spore: "#ffb050", plaza: "#5a3236" } };
 const GSETS: Partial<Record<"moss" | "marsh" | "ember" | "tide" | "violet" | "husk", GroundSet>> = {};
 const gset = (t: "moss" | "marsh" | "ember" | "tide" | "violet" | "husk") => (GSETS[t] ??= groundSet({ floor: PAL[t].floor[0], moss: PAL[t].moss[0], path: PAL[t].path[0], water: PAL[t].water[0], ...GPAL[t] }, t === "moss" ? 1 : t === "marsh" ? 2 : t === "ember" ? 3 : 4));
-export const CREDITS_T = 52;
-const CREDITS = ["#KINDLE QUEST", "", "an original game for Bill Weathersbee", "", "#Lamps still need lighting.", "#Just not all the time.", "", "", "#Story & World", "the World/Story team", "", "#Combat, Heroes & Bosses", "the Master Builder team", "", "#Menus, Save & Input", "the Cozy Builder team", "", "#Music & Sound", "Hearthmoor Sound (ACE-Step 1.5, sfxr)", "", "#Starring", "Rook, the lamplighter", "Mirela, keeper of the dead", "Brann Okoro, smith", "Sable Kestrel, the herald who turned", "", "#and", "Malachar Vesh, the Last Dusk", "", "#Final boss", "Warden Rune, the Last Guardian of the Wellsprings", "", "", "#Thank you for playing.", "", "The glow nights still come each evening.", "Everyone gathers close, by choice now."];
+export const CREDITS_T = 64; // ~58 lines at 16 px/s (W17d: Burning Bush / Created by Will / Also starring)
+const CREDITS = ["#KINDLE QUEST", "", "an original game for Bill Weathersbee", "", "#Lamps still need lighting.", "#Just not all the time.", "", "",
+  "#A Burning Bush Productions game", "", "#Created by", "Will (Bill Weathersbee)", "",
+  "#Story & World", "the World/Story team", "Hearthmoor Story", "", "#Combat, Heroes & Bosses", "the Master Builder team", "",
+  "#Art", "Nintendo 64 Style and the art team", "", "#Menus, Save & Input", "the Cozy Builder team", "",
+  "#Music & Sound", "Hearthmoor Sound (ACE-Step 1.5, sfxr)", "", "#Build & Release", "Nintendo 64 Style", "",
+  "#Starring", "Rook, the lamplighter", "Mirela, keeper of the dead", "Brann Okoro, smith", "Sable Kestrel, the herald who turned", "",
+  "#and", "Malachar Vesh, the Last Dusk", "",
+  "#Also starring", "Ashmaw, Grotto Devourer", "Slagheart", "Count Aurel, Tide General", "the Cageward Twins", "Morvant, the Eclipse Golem", "Hollowmere, the Drinking Colossus", "",
+  "#Final boss", "Warden Rune, the Last Guardian of the Wellsprings", "", "",
+  "#Thank you for playing.", "", "The glow nights still come each evening.", "Everyone gathers close, by choice now."];
 const KIND: Record<number, Kind> = { [T_FLOOR]: "floor", [T_MOSS]: "moss", [T_PATH]: "path", [T_PLAZA]: "plaza", [T_WATER]: "water", [T_HIDDEN]: "water", [T_WARD]: "floor" };
 
 export function tile(c: C2, theme: "moss" | "marsh" | "ember" | "tide" | "violet" | "husk", v: number, X: number, Y: number, tx: number, ty: number, time: number, tiles?: Uint8Array) {

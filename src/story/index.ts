@@ -133,8 +133,26 @@ export class Story {
     // wakes on malacharFade && !runeDown; dawn + credits follow runeDown. Lines: staging/story/w17.md.
     if (g.area.id === "husk" && F.malacharFade && !F.runeDown && !F.runeSeen && !this.box) return B("runeSeen", "Warden Rune", ["(The five pedestals crack. A guardian of stone and gold unfolds from the sun's heart, runes burning cyan along its arms.)", "SUN. RELIT. UNSANCTIONED. THE WELLSPRINGS ARE SEALED. THEY ARE TO STAY SEALED.", "I KEPT THIS WORLD DIM FOR THREE HUNDRED YEARS SO IT COULD NOT BURN. STAND ASIDE, LAMPLIGHTER."]);
     if (g.area.id === "husk" && F.runeDown && !F.dawn && !this.box) {
-      this.say("Warden Rune", ["(Its runes go out one by one, cyan, then gold, then nothing.)", "...The world... is warm... and nothing... is burning.", "Then my watch... is over. Keep the lamps... lamplighter. Not all the time. Just... when it's dark."],
-        () => { F.dawn = true; this.save(); g.gainExp(1000); this.say("Rook", ["(The first grey-gold dawn in three hundred years.)", "Lamps still need lighting. Just not all the time."], () => { this.credits = CREDITS_T; }); }); return true;
+      // W17d ending (staging/story/ending_warden_rune.md, trimmed). Beats with `needs` play only if that flag is set,
+      // so the ending never breaks when e.g. Linnet's Letters (lettersDone) isn't done/built.
+      const END: { who: string; lines: string[]; needs?: string }[] = [
+        { who: "Rook", lines: ["We will. Rest. You held the door for three hundred years."] },
+        { who: "Warden Rune", lines: ["...Three hundred... and one.", "(A last gold rune settles on Rook's lamp like a spark. The Warden is only stone now, sitting, hands open.)"] },
+        { who: "Mirela", lines: ["The dead aren't afraid of it anymore. Neither am I."] },
+      ];
+      const EPI: { who: string; lines: string[]; needs?: string }[] = [
+        { who: "Elder Ama Quill", lines: ["(Wickhaven.) Put your pole down, boy. The sun's doing your rounds today.", "Pip: \"Can we still light them tonight? For fun?\""] },
+        { who: "Mirela Vant", lines: ["(Hushwater.) The graves are quiet. Not empty. Quiet. They're watching the sky like everyone else."] },
+        { who: "Linnet Vant", needs: "lettersDone", lines: ["(The hidden spring.) There you are, little lamp. You found the spring I couldn't.", "Mirela: \"Grandmother... you can go now. I'll keep the light.\""] },
+        { who: "Brann Okoro", lines: ["(Kilnreach.) Forge fires are for bread now. First sunrise loaf. Everyone gets the heel."] },
+        { who: "Neri Calloway", lines: ["(Drowned Vesper.) The tide's going out. Old Calder says there's a road under there. Says it goes home.", "Old Calder: \"Stubborn, like us Calders.\""] },
+        { who: "Sable Kestrel", lines: ["(The Stair.) I keep waiting for the light to ask for something back.", "(She stays in the sun anyway, eyes shut.) ...It doesn't."] },
+        { who: "The Husk Sun", needs: "malacharFade", lines: ["(A single warm glow orb drifts out of the sun and into the dawn.)"] },
+        { who: "Rook", lines: ["(Wickhaven, evening. He lights one lamp anyway. Everyone gathers close.)", "By choice now."] },
+      ];
+      const chain = (bs: typeof END, done: () => void) => { const q = bs.filter((b) => !b.needs || F[b.needs]); const nx = (i: number): void => { if (i >= q.length) { done(); return; } this.say(q[i].who, q[i].lines, () => nx(i + 1)); }; nx(0); };
+      this.say("Warden Rune", ["(Its runes go out one by one: cyan, then gold, then nothing. The ward walls fold down like a closing book.)", "...The world... is warm... and nothing... is burning.", "Then my watch... is over. Keep the lamps... lamplighter. Not all the time. Just... when it's dark."],
+        () => chain(END, () => { F.dawn = true; this.save(); g.gainExp(1000); this.say("Rook", ["(The first grey-gold dawn in three hundred years.)", "Lamps still need lighting. Just not all the time."], () => chain(EPI, () => { this.credits = CREDITS_T; })); })); return true;
     }
     if (g.area.id === "husk" && F.malacharDown && !F.malacharFade && !F.dawn && !this.box) {
       F.poured = true; this.save();

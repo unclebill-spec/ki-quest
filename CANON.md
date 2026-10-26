@@ -1,5 +1,5 @@
 # Kindle Quest: CANON (official story + name list)
-> Status: placed in ki-rpg by Nintendo 64 Style, 2026-10-26 (W17d), from Hearthmoor Story's staging draft, diffed against masters/kindle-quest/CANON.md and the build.
+> Status: placed in ki-rpg by Nintendo 64 Style, 2026-10-26 (W17d), from Hearthmoor Story's staging draft (16:11 version), diffed against masters/kindle-quest/CANON.md and the build.
 > Source order: NAMES.md (Kindle Quest section) wins on names and decisions; the live build (`games/ki-rpg/src`) wins on what exists; staging docs fill in the rest.
 > Player-facing title: **Kindle Quest**. Internal ids `ki-rpg`, `kiquest`, `anime-fighter` are folder names, not titles.
 
@@ -49,7 +49,7 @@ Elder Ama Quill, Odile Brask, Pip Arden, Tib, Joss Tumble (Lanternmoss) · Fen M
 `malachar.ts` is a 5-phase boss in HUSK_ARENA. On his defeat (`malacharDown`) the heroes pour the Wellsprings back, and he says "I was only ever the herald... the Warden was the wall" and fades (`malacharFade`). That wakes Warden Rune. Credits list him under "and", not as final boss.
 
 ## The finale (build + this pack)
-Husk entry (`huskIn`) → Malachar fight → Wellsprings poured back (`poured`) → Malachar fades (`malacharFade`) → Warden Rune wakes (`runeSeen`) → fight → Rune's last lines (`runeDown`) → dawn + Rook (`dawn`) → credits. Expanded epilogue and credits: `ending_warden_rune.md` (built W17d, trimmed; the Linnet scene and the Husk-orb scene are skipped until Linnet's Letters is built and Malachar's role is decided).
+Husk entry (`huskIn`) → Malachar fight → Wellsprings poured back (`poured`) → Malachar fades (`malacharFade`) → Warden Rune wakes (`runeSeen`) → fight → Rune's last lines (`runeDown`) → dawn + Rook (`dawn`) → credits. Expanded epilogue and credits: `ending_warden_rune.md`.
 
 ## Name list
 | Name | Type | Where | Status |
@@ -91,10 +91,13 @@ Husk entry (`huskIn`) → Malachar fight → Wellsprings poured back (`poured`) 
 ## Open questions
 1. **Malachar's role (UNDECIDED, Will).** Options: (a) keep him as a full penultimate boss that fades and wakes Rune (current build); (b) make him a non-fight scene, so the Husk goes straight to Rune; (c) turn him into a short "herald" phase-0 of the Rune fight; (d) a redemption arc where he helps against Rune; (e) move him earlier (e.g. Stair) as Act III's climax.
 2. Should NAMES.md's "Grotto boss: Warden Rune" line be changed to Ashmaw? (Owner: NAMES.md keeper.)
-3. ~~Rename gear key `rune`?~~ **Decided (Will, Oct 26): no.** `rune` stays as Ashmaw's key (saves use it); a code comment in src/gear.ts says so. `wardenrune` = Warden Rune.
+3. ~~Rename gear key `rune`?~~ **Decided (Will, Oct 26): no.** `rune` stays as Ashmaw's key (saves use it); a comment in src/gear.ts says so. `wardenrune` = Warden Rune.
 4. Will Linnet's Letters be built (`lettersN`/`lettersDone`)? The ending's Linnet scene depends on it.
-5. Credits line for Will/studio: what is the studio's exact name? Until he says, "Will" is used.
+5. RESOLVED (Will, Oct 26, 2026): the studio is Burning Bush Productions. Malachar stays option (a), the full fight before Rune that ends in the fade, until Will says otherwise.
 6. Where does Hollowmere sit in the canon order if it's ever made mandatory?
 
 ## Internal ids (do not rename)
 Repo `ki-rpg`, `kiquest` files/save keys, URL base `/ki-quest/`, `window.__ki`, gear BOSS keys `rune` (= Ashmaw, grotto) / `wardenrune` (= Warden Rune) / `slag` / `aurel` / `twins` / `morvant` / `malachar`, mb keys `boss`..`boss12` (boss11 Hollowmere, boss12 Warden Rune), `warden` = Stoneward foe role (not a boss).
+
+## Built ending (W17d)
+Defeat beat + dawn + epilogue slideshow (Wickhaven, Hushwater, Kilnreach, Vesper, Stair, Wickhaven evening) + credits with Burning Bush Productions / Created by Will. Linnet scene shows only if `lettersDone`; the Malachar orb shot shows because his fade stays canon (option a).
