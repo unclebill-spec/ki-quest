@@ -6,7 +6,7 @@
   var late = { sable3: 1, twist: 1, malachar: 1, stairIn: 1, cageDone: 1, sableJoin: 1, morvantDown: 1, threshold: 1, huskIn: 1, malacharDown: 1, poured: 1, malacharFade: 1 };
   var F = {
     ashmaw: { area: "lanternmoss", x: 536, y: 280, lvl: 8, mb: 0, fl: { introSeen: 1, metAma: 1, metMirela: 1, bell: 1, bellDone: 1, reedQ: 1, reedDone: 1, oath: 1, visited_wickhaven: 1, visited_hushwater: 1 }, g: { w: "w1", a: "a2", c: "c1", h: "h2", f: "f2" } },
-    hollowmere: { area: "hushwater", x: 328, y: 360, lvl: 15, mb: 3, fl: Object.assign({ metAma: 1, metMirela: 1, bell: 1, bellDone: 1, reedQ: 1, reedDone: 1, corvinDown: 1 }, base), g: { w: "w3", a: "a4", c: "c4", h: "h4", f: "f4" } },
+    hollowmere: { area: "hushwater", x: 328, y: 360, lvl: 11, mb: 3, fl: Object.assign({ metAma: 1, metMirela: 1, bell: 1, bellDone: 1, reedQ: 1, reedDone: 1, corvinDown: 1 }, base), g: { w: "w3", a: "a2", c: "c3", h: "h2", f: "f2" } },
     warden: { area: "husk", x: 392, y: 312, lvl: 22, mb: 10, fl: Object.assign({}, base, late), g: { w: "w6", a: "a5", c: "c6", h: "h6", f: "f6" } },
     ending: { area: "husk", x: 392, y: 312, lvl: 22, mb: 10, fl: Object.assign({ runeSeen: 1 }, base, late), g: { w: "w6", a: "a5", c: "c6", h: "h6", f: "f6" } }
   }[w];

@@ -30,7 +30,8 @@ export interface Shot { x: number; y: number; vx: number; vy: number; life: numb
 export interface Num { x: number; y: number; txt: string; col: string; t: number; big: boolean }
 
 export const EP_BLAST = 8, EP_SHIELD_PER_S = 22;
-export const expNext = (l: number) => Math.round(12 * Math.pow(l, 1.3));
+/** W17d: Lv 1-7 cost half (was ~535 EXP / 55-60 kills to the Lv 8 ward, now ~270 / ~20 kills + Pip's orbs); Lv 8+ unchanged. */
+export const expNext = (l: number) => Math.round(12 * Math.pow(l, 1.3) * (l < 8 ? 0.5 : 1));
 const DIRS8 = Array.from({ length: 8 }, (_, i) => [Math.cos((i * Math.PI) / 4), Math.sin((i * Math.PI) / 4)]);
 
 export class Game {
@@ -42,7 +43,14 @@ export class Game {
   swing = { step: 0, t: 0, queued: false, hitId: 0, chainT: 0, chainStep: 0 };
   blastCd = 0; blocking = false; shield = false;
   enemies: Enemy[] = []; shots: Shot[] = []; nums: Num[] = [];
-  toast = ""; toastT = 0; banner = ""; bannerT = 0; levelT = 0;
+  toast = ""; toastT = 0; levelT = 0;
+  /** W17d banners: one at a time, each shown >= 1.6 s; a newer banner waits (only the latest waits). */
+  private _b = ""; private _bt = 0; private _bAge = 9; private _bq: [string, number] | null = null; private _qNext = false;
+  get banner() { return this._b; }
+  set banner(v: string) { const cap = (t: string) => t === t.toUpperCase(); if (this._bt > 0 && this._bAge < 1.6 && v !== this._b && cap(this._b) && !cap(v)) { /* minor text waits behind a fresh boss/phase banner; phase flips are prevented by the boss phase hold */ this._bq = [v, 2]; this._qNext = true; } else { this._b = v; this._bAge = 0; this._qNext = false; } }
+  get bannerT() { return this._bt; }
+  set bannerT(v: number) { if (this._qNext && this._bq) { this._bq[1] = v; this._qNext = false; } else this._bt = v; }
+  tickBanner(dt: number) { this._bt -= dt; this._bAge += dt; this._qNext = false; if (this._bq && (this._bAge >= 1.6 || this._bt <= 0)) { [this._b, this._bt] = this._bq; this._bq = null; this._bAge = 0; } }
   menuSel = 0; onPad = false; shake = 0;
   /** HD2D W14: equipped gear ids, playtime (s), screen-shake option. */
   gear: Equip = { ...DEFAULT_GEAR }; play = 0;
@@ -153,7 +161,7 @@ export class Game {
     if (inp.pressed("map")) { this.mode = this.mode === "map" ? "play" : "map"; return; }
     if (this.mode === "pause") return this.menu();
     if (this.mode === "map") { if (inp.pressed("melee") || inp.pressed("blast")) this.mode = "play"; return; }
-    this.toastT -= dt; this.bannerT -= dt; this.levelT -= dt; this.shake = Math.max(0, this.shake - dt * 20);
+    this.toastT -= dt; this.tickBanner(dt); this.levelT -= dt; this.shake = Math.max(0, this.shake - dt * 20);
     this.hero(dt);
     updateDrops(this, dt); quickInput(this, dt);
     if ((this.syncT -= dt) <= 0) { this.syncT = 0.5; this.syncGear(); }
@@ -254,9 +262,30 @@ export class Game {
       this.damageFoe(e, d, p.fx * kb, p.fy * kb, crit);
     }
   }
+  /** W17d boss tuning (Will, 4:17 PM: "make sure the tune on all the fights isnt to easy"). No HP changes. Per boss:
+   *  th = its PHASE_AT thresholds; min = seconds each phase must last before HP can cross the next threshold (no 2 s banner flips);
+   *  out = damage multiplier on hits the hero takes while that boss is alive. Poise (all): 7+ hits in 2 s -> 1.6 s guard
+   *  (25% damage) + a push-back shockwave, so mashing stalls and dodging/skills win. */
+  static TUNE: Record<string, { th: number[]; min: number; out: number }> = {
+    boss: { th: [0.66, 0.33], min: 17, out: 1.4 }, hollowmere: { th: [0.66, 0.33], min: 14, out: 1.5 }, slag: { th: [0.66, 0.33], min: 15, out: 1.4 },
+    aurel: { th: [0.75, 0.5, 0.25], min: 12, out: 1.5 }, vey: { th: [], min: 0, out: 1.5 }, nell: { th: [], min: 0, out: 1.5 },
+    morvant: { th: [0.75, 0.5, 0.25], min: 12, out: 1.6 }, malachar: { th: [0.8, 0.6, 0.4, 0.2], min: 10, out: 2.2 }, wardenrune: { th: [0.85, 0.7, 0.55, 0.4, 0.2], min: 9, out: 3 },
+  };
+  bossOut() { let m = 1; for (const e of this.enemies) if (!e.dead && Game.TUNE[e.kind]) m = Math.max(m, Game.TUNE[e.kind].out); return m; }
+  finaleGuard(e: Enemy, d: number) {
+    const T = Game.TUNE[e.kind]; if (!T) return d; const th = T.th;
+    const x = e as unknown as { _hits?: number[]; _guard?: number; _ph?: number; _pt?: number };
+    const now = this.time; x._hits = (x._hits ?? []).filter((t) => now - t < 2); x._hits.push(now);
+    if ((x._guard ?? 0) > now) d *= 0.25;
+    else if (x._hits.length >= 7) { x._guard = now + 1.6; x._hits = []; this.mb.hazards.push({ x: e.x, y: e.y, r: 48, t: 0.5, max: 0.5, dmg: 10, foe: true } as never); this.shake = 4; d *= 0.25; }
+    const ph = th.filter((t) => e.hp / e.max <= t).length; if (x._ph !== ph) { x._ph = ph; x._pt = now; }
+    if (ph < th.length && now - (x._pt ?? now) < T.min) { const floor = th[ph] * e.max + 1; d = Math.min(d, Math.max(0, e.hp - floor)); }
+    return d;
+  }
   damageFoe(e: Enemy, d: number, kx: number, ky: number, crit: boolean, pierce = false) {
-    const h = onFoeHit(this, e, d, kx, ky, crit, pierce); d = h.d; kx = h.kx; ky = h.ky; // MB hook
+    const real = !!(kx || ky); const h = onFoeHit(this, e, d, kx, ky, crit, pierce); d = h.d; kx = h.kx; ky = h.ky; // MB hook
     if (h.blocked) { crit = false; if (!d) return; }
+    if (real) { d = this.finaleGuard(e, d); if (d <= 0) return; } // scripted hits (kx=ky=0: tests/cutscenes) skip boss tuning
     e.hp -= d; e.vx += kx; e.vy += ky; e.flash = 0.12;
     if (crit) { this.stats.crits++; this.shake = 3; } else this.stats.normals++;
     this.num(e.x, e.y - 22, d, crit ? "#ffe14a" : "#ff4a4a", crit);
@@ -290,7 +319,7 @@ export class Game {
     const a = Math.atan2(p.y - fromY, p.x - fromX);
     if (this.shield) { this.stats.shieldBlocks++; this.num(p.x, p.y - 34, 0, "#9fe8ff"); p.inv = 0.2; return; }
     if (this.blocking) d *= 0.3;
-    d *= 1 - this.defense;
+    d *= 1 - this.defense; d *= this.bossOut(); // W17d boss tuning
     this.hp -= d; p.inv = 0.6; this.stunT = 0.4; bark(this, "rook", "hurt"); /* MB hook: barks */ meterGain(this, TF_HURT); // MB hook this.stats.hurt++; this.shake = 2;
     p.kx = Math.cos(a) * (this.blocking ? 60 : 160); p.ky = Math.sin(a) * (this.blocking ? 60 : 160);
     this.num(p.x, p.y - 34, d, "#ff9a9a");

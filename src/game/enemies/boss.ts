@@ -26,13 +26,18 @@ export function updateArena(g: Game, dt: number) {
   if (g.area.id !== ARENA.area) return;
   const b = g.mb.boss, p = g.p, c = arenaCenter(g);
   b.lockT = Math.max(0, b.lockT - dt); b.introT = Math.max(0, b.introT - dt);
-  if (!b.active && !b.done && Math.hypot(p.x - c.x, p.y - c.y) < ARENA.r - 30) {
+  // W17d gate: Ashmaw only wakes after the Lantern Oath (same as the ashmawSeen lead-in), so a fresh Lv 1 save can't get locked in.
+  const gate = !!story()?.flags.oath, near = Math.hypot(p.x - c.x, p.y - c.y) < ARENA.r - 30;
+  if (!b.active && !b.done && near && !gate) { if (g.bannerT <= 0 && g.frame % 240 === 0) g.say("Warm air stirs in the grotto... something sleeps. Not yet."); }
+  if (!b.active && !b.done && near && gate) {
     b.active = true; b.phase = 1; b.introT = 2.2; b.lockT = 1.4;
     const e = makeEnemy("boss", c.x, c.y - 40); e.state = "recover"; e.t = 1.6; g.enemies.push(e);
     // clear small fry inside the arena so it's a duel
     for (const f of g.enemies) if (f !== e && !f.dead && Math.hypot(f.x - c.x, f.y - c.y) < ARENA.r + 20) { f.x = f.hx = c.x + (f.x < c.x ? -1 : 1) * (ARENA.r + 60); f.hy = f.y; }
     g.banner = "ASHMAW, GROTTO DEVOURER"; g.bannerT = 2.5; g.shake = 4;
   }
+  // never trap: if the fight is "active" but Ashmaw isn't actually there, drop the barrier
+  if (b.active && !bossOf(g) && b.introT <= 0) b.active = false;
   if (b.active) {
     // barrier: keep the hero inside the arena
     const dx = p.x - c.x, dy = p.y - c.y, d = Math.hypot(dx, dy);
@@ -47,7 +52,7 @@ export function updateBoss(g: Game, e: Enemy, dt: number, ux: number, uy: number
   const want = e.hp / e.max <= PHASE_AT[2] ? 3 : e.hp / e.max <= PHASE_AT[1] ? 2 : 1;
   if (want > b.phase) {
     b.phase = want; b.lockT = 1.2; e.state = "recover"; e.t = 1.3; e.move = "";
-    g.banner = want === 3 ? "ASHMAW IS ENRAGED" : "ASHMAW: PHASE 2"; g.bannerT = 1.8; g.shake = 5;
+    g.banner = want === 3 ? "ASHMAW IS ENRAGED" : "ASHMAW: PHASE 2"; g.bannerT = 2.2; g.shake = 5;
     g.mb.hazards.push({ x: e.x, y: e.y, r: 46, t: 0.6, max: 0.6, dmg: 8, foe: true });
     for (let i = 0; i < 10; i++) g.parts.emit(CH_COMBAT, K_SPARK, e.x, e.y - 20, Math.cos(i * 0.63) * 120, Math.sin(i * 0.63) * 120, 0.5, C_RED, 0, 2);
     for (let i = 0; i < 10; i++) g.parts.emit(CH_COMBAT, K_ASH, e.x + (Math.random() - 0.5) * 40, e.y - 8, (Math.random() - 0.5) * 40, -30 - Math.random() * 30, 0.9, i & 1 ? C_ASH : C_ASH_DARK);

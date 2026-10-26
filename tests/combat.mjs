@@ -49,7 +49,7 @@ try {
   ok("kills drop EXP orbs that fly to the hero", orb.orbs === 3 && orb.gained > 0 && orb.left === 0, JSON.stringify(orb));
   // boss
   await E(() => { const g = window.__ki.game; g.hp = 9999; g.enemies.forEach((e) => { e.dead = true; e.respawn = 999; }); });
-  const trig = await E(() => { const g = window.__ki.game; g.mb.tfOn = false; g.tf = 0; g.p.inv = 0;
+  const trig = await E(() => { const g = window.__ki.game; window.__ki.story.flags.oath = true; /* W17d grotto gate */ g.mb.tfOn = false; g.tf = 0; g.p.inv = 0;
     // arena tile 38,17; nearest free tile is used by the game
     g.p.x = 38 * 16 + 8; g.p.y = 17 * 16 + 8 + 30; for (let i = 0; i < 3; i++) g.step(1 / 60);
     const b = g.enemies.find((e) => e.kind === "boss"); return { active: g.mb.boss.active, boss: !!b, phase: g.mb.boss.phase }; });

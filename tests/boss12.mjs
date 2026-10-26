@@ -58,7 +58,7 @@ try {
     return { n, dead: e.dead, flag: s.flags.runeDown === true, sv: JSON.parse(localStorage.getItem("kiquest-mb-v1") || "{}"), done: g.mb.boss12.done, active: g.mb.boss12.active, dpts: g.pts - pts, banner: g.banner, hz: g.mb.hazards.length }; });
   ok("Warden Rune falls: THE WARDEN'S WATCH ENDS, +10 pts, runeDown + boss12 saved, hazards cleared", rw.dead && rw.flag && rw.sv.boss12 && rw.sv.boss6 && rw.done && !rw.active && rw.dpts >= 10 && rw.banner === "THE WARDEN'S WATCH ENDS" && rw.hz === 0, JSON.stringify(rw));
   await page.waitForFunction(() => window.__ki.story.box?.who === "Warden Rune", null, { timeout: 8000, polling: 50 }).catch(() => {});
-  const end = await E(() => { const s = window.__ki.story, who = []; for (let k = 0; k < 10 && s.box; k++) { who.push(s.box.who); const t = s.box.then; s.box = null; t && t(); }
+  const end = await E(() => { const s = window.__ki.story, who = []; for (let k = 0; k < 40 && s.box; k++) { who.push(s.box.who); const t = s.box.then; s.box = null; t && t(); }
     return { who: who.join(">"), dawn: s.flags.dawn === true, credits: s.credits > 0, re: window.__ki.game.mb.boss12.active }; });
   ok("finale hand-off: Warden Rune > Rook, dawn saved, credits roll, no re-trigger", /^Warden Rune>.*Rook/.test(end.who) && end.dawn && end.credits && !end.re, JSON.stringify(end));
   ok("no page errors", errs.length === 0, errs.slice(0, 3).join(" | "));
