@@ -1,5 +1,6 @@
 /**
- * Area 1 boss: Warden Rune. Arena trigger east of the ridge; 3 phases by HP.
+ * Area 1 boss: ASHMAW, GROTTO DEVOURER (W17 rename of the old grotto "Warden Rune"; sheet public/art/chars/ashmaw.*,
+ * ash grey + ember orange). Same HP (420) and damage as before. Defeat sets mb boss1 done + story flag ashmawDown. Arena trigger east of the ridge; 3 phases by HP.
  * P1 dash + fan volley · P2 adds ground slams + bullet ring · P3 (enraged) triple dash + spiral + slam cluster.
  * Every move has a telegraph (state "tele", e.move names it). Owner: Master Builder.
  */
@@ -7,7 +8,12 @@ import type { Game } from "../../game";
 import { Enemy, makeEnemy } from "./types";
 import { freeNear, shoot } from "./ai";
 import { writeBossDone } from "../combat/state";
-import { CH_COMBAT, K_RING, K_SPARK, C_GOLD, C_RED, C_VIOLET } from "../../vendor/particles";
+import { CH_COMBAT, K_RING, K_SPARK, K_ASH, C_GOLD, C_ASH, C_ASH_DARK } from "../../vendor/particles";
+/** W17 Ashmaw palette: ember orange sparks (FX_PALETTE 8) over ash smoke. */
+const C_EMBER = 8, C_VIOLET = C_EMBER, C_RED = C_EMBER;
+const story = () => (globalThis as unknown as { __ki?: { story?: { flags: Record<string, unknown>; save(): void } } }).__ki?.story;
+/** Old saves: boss1 done -> ashmawDown (silent); called each frame by updateW17. */
+export function syncAshmaw(g: Game) { const s = story(); if (s && g.mb.boss.done && !s.flags.ashmawDown) { s.flags.ashmawDown = true; s.save(); } }
 
 export const ARENA = { area: "lanternmoss", tx: 38, ty: 17, r: 104 };
 export function arenaCenter(g: Game) { return freeNear(g.area, ARENA.tx, ARENA.ty); }
@@ -25,7 +31,7 @@ export function updateArena(g: Game, dt: number) {
     const e = makeEnemy("boss", c.x, c.y - 40); e.state = "recover"; e.t = 1.6; g.enemies.push(e);
     // clear small fry inside the arena so it's a duel
     for (const f of g.enemies) if (f !== e && !f.dead && Math.hypot(f.x - c.x, f.y - c.y) < ARENA.r + 20) { f.x = f.hx = c.x + (f.x < c.x ? -1 : 1) * (ARENA.r + 60); f.hy = f.y; }
-    g.banner = "WARDEN RUNE, GROTTO GUARDIAN"; g.bannerT = 2.5; g.shake = 4;
+    g.banner = "ASHMAW, GROTTO DEVOURER"; g.bannerT = 2.5; g.shake = 4;
   }
   if (b.active) {
     // barrier: keep the hero inside the arena
@@ -41,11 +47,13 @@ export function updateBoss(g: Game, e: Enemy, dt: number, ux: number, uy: number
   const want = e.hp / e.max <= PHASE_AT[2] ? 3 : e.hp / e.max <= PHASE_AT[1] ? 2 : 1;
   if (want > b.phase) {
     b.phase = want; b.lockT = 1.2; e.state = "recover"; e.t = 1.3; e.move = "";
-    g.banner = want === 3 ? "WARDEN RUNE IS ENRAGED" : "WARDEN RUNE: PHASE 2"; g.bannerT = 1.8; g.shake = 5;
+    g.banner = want === 3 ? "ASHMAW IS ENRAGED" : "ASHMAW: PHASE 2"; g.bannerT = 1.8; g.shake = 5;
     g.mb.hazards.push({ x: e.x, y: e.y, r: 46, t: 0.6, max: 0.6, dmg: 8, foe: true });
     for (let i = 0; i < 10; i++) g.parts.emit(CH_COMBAT, K_SPARK, e.x, e.y - 20, Math.cos(i * 0.63) * 120, Math.sin(i * 0.63) * 120, 0.5, C_RED, 0, 2);
+    for (let i = 0; i < 10; i++) g.parts.emit(CH_COMBAT, K_ASH, e.x + (Math.random() - 0.5) * 40, e.y - 8, (Math.random() - 0.5) * 40, -30 - Math.random() * 30, 0.9, i & 1 ? C_ASH : C_ASH_DARK);
     return [0, 0];
   }
+  if (g.frame % 4 === 0) g.parts.emit(CH_COMBAT, g.frame % 8 ? K_SPARK : K_ASH, e.x + (Math.random() - 0.5) * 26, e.y - 30 + Math.random() * 20, 0, -36, 0.6, g.frame % 8 ? C_EMBER : C_ASH);
   const spd = b.phase === 3 ? 1.35 : 1;
   if (e.state === "idle" || e.state === "chase") {
     e.state = "chase";
@@ -91,10 +99,11 @@ export function updateBoss(g: Game, e: Enemy, dt: number, ux: number, uy: number
 /** Reward: EXP orbs (dropped by onFoeKill), Ember Core: +3 stat points, full power meter; arena unlocks. */
 export function bossKilled(g: Game, e: Enemy) {
   const b = g.mb.boss; b.active = false; b.done = true; writeBossDone();
+  const st = story(); if (st) { st.flags.ashmawDown = true; st.save(); }
   g.pts += 3; g.tf = 100; g.hp = g.maxHp; g.ep = g.maxEp; g.shake = 6;
   g.mb.hazards.length = 0; g.shots = g.shots.filter((s) => !s.foe);
-  g.banner = "WARDEN RUNE FALLS"; g.bannerT = 3;
+  g.banner = "ASHMAW FALLS"; g.bannerT = 3;
   g.say("Ember Core obtained! +3 stat points, power meter full", 4);
   g.stats.bossKills = (g.stats.bossKills ?? 0) + 1;
-  for (let i = 0; i < 12; i++) g.parts.emit(CH_COMBAT, i & 1 ? K_RING : K_SPARK, e.x, e.y - 20, Math.cos(i / 1.9) * 140, Math.sin(i / 1.9) * 140, 0.7, C_GOLD, 0, 2);
+  for (let i = 0; i < 12; i++) g.parts.emit(CH_COMBAT, i & 1 ? K_RING : K_SPARK, e.x, e.y - 20, Math.cos(i / 1.9) * 140, Math.sin(i / 1.9) * 140, 0.7, i % 3 ? C_EMBER : C_GOLD, 0, 2);
 }

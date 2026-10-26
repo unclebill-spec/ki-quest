@@ -15,8 +15,8 @@ try {
   const shot = (n) => p.screenshot({ path: `/tmp/full-w-${n}.png`, clip: { x: 0, y: 0, width: 1152, height: 648 } });
   const E = (f, a) => p.evaluate(f, a);
   const dismiss = async () => { for (let i = 0; i < 60 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(120); } };
-  const KILL = (a) => E(({ x, y, flag }) => { const g = window.__ki.game, s = window.__ki.story, K = ["slag", "aurel", "vey", "nell", "pylon", "morvant", "malachar"]; s.box = null; g.p.x = x; g.p.y = y; let n = 0;
-    for (; n < 60 * 300 && !s.flags[flag]; n++) { g.p.inv = 1; g.hp = g.maxHp; s.box = null; if (n > 120 && n % 20 === 0) for (const e of g.enemies) if (!e.dead && K.includes(e.kind)) { for (const k of ["boss2", "boss3", "boss4", "boss5", "boss6"]) if (g.mb[k]) g.mb[k].lockT = 0; e.hurt = 0; g.damageFoe(e, Math.ceil(e.max / (e.kind === "pylon" ? 6 : 40)), 0, 0, false); } g.step(1 / 60); }
+  const KILL = (a) => E(({ x, y, flag }) => { const g = window.__ki.game, s = window.__ki.story, K = ["slag", "aurel", "vey", "nell", "pylon", "morvant", "malachar", "wardenrune"]; s.box = null; g.p.x = x; g.p.y = y; let n = 0;
+    for (; n < 60 * 300 && !s.flags[flag]; n++) { g.p.inv = 1; g.hp = g.maxHp; s.box = null; if (n > 120 && n % 20 === 0) for (const e of g.enemies) if (!e.dead && K.includes(e.kind)) { for (const k of ["boss2", "boss3", "boss4", "boss5", "boss6", "boss12"]) if (g.mb[k]) g.mb[k].lockT = 0; e.hurt = 0; g.damageFoe(e, Math.ceil(e.max / (e.kind === "pylon" ? 6 : 40)), 0, 0, false); } g.step(1 / 60); }
     return { n, flag: !!s.flags[flag], area: g.area.id }; }, a);
   const ride = async (to) => { await dismiss(); await E((to) => { const g = window.__ki.game, t = g.area.travel.find((t) => t.to === to); window.__ki.story.flags.stoneT = false; g.p.x = t.x; g.p.y = t.y; }, to); await p.waitForTimeout(300);
     for (let i = 0; i < 6 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(200); }
@@ -176,8 +176,14 @@ try {
   await E(() => { const g = window.__ki.game; g.p.x = 24 * 16; g.p.y = 21 * 16; }); await p.waitForTimeout(700);
   await p.screenshot({ path: "/tmp/full-husk-arena.png" });
   ok("REAL Malachar kill", (await KILL(await E(() => { const A = globalThis.__kiMB.ARENA6; return { x: A.tx * 16 + 8, y: A.ty * 16 + 40, flag: "malacharDown" }; }))).flag); await p.waitForTimeout(400);
+  // W17: Malachar fades, the Warden Rune wakes (true final boss); Hollowmere was never fought (optional)
+  for (let i = 0; i < 40 && !(await E(() => window.__ki.story.flags.runeSeen === true && !window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  ok("Malachar fades (malacharFade), no dawn yet, Warden Rune intro seen", await E(() => { const f = window.__ki.story.flags; return f.malacharFade === true && f.runeSeen === true && !f.dawn && window.__ki.story.credits <= 0; }));
+  await p.waitForTimeout(300); ok("Warden Rune wakes in the husk arena", await E(() => window.__ki.game.mb.boss12.active && !!globalThis.__kiMB.runeOf(window.__ki.game)));
+  ok("REAL Warden Rune kill", (await KILL(await E(() => { const A = globalThis.__kiMB.ARENA12; return { x: A.tx * 16 + 8, y: A.ty * 16 + 40, flag: "runeDown" }; }))).flag); await p.waitForTimeout(400);
+  ok("Hollowmere skipped: optional, never required", await E(() => !window.__ki.story.flags.hollowmereDown && !window.__ki.game.mb.boss11.done && globalThis.__kiMB.HOLLOWMERE_REQUIRED === false));
   for (let i = 0; i < 40 && (await E(() => window.__ki.story.credits <= 0)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
-  ok("dawn + credits roll after Malachar", await E(() => window.__ki.story.flags.dawn === true && window.__ki.story.credits > 0));
+  ok("dawn + credits roll after Warden Rune (runeDown)", await E(() => window.__ki.story.flags.dawn === true && window.__ki.story.credits > 0));
   await p.waitForTimeout(6000); await p.screenshot({ path: "/tmp/full-credits.png" });
   await p.keyboard.press("KeyJ"); await p.waitForTimeout(400);
   ok("credits skippable", await E(() => window.__ki.story.credits === 0));

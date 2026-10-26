@@ -126,11 +126,18 @@ export class Story {
     }
     // Finale: inside the husk sun
     if (g.area.id === "husk" && !F.huskIn && !this.box) return B("huskIn", "The Husk Sun", ["(Inside, the sun is a cathedral of cold ash. Five pedestals ring a heart that barely beats.)", "Malachar: \"You climbed all this way to watch it die with me? How kind.\"", "Malachar: \"Every Wellspring you walked past, I drank. Every lamp you lit, I let you light. Come, lamplighter. Be the last warm thing.\""], 300);
-    if (g.area.id === "husk" && F.malacharDown && !F.dawn && !this.box) {
+    // MB hook (W17, mechanical; N64 to review): Malachar's beat now ends on malacharFade; boss12 Warden Rune (src/game/enemies/wardenrune.ts)
+    // wakes on malacharFade && !runeDown; dawn + credits follow runeDown. Lines: staging/story/w17.md.
+    if (g.area.id === "husk" && F.malacharFade && !F.runeDown && !F.runeSeen && !this.box) return B("runeSeen", "Warden Rune", ["(The five pedestals crack. A guardian of stone and gold unfolds from the sun's heart, runes burning cyan along its arms.)", "SUN. RELIT. UNSANCTIONED. THE WELLSPRINGS ARE SEALED. THEY ARE TO STAY SEALED.", "I KEPT THIS WORLD DIM FOR THREE HUNDRED YEARS SO IT COULD NOT BURN. STAND ASIDE, LAMPLIGHTER."]);
+    if (g.area.id === "husk" && F.runeDown && !F.dawn && !this.box) {
+      this.say("Warden Rune", ["(Its runes go out one by one, cyan, then gold, then nothing.)", "...The world... is warm... and nothing... is burning.", "Then my watch... is over. Keep the lamps... lamplighter. Not all the time. Just... when it's dark."],
+        () => { F.dawn = true; this.save(); g.gainExp(1000); this.say("Rook", ["(The first grey-gold dawn in three hundred years.)", "Lamps still need lighting. Just not all the time."], () => { this.credits = CREDITS_T; }); }); return true;
+    }
+    if (g.area.id === "husk" && F.malacharDown && !F.malacharFade && !F.dawn && !this.box) {
       F.poured = true; this.save();
       this.say("The Wellsprings", ["(The heroes don't take the light. They give it back.)", "Rook pours the Lanternmoss spring. Mirela, the Hushwater dead's. Brann, the Quarry Heart.", "Neri's tide-light rises from the drowned Wellspring. And Sable pours back everything he drank from her."],
-        () => this.say("Malachar Vesh", ["(Left with only his own small light, he looks up at the sun, relit.)", "...It's warm. I'd forgotten it was warm.", "(He goes still. He fades into a single warm glow orb that drifts out into the dawn.)"],
-        () => { F.dawn = true; this.save(); g.gainExp(1000); this.say("Rook", ["(The first grey-gold dawn in three hundred years.)", "Lamps still need lighting. Just not all the time."], () => { this.credits = CREDITS_T; }); })); return true;
+        () => this.say("Malachar Vesh", ["(Left with only his own small light, he looks up at the sun, relit.)", "...It's warm. I'd forgotten it was warm.", "But you've woken him. The one I was set to keep asleep. I was only ever the herald, lamplighter... the Warden was the wall.", "(He fades into a single warm glow orb. Under the pedestals, something vast and old turns over in its sleep.)"],
+        () => { F.malacharFade = true; this.save(); })); return true;
     }
     // Act III open: the Sunwarden's Stair
     if (g.area.id === "stair" && !F.stairIn && !this.box) return B("stairIn", "The Sunwarden's Stair", ["(Broken stone rings float up and up toward a vast dark sphere: the husk of the sun.)", "The murals in the waystation carry a name now: \"Malachar Vesh, the last warden.\"", "Court soldiers everywhere... but they're not looking at you. They're hunting someone."], 200);
@@ -205,7 +212,7 @@ export class Story {
   objective(): string {
     const f = this.flags, g = this.g;
     if (F0(f)) return "Dawn · free roam: days are gold, the glow nights still return";
-    if (g.area.id === "husk") return f.malacharDown ? "Give the light back" : "Defeat Malachar Vesh at the sun's heart";
+    if (g.area.id === "husk") return f.malacharFade && !f.runeDown ? "Defeat Warden Rune, the last guardian" : f.malacharDown ? "Give the light back" : "Defeat Malachar Vesh at the sun's heart"; // MB hook (W17)
     if (g.area.id === "stair" && f.threshold) return "Ride the top-ring stone up into the husk sun";
     if (g.area.id === "stair") return f.threshold ? "The husk sun is starving. Finale: give back every spring" : f.morvantDown ? "Climb to the top ring" : f.sableJoin ? "Top ring: get past Morvant, the Eclipse Golem" : "Free Sable from the Red Cage (centre ring)";
     if (g.area.id === "drowned" && f.malachar) return "Malachar Vesh is named · the Undertide stone now points north to the Stair";

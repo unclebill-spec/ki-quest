@@ -81,8 +81,8 @@ try {
   // hand-off: the story's husk ending reads malacharDown -> Wellsprings scene -> Malachar's last words -> dawn -> credits
   await page.waitForFunction(() => window.__ki.story.box?.who === "The Wellsprings", null, { timeout: 8000, polling: 50 }).catch(() => {});
   const end = await E(() => { const s = window.__ki.story, who = []; for (let k = 0; k < 10 && s.box; k++) { who.push(s.box.who); const t = s.box.then; s.box = null; t && t(); }
-    return { who: who.join(">"), dawn: s.flags.dawn === true, credits: s.credits > 0, re: window.__ki.game.mb.boss6.active }; });
-  ok("finale hand-off: Wellsprings > Malachar > Rook, dawn saved, credits roll, no re-trigger", /^The Wellsprings>Malachar Vesh>Rook/.test(end.who) && end.dawn && end.credits && !end.re, JSON.stringify(end));
+    return { who: who.join(">"), fade: s.flags.malacharFade === true, dawn: s.flags.dawn === true, credits: s.credits > 0, re: window.__ki.game.mb.boss6.active }; });
+  ok("W17 hand-off: Wellsprings > Malachar, malacharFade saved (no dawn / credits yet: Warden Rune is next), no re-trigger", /^The Wellsprings>Malachar Vesh$/.test(end.who) && end.fade && !end.dawn && !end.credits && !end.re, JSON.stringify(end));
   ok("no page errors", errs.length === 0, errs.slice(0, 3).join(" | "));
 } finally { await browser.close(); srv.kill(); }
 for (const [s, n, d] of results) console.log(`${s}  ${n}  ${d}`);

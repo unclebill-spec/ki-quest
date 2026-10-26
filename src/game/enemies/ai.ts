@@ -14,6 +14,9 @@ import { updateTwin, twinKilled, twinShielded, twinsLog } from "./twins";
 import { updateMorvant, morvantKilled } from "./morvant";
 import { updateMalachar, malacharKilled } from "./malachar";
 import { hurtAlly } from "../combat/companion";
+import { updateHollowmere, hollowmereKilled, hollowSunk, hollowLog } from "./hollowmere"; // MB W17
+import { updateRune, runeKilled } from "./wardenrune"; // MB W17
+import { w17Clamp } from "../combat/w17"; // MB W17
 
 /** Extra spawns this module adds to the area (wardens), on open floor near the given tiles. */
 export function extraSpawns(a: Area): { kind: "warden"; x: number; y: number }[] {
@@ -30,7 +33,9 @@ export function freeNear(a: Area, tx: number, ty: number) {
 
 /** Called from Game.damageFoe before applying damage. Returns adjusted damage/knockback. */
 export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, crit: boolean, pierce = false) {
-  if (miniLocked(g, e) || (e.kind === "boss" && g.mb.boss.lockT > 0) || (e.kind === "slag" && g.mb.boss2.lockT > 0) || (e.kind === "aurel" && g.mb.boss3.lockT > 0) || (e.kind === "morvant" && g.mb.boss5.lockT > 0) || (e.kind === "malachar" && g.mb.boss6.lockT > 0)) return { d: 0, kx: 0, ky: 0, blocked: true };
+  if (miniLocked(g, e) || (e.kind === "boss" && g.mb.boss.lockT > 0) || (e.kind === "slag" && g.mb.boss2.lockT > 0) || (e.kind === "aurel" && g.mb.boss3.lockT > 0) || (e.kind === "morvant" && g.mb.boss5.lockT > 0) || (e.kind === "malachar" && g.mb.boss6.lockT > 0) || (e.kind === "hollowmere" && g.mb.boss11.lockT > 0) || (e.kind === "wardenrune" && g.mb.boss12.lockT > 0)) return { d: 0, kx: 0, ky: 0, blocked: true };
+  if (hollowSunk(e)) { hollowLog.sunkHits++; return { d: 0, kx: 0, ky: 0, blocked: true }; } // MB W17: under the mere
+  if (e.kind === "hollowmere" || e.kind === "wardenrune") d = w17Clamp(e, d); // MB W17: test HP floor
   if (twinShielded(g, e)) { twinsLog.shieldedHits++; return { d: 0, kx: 0, ky: 0, blocked: true }; }
   if (roleOf(e.kind) === "warden" && e.guard) {
     const n = Math.hypot(kx, ky) || 1, front = (kx / n) * e.ax + (ky / n) * e.ay < -0.2;
@@ -51,7 +56,7 @@ export function onFoeHit(g: Game, e: Enemy, d: number, kx: number, ky: number, c
 export function onFoeKill(g: Game, e: Enemy) {
   const info = FOE_INFO[e.kind];
   e.respawn = e.minion ? Infinity : info.respawn;
-  const n = e.kind === "boss" ? 10 : e.kind === "slag" || e.kind === "aurel" ? 12 : e.kind === "morvant" ? 14 : e.kind === "malachar" ? 18 : e.kind === "vey" || e.kind === "nell" || isMini(e.kind) ? 8 : 3, each = Math.ceil(info.exp / n);
+  const n = e.kind === "boss" ? 10 : e.kind === "slag" || e.kind === "aurel" ? 12 : e.kind === "morvant" ? 14 : e.kind === "malachar" ? 18 : e.kind === "wardenrune" ? 24 : e.kind === "hollowmere" ? 14 : e.kind === "vey" || e.kind === "nell" || isMini(e.kind) ? 8 : 3, each = Math.ceil(info.exp / n);
   for (let i = 0; i < n; i++) { const a = (i / n) * 6.28; g.mb.orbs.push({ x: e.x, y: e.y - 8, vx: Math.cos(a) * 60, vy: Math.sin(a) * 60 - 30, v: each, t: 0 }); }
   if (e.kind === "boss") bossKilled(g, e);
   if (e.kind === "slag") slagKilled(g, e);
@@ -60,6 +65,8 @@ export function onFoeKill(g: Game, e: Enemy) {
   if (e.kind === "aurel") aurelKilled(g, e);
   if (e.kind === "morvant") morvantKilled(g, e);
   if (e.kind === "malachar") malacharKilled(g, e);
+  if (e.kind === "hollowmere") hollowmereKilled(g, e);
+  if (e.kind === "wardenrune") runeKilled(g, e);
   if (e.kind === "vey" || e.kind === "nell" || e.kind === "pylon") twinKilled(g, e);
   if (isBigBoss(e.kind) && !anyBossActive(g)) barkParty(g, "victory"); // MB hook: barks (boss fight won)
 }
@@ -92,6 +99,8 @@ export function updateFoes(g: Game, dt: number) {
     else if (e.kind === "aurel") [wx, wy] = updateAurel(g, e, dt, ux, uy, dist);
     else if (e.kind === "morvant") [wx, wy] = updateMorvant(g, e, dt, ux, uy, dist);
     else if (e.kind === "malachar") [wx, wy] = updateMalachar(g, e, dt, ux, uy, dist);
+    else if (e.kind === "hollowmere") [wx, wy] = updateHollowmere(g, e, dt, ux, uy, dist);
+    else if (e.kind === "wardenrune") [wx, wy] = updateRune(g, e, dt, ux, uy, dist);
     else if (e.kind === "vey" || e.kind === "nell") [wx, wy] = updateTwin(g, e, dt, ux, uy, dist);
     else if (e.kind === "pylon") [wx, wy] = [0, 0];
     else if (roleOf(e.kind) === "brute") {

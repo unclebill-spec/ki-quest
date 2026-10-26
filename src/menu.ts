@@ -133,7 +133,7 @@ export function applyRecord(g: Game, r: SaveRecord) {
   try {
     if (r.bosses) { localStorage.setItem(MB_SLOT, JSON.stringify(r.bosses)); const b = r.bosses as Record<string, boolean>;
       const mb = g.mb as unknown as Record<string, { done: boolean; active: boolean }>;
-      for (const k of ["boss", "boss2", "boss3", "boss4", "boss5", "boss6"]) if (mb[k]) { mb[k].done = b[k === "boss" ? "boss1" : k] === true; mb[k].active = false; } }
+      for (const k of ["boss", "boss2", "boss3", "boss4", "boss5", "boss6", "boss7", "boss8", "boss9", "boss10", "boss11", "boss12"]) if (mb[k])  /* MB hook W17 */ { mb[k].done = b[k === "boss" ? "boss1" : k] === true; mb[k].active = false; } }
   } catch { /* storage blocked */ }
   const s = ki().story;
   if (s && r.story) { s.flags = { ...r.story }; s.save(); }
@@ -220,12 +220,14 @@ function bios(g: Game) {
   if (A("mirela") || F.oath) L.push({ name: "Mirela", tag: "Oathkeeper · ally", text: ["Swore to walk with you to the", "dead sun. Fights close, throws", "teal bolts, never retreats."] });
   if (A("brann") || F.brann) L.push({ name: "Brann", tag: "Shield-wall · ally", text: ["Big, slow, loud. Draws foes off", "you with a taunt and takes", "the hits nobody else can."] });
   if (A("sable") || F.sableJoin) L.push({ name: "Sable", tag: "Caster · healer · ally", text: ["She reads the Lens like a book.", "Hangs back, casts, and mends", "the party when it counts."] });
-  if (mb.boss?.done) L.push({ name: "Warden Rune", tag: "Guardian · defeated", text: ["A stone keeper of the ridge.", "Dashes, fans, slams. Its rune", "went quiet at last."] });
+  if (mb.boss?.done) L.push({ name: "Ashmaw", tag: "Grotto Devourer · defeated", text: ["An ember-jawed beast of the grotto.", "Dashes, fans, slams. Its embers", "went cold at last."] }); // MB hook W17
   if (mb.boss2?.done) L.push({ name: "Slagheart", tag: "Quarry boss · defeated", text: ["Molten core in a slag shell.", "The quarry cools without it."] });
   if (mb.boss3?.done) L.push({ name: "Count Aurel", tag: "Undertide · defeated", text: ["Lord of the drowned spring.", "Called the tide to his side."] });
   if (mb.boss4?.done) L.push({ name: "Cageward Twins", tag: "Red Cage · defeated", text: ["Two wardens, three pylons,", "one cage. Broken together."] });
   if (mb.boss5?.done) L.push({ name: "Morvant", tag: "Eclipse Golem · defeated", text: ["Guarded the Husk Ring. Its", "fall opened the way up."] });
   if (mb.boss6?.done) L.push({ name: "Malachar Vesh", tag: "The Last Dusk · defeated", text: ["Wanted the world dark.", "Dawn came anyway."] });
+  if (mb.boss11?.done) L.push({ name: "Hollowmere", tag: "Drinking Colossus · defeated", text: ["It drank the Hushwater mere.", "The fog thins without it."] }); // MB hook W17
+  if (mb.boss12?.done) L.push({ name: "Warden Rune", tag: "Last Guardian · defeated", text: ["Kept the world dim so it", "could not burn. Its watch is over."] }); // MB hook W17
   return L;
 }
 

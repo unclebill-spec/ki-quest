@@ -31,7 +31,8 @@ export function rollKill(g: Game, x: number, y: number, boss: boolean) {
   const f = debug.force; debug.force = null;
   g.coins += f?.coins ?? (boss ? 50 : 1 + Math.floor(rng.next() * 3));
   if (boss) { addItem(g, "berry"); addItem(g, "tear"); g.say("Boss spoils: Kindleberry + Wellspring Tear", 2.5); return; }
-  const gid = f ? f.gear : rng.next() < GEAR_DROP ? MOB_GEAR[Math.floor(rng.next() * MOB_GEAR.length)] : undefined;
+  const gid0 = f ? f.gear : rng.next() < GEAR_DROP ? MOB_GEAR[Math.floor(rng.next() * MOB_GEAR.length)] : undefined;
+  const gid = gid0 && gearById(gid0)?.src !== "B" ? gid0 : undefined; // MB hook (W17): boss-unique gear (e.g. c7 Stillwater Charm) never drops as loot
   if (gid) g.drops.push({ x, y, kind: "gear", id: gid, t: 30 });
   const r = rng.next();
   const it: ItemId | undefined = f ? f.item : r < ITEMS.tear.drop ? "tear" : r < ITEMS.tear.drop + ITEMS.berry.drop ? "berry" : r < ITEMS.tear.drop + ITEMS.berry.drop + ITEMS.morsel.drop ? "morsel" : undefined;

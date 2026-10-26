@@ -191,3 +191,10 @@ Slots: Story suggested build order Kettle → Corvin → Capmother → Ombrelle;
 - Test: tests/artpack3.mjs (14 checks, incl. hero facing right draws walk_right_N unmirrored). Screenshots: docs/artpack3_hero_right_{before,after,before_after}.png.
 
 - 2026-10-26 W17: boss plan in docs/BOSS_PLAN_W17.md (Ashmaw grotto re-skin, Hollowmere Hushwater boss, Warden Rune final). Canon names: /workspace/masters/kindle-quest/CANON.md. No boss code yet.
+
+## MB W17b (Master Builder, 2026-10-26)
+- Code: src/game/enemies/hollowmere.ts, wardenrune.ts; src/game/combat/w17.ts (update/abort/charm), draw17.ts (draw hooks). `// MB hook` edits in ai.ts, draw.ts, game.ts, companion.ts, menu.ts, gear.ts (c7 + BOSS map), loot.ts (no B-gear in rolls), story/index.ts (malacharFade -> runeSeen -> runeDown -> dawn).
+- Flags: ashmawDown, hollowmereWake, hollowmereDown, malacharFade, runeSeen, runeDown. MB saves: boss11, boss12.
+- Test hooks: __kiMB.forceHollowMove / forceRuneMove, setHpFloor(kind, frac), hollowLog / runeLog / w17Log.
+- For N64 to review: story/index.ts finale edit (lines from staging/story/w17.md); add the credits line "Final boss: Warden Rune, the Last Guardian of the Wellsprings" to src/areas/art.ts CREDITS (N64-owned, not touched); the c7 icon reuses c3's [80,48]; the wake gate uses `bell` (not `bellDone`), so please confirm the flag name.
+- Shots: docs/bill/ashmaw_8x.png, hollowmere_8x.png, warden_rune_8x.png, boss11.png, boss12.png. PixelLab: none used.

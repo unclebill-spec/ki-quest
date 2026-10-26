@@ -72,6 +72,7 @@ try {
   await shot("combat-boss-p3");
   const rw = await E(() => { const g = window.__ki.game; const b = g.enemies.find((e) => e.kind === "boss"); const pts = g.pts; g.mb.boss.lockT = 0; g.damageFoe(b, 99999, 0, 0, false); for (let i = 0; i < 150; i++) g.step(1 / 60); return { done: g.mb.boss.done, active: g.mb.boss.active, pts: g.pts - pts, saved: localStorage.getItem("kiquest-mb-v1"), alive: g.enemies.some((e) => e.kind === "boss" && !e.dead) }; });
   ok("boss reward: +3 pts (plus level-ups), unlock, saved", rw.done && !rw.active && rw.pts >= 3 && !!rw.saved && !rw.alive, JSON.stringify(rw));
+  ok("W17: boss1 is Ashmaw and its kill sets ashmawDown", await E(() => window.__ki.story.flags.ashmawDown === true));
   // sprites loaded from public/art/chars
   const spr = await E(() => { const imgs = performance.getEntriesByType("resource").map((r) => r.name).filter((n) => n.includes("art/chars/")); return imgs.length; });
   ok("sprite sheets loaded", spr >= 10, String(spr));

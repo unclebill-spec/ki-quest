@@ -30,8 +30,15 @@ try {
   ok("Malachar killed in a real fight (all phases) sets malacharDown", k.down && k.phase >= 5, JSON.stringify(k));
   await page.waitForFunction(() => window.__ki.story.box?.who === "The Wellsprings", null, { timeout: 5000 }).catch(() => {});
   ok("ending: the Wellsprings are given back", await E(() => window.__ki.story.box?.who === "The Wellsprings" && window.__ki.story.flags.poured === true));
-  const seen = new Set(); for (let i = 0; i < 40 && (await E(() => window.__ki.story.credits <= 0)); i++) { const who = await E(() => window.__ki.story.box?.who ?? ""); seen.add(who); await page.keyboard.press("KeyJ"); await page.waitForTimeout(150); }
-  ok("Malachar's last words + Rook's dawn line", seen.has("Malachar Vesh") && seen.has("Rook"), [...seen].join(","));
+  const seen = new Set(); for (let i = 0; i < 40 && !(await E(() => window.__ki.story.flags.runeSeen === true && !window.__ki.story.box)); i++) { const who = await E(() => window.__ki.story.box?.who ?? ""); seen.add(who); await page.keyboard.press("KeyJ"); await page.waitForTimeout(150); }
+  ok("W17: Malachar's last words end on malacharFade (no dawn), Warden Rune intro follows", seen.has("Malachar Vesh") && seen.has("Warden Rune") && await E(() => window.__ki.story.flags.malacharFade === true && !window.__ki.story.flags.dawn), [...seen].join(","));
+  await page.waitForTimeout(300);
+  const wr = await E(() => { const g = window.__ki.game, M = globalThis.__kiMB; let n = 0;
+    for (; n < 60 * 400 && !window.__ki.story.flags.runeDown; n++) { g.p.inv = 1; g.hp = g.maxHp; const m = M.runeOf(g); if (m && !m.dead && n % 20 === 0) { g.mb.boss12.lockT = 0; m.hurt = 0; g.damageFoe(m, Math.ceil(m.max / 40), 0, 0, false); } g.step(1 / 60); }
+    return { n, down: !!window.__ki.story.flags.runeDown, phase: g.mb.boss12.phase }; });
+  ok("Warden Rune killed in a real fight (all 6 phases) sets runeDown", wr.down && wr.phase >= 6, JSON.stringify(wr));
+  for (let i = 0; i < 40 && (await E(() => window.__ki.story.credits <= 0)); i++) { const who = await E(() => window.__ki.story.box?.who ?? ""); seen.add(who); await page.keyboard.press("KeyJ"); await page.waitForTimeout(150); }
+  ok("Warden Rune's last words + Rook's dawn line", seen.has("Warden Rune") && seen.has("Rook"), [...seen].join(","));
   ok("dawn flag + credits rolling", await E(() => window.__ki.story.flags.dawn === true && window.__ki.story.credits > 0));
   await page.waitForTimeout(4000); await page.screenshot({ path: "docs/bill/credits.png" });
   await page.keyboard.press("KeyJ"); await page.waitForTimeout(400);

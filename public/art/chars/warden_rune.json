@@ -1,14 +1,14 @@
 {
  "name": "warden_rune",
  "role": "boss",
- "palette": "gloom-glow",
+ "palette": "stone-gold-cyan",
  "frame": [
-  48,
-  64
+  64,
+  80
  ],
  "pivot": [
-  24,
-  63
+  32,
+  79
  ],
  "facings": [
   "down",
@@ -17,349 +17,354 @@
   "right"
  ],
  "anims": {
-  "stand": {
-   "count": 1
+  "idle": {
+   "count": 2
   },
-  "walk": {
-   "count": 4
+  "cast": {
+   "count": 3
   },
-  "attack": {
+  "slam": {
    "count": 3
   },
   "hurt": {
    "count": 1
   },
-  "stomp": {
+  "seal": {
    "count": 3
-  },
-  "beam": {
-   "count": 3
-  },
-  "guard": {
-   "count": 2
   }
  },
  "layout": "row = anim x facing (anim order as listed, facings down,up,left,right), col = frame index; right = left mirrored",
+ "fx_palette": {
+  "rune": [
+   "#8afcff",
+   "#2ad0ff",
+   "#e8fcff"
+  ],
+  "gold": [
+   "#ffe68a",
+   "#e0aa34"
+  ]
+ },
  "frames": [
   {
-   "name": "warden_rune_stand_down_0",
-   "anim": "stand",
+   "name": "warden_rune_idle_down_0",
+   "anim": "idle",
    "facing": "down",
    "i": 0,
    "x": 0,
    "y": 0,
-   "w": 48,
-   "h": 64
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_stand_up_0",
-   "anim": "stand",
+   "name": "warden_rune_idle_down_1",
+   "anim": "idle",
+   "facing": "down",
+   "i": 1,
+   "x": 64,
+   "y": 0,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_idle_up_0",
+   "anim": "idle",
    "facing": "up",
    "i": 0,
    "x": 0,
-   "y": 64,
-   "w": 48,
-   "h": 64
+   "y": 80,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_stand_left_0",
-   "anim": "stand",
+   "name": "warden_rune_idle_up_1",
+   "anim": "idle",
+   "facing": "up",
+   "i": 1,
+   "x": 64,
+   "y": 80,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_idle_left_0",
+   "anim": "idle",
    "facing": "left",
    "i": 0,
    "x": 0,
-   "y": 128,
-   "w": 48,
-   "h": 64
+   "y": 160,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_stand_right_0",
-   "anim": "stand",
+   "name": "warden_rune_idle_left_1",
+   "anim": "idle",
+   "facing": "left",
+   "i": 1,
+   "x": 64,
+   "y": 160,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_idle_right_0",
+   "anim": "idle",
    "facing": "right",
    "i": 0,
    "x": 0,
-   "y": 192,
-   "w": 48,
-   "h": 64
+   "y": 240,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_walk_down_0",
-   "anim": "walk",
-   "facing": "down",
-   "i": 0,
-   "x": 0,
-   "y": 256,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_down_1",
-   "anim": "walk",
-   "facing": "down",
+   "name": "warden_rune_idle_right_1",
+   "anim": "idle",
+   "facing": "right",
    "i": 1,
-   "x": 48,
-   "y": 256,
-   "w": 48,
-   "h": 64
+   "x": 64,
+   "y": 240,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_walk_down_2",
-   "anim": "walk",
+   "name": "warden_rune_cast_down_0",
+   "anim": "cast",
    "facing": "down",
-   "i": 2,
-   "x": 96,
-   "y": 256,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_down_3",
-   "anim": "walk",
-   "facing": "down",
-   "i": 3,
-   "x": 144,
-   "y": 256,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_up_0",
-   "anim": "walk",
-   "facing": "up",
    "i": 0,
    "x": 0,
    "y": 320,
-   "w": 48,
-   "h": 64
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_walk_up_1",
-   "anim": "walk",
-   "facing": "up",
-   "i": 1,
-   "x": 48,
-   "y": 320,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_up_2",
-   "anim": "walk",
-   "facing": "up",
-   "i": 2,
-   "x": 96,
-   "y": 320,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_up_3",
-   "anim": "walk",
-   "facing": "up",
-   "i": 3,
-   "x": 144,
-   "y": 320,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_left_0",
-   "anim": "walk",
-   "facing": "left",
-   "i": 0,
-   "x": 0,
-   "y": 384,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_left_1",
-   "anim": "walk",
-   "facing": "left",
-   "i": 1,
-   "x": 48,
-   "y": 384,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_left_2",
-   "anim": "walk",
-   "facing": "left",
-   "i": 2,
-   "x": 96,
-   "y": 384,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_left_3",
-   "anim": "walk",
-   "facing": "left",
-   "i": 3,
-   "x": 144,
-   "y": 384,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_right_0",
-   "anim": "walk",
-   "facing": "right",
-   "i": 0,
-   "x": 0,
-   "y": 448,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_right_1",
-   "anim": "walk",
-   "facing": "right",
-   "i": 1,
-   "x": 48,
-   "y": 448,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_right_2",
-   "anim": "walk",
-   "facing": "right",
-   "i": 2,
-   "x": 96,
-   "y": 448,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_walk_right_3",
-   "anim": "walk",
-   "facing": "right",
-   "i": 3,
-   "x": 144,
-   "y": 448,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_attack_down_0",
-   "anim": "attack",
-   "facing": "down",
-   "i": 0,
-   "x": 0,
-   "y": 512,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_attack_down_1",
-   "anim": "attack",
+   "name": "warden_rune_cast_down_1",
+   "anim": "cast",
    "facing": "down",
    "i": 1,
-   "x": 48,
-   "y": 512,
-   "w": 48,
-   "h": 64
+   "x": 64,
+   "y": 320,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_down_2",
-   "anim": "attack",
+   "name": "warden_rune_cast_down_2",
+   "anim": "cast",
    "facing": "down",
    "i": 2,
-   "x": 96,
-   "y": 512,
-   "w": 48,
-   "h": 64
+   "x": 128,
+   "y": 320,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_up_0",
-   "anim": "attack",
+   "name": "warden_rune_cast_up_0",
+   "anim": "cast",
    "facing": "up",
    "i": 0,
    "x": 0,
-   "y": 576,
-   "w": 48,
-   "h": 64
+   "y": 400,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_up_1",
-   "anim": "attack",
+   "name": "warden_rune_cast_up_1",
+   "anim": "cast",
    "facing": "up",
    "i": 1,
-   "x": 48,
-   "y": 576,
-   "w": 48,
-   "h": 64
+   "x": 64,
+   "y": 400,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_up_2",
-   "anim": "attack",
+   "name": "warden_rune_cast_up_2",
+   "anim": "cast",
    "facing": "up",
    "i": 2,
-   "x": 96,
-   "y": 576,
-   "w": 48,
-   "h": 64
+   "x": 128,
+   "y": 400,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_left_0",
-   "anim": "attack",
+   "name": "warden_rune_cast_left_0",
+   "anim": "cast",
    "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 480,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_cast_left_1",
+   "anim": "cast",
+   "facing": "left",
+   "i": 1,
+   "x": 64,
+   "y": 480,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_cast_left_2",
+   "anim": "cast",
+   "facing": "left",
+   "i": 2,
+   "x": 128,
+   "y": 480,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_cast_right_0",
+   "anim": "cast",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 560,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_cast_right_1",
+   "anim": "cast",
+   "facing": "right",
+   "i": 1,
+   "x": 64,
+   "y": 560,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_cast_right_2",
+   "anim": "cast",
+   "facing": "right",
+   "i": 2,
+   "x": 128,
+   "y": 560,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_slam_down_0",
+   "anim": "slam",
+   "facing": "down",
    "i": 0,
    "x": 0,
    "y": 640,
-   "w": 48,
-   "h": 64
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_left_1",
-   "anim": "attack",
+   "name": "warden_rune_slam_down_1",
+   "anim": "slam",
+   "facing": "down",
+   "i": 1,
+   "x": 64,
+   "y": 640,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_slam_down_2",
+   "anim": "slam",
+   "facing": "down",
+   "i": 2,
+   "x": 128,
+   "y": 640,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_slam_up_0",
+   "anim": "slam",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 720,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_slam_up_1",
+   "anim": "slam",
+   "facing": "up",
+   "i": 1,
+   "x": 64,
+   "y": 720,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_slam_up_2",
+   "anim": "slam",
+   "facing": "up",
+   "i": 2,
+   "x": 128,
+   "y": 720,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_slam_left_0",
+   "anim": "slam",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 800,
+   "w": 64,
+   "h": 80
+  },
+  {
+   "name": "warden_rune_slam_left_1",
+   "anim": "slam",
    "facing": "left",
    "i": 1,
-   "x": 48,
-   "y": 640,
-   "w": 48,
-   "h": 64
+   "x": 64,
+   "y": 800,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_left_2",
-   "anim": "attack",
+   "name": "warden_rune_slam_left_2",
+   "anim": "slam",
    "facing": "left",
    "i": 2,
-   "x": 96,
-   "y": 640,
-   "w": 48,
-   "h": 64
+   "x": 128,
+   "y": 800,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_right_0",
-   "anim": "attack",
+   "name": "warden_rune_slam_right_0",
+   "anim": "slam",
    "facing": "right",
    "i": 0,
    "x": 0,
-   "y": 704,
-   "w": 48,
-   "h": 64
+   "y": 880,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_right_1",
-   "anim": "attack",
+   "name": "warden_rune_slam_right_1",
+   "anim": "slam",
    "facing": "right",
    "i": 1,
-   "x": 48,
-   "y": 704,
-   "w": 48,
-   "h": 64
+   "x": 64,
+   "y": 880,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_attack_right_2",
-   "anim": "attack",
+   "name": "warden_rune_slam_right_2",
+   "anim": "slam",
    "facing": "right",
    "i": 2,
-   "x": 96,
-   "y": 704,
-   "w": 48,
-   "h": 64
+   "x": 128,
+   "y": 880,
+   "w": 64,
+   "h": 80
   },
   {
    "name": "warden_rune_hurt_down_0",
@@ -367,9 +372,9 @@
    "facing": "down",
    "i": 0,
    "x": 0,
-   "y": 768,
-   "w": 48,
-   "h": 64
+   "y": 960,
+   "w": 64,
+   "h": 80
   },
   {
    "name": "warden_rune_hurt_up_0",
@@ -377,9 +382,9 @@
    "facing": "up",
    "i": 0,
    "x": 0,
-   "y": 832,
-   "w": 48,
-   "h": 64
+   "y": 1040,
+   "w": 64,
+   "h": 80
   },
   {
    "name": "warden_rune_hurt_left_0",
@@ -387,9 +392,9 @@
    "facing": "left",
    "i": 0,
    "x": 0,
-   "y": 896,
-   "w": 48,
-   "h": 64
+   "y": 1120,
+   "w": 64,
+   "h": 80
   },
   {
    "name": "warden_rune_hurt_right_0",
@@ -397,329 +402,129 @@
    "facing": "right",
    "i": 0,
    "x": 0,
-   "y": 960,
-   "w": 48,
-   "h": 64
+   "y": 1200,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_stomp_down_0",
-   "anim": "stomp",
-   "facing": "down",
-   "i": 0,
-   "x": 0,
-   "y": 1024,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_down_1",
-   "anim": "stomp",
-   "facing": "down",
-   "i": 1,
-   "x": 48,
-   "y": 1024,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_down_2",
-   "anim": "stomp",
-   "facing": "down",
-   "i": 2,
-   "x": 96,
-   "y": 1024,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_up_0",
-   "anim": "stomp",
-   "facing": "up",
-   "i": 0,
-   "x": 0,
-   "y": 1088,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_up_1",
-   "anim": "stomp",
-   "facing": "up",
-   "i": 1,
-   "x": 48,
-   "y": 1088,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_up_2",
-   "anim": "stomp",
-   "facing": "up",
-   "i": 2,
-   "x": 96,
-   "y": 1088,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_left_0",
-   "anim": "stomp",
-   "facing": "left",
-   "i": 0,
-   "x": 0,
-   "y": 1152,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_left_1",
-   "anim": "stomp",
-   "facing": "left",
-   "i": 1,
-   "x": 48,
-   "y": 1152,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_left_2",
-   "anim": "stomp",
-   "facing": "left",
-   "i": 2,
-   "x": 96,
-   "y": 1152,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_right_0",
-   "anim": "stomp",
-   "facing": "right",
-   "i": 0,
-   "x": 0,
-   "y": 1216,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_right_1",
-   "anim": "stomp",
-   "facing": "right",
-   "i": 1,
-   "x": 48,
-   "y": 1216,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_stomp_right_2",
-   "anim": "stomp",
-   "facing": "right",
-   "i": 2,
-   "x": 96,
-   "y": 1216,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_beam_down_0",
-   "anim": "beam",
+   "name": "warden_rune_seal_down_0",
+   "anim": "seal",
    "facing": "down",
    "i": 0,
    "x": 0,
    "y": 1280,
-   "w": 48,
-   "h": 64
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_down_1",
-   "anim": "beam",
+   "name": "warden_rune_seal_down_1",
+   "anim": "seal",
    "facing": "down",
    "i": 1,
-   "x": 48,
+   "x": 64,
    "y": 1280,
-   "w": 48,
-   "h": 64
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_down_2",
-   "anim": "beam",
+   "name": "warden_rune_seal_down_2",
+   "anim": "seal",
    "facing": "down",
    "i": 2,
-   "x": 96,
+   "x": 128,
    "y": 1280,
-   "w": 48,
-   "h": 64
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_up_0",
-   "anim": "beam",
+   "name": "warden_rune_seal_up_0",
+   "anim": "seal",
    "facing": "up",
    "i": 0,
    "x": 0,
-   "y": 1344,
-   "w": 48,
-   "h": 64
+   "y": 1360,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_up_1",
-   "anim": "beam",
+   "name": "warden_rune_seal_up_1",
+   "anim": "seal",
    "facing": "up",
    "i": 1,
-   "x": 48,
-   "y": 1344,
-   "w": 48,
-   "h": 64
+   "x": 64,
+   "y": 1360,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_up_2",
-   "anim": "beam",
+   "name": "warden_rune_seal_up_2",
+   "anim": "seal",
    "facing": "up",
    "i": 2,
-   "x": 96,
-   "y": 1344,
-   "w": 48,
-   "h": 64
+   "x": 128,
+   "y": 1360,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_left_0",
-   "anim": "beam",
+   "name": "warden_rune_seal_left_0",
+   "anim": "seal",
    "facing": "left",
    "i": 0,
    "x": 0,
-   "y": 1408,
-   "w": 48,
-   "h": 64
+   "y": 1440,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_left_1",
-   "anim": "beam",
+   "name": "warden_rune_seal_left_1",
+   "anim": "seal",
    "facing": "left",
    "i": 1,
-   "x": 48,
-   "y": 1408,
-   "w": 48,
-   "h": 64
+   "x": 64,
+   "y": 1440,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_left_2",
-   "anim": "beam",
+   "name": "warden_rune_seal_left_2",
+   "anim": "seal",
    "facing": "left",
    "i": 2,
-   "x": 96,
-   "y": 1408,
-   "w": 48,
-   "h": 64
+   "x": 128,
+   "y": 1440,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_right_0",
-   "anim": "beam",
+   "name": "warden_rune_seal_right_0",
+   "anim": "seal",
    "facing": "right",
    "i": 0,
    "x": 0,
-   "y": 1472,
-   "w": 48,
-   "h": 64
+   "y": 1520,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_right_1",
-   "anim": "beam",
+   "name": "warden_rune_seal_right_1",
+   "anim": "seal",
    "facing": "right",
    "i": 1,
-   "x": 48,
-   "y": 1472,
-   "w": 48,
-   "h": 64
+   "x": 64,
+   "y": 1520,
+   "w": 64,
+   "h": 80
   },
   {
-   "name": "warden_rune_beam_right_2",
-   "anim": "beam",
+   "name": "warden_rune_seal_right_2",
+   "anim": "seal",
    "facing": "right",
    "i": 2,
-   "x": 96,
-   "y": 1472,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_guard_down_0",
-   "anim": "guard",
-   "facing": "down",
-   "i": 0,
-   "x": 0,
-   "y": 1536,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_guard_down_1",
-   "anim": "guard",
-   "facing": "down",
-   "i": 1,
-   "x": 48,
-   "y": 1536,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_guard_up_0",
-   "anim": "guard",
-   "facing": "up",
-   "i": 0,
-   "x": 0,
-   "y": 1600,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_guard_up_1",
-   "anim": "guard",
-   "facing": "up",
-   "i": 1,
-   "x": 48,
-   "y": 1600,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_guard_left_0",
-   "anim": "guard",
-   "facing": "left",
-   "i": 0,
-   "x": 0,
-   "y": 1664,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_guard_left_1",
-   "anim": "guard",
-   "facing": "left",
-   "i": 1,
-   "x": 48,
-   "y": 1664,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_guard_right_0",
-   "anim": "guard",
-   "facing": "right",
-   "i": 0,
-   "x": 0,
-   "y": 1728,
-   "w": 48,
-   "h": 64
-  },
-  {
-   "name": "warden_rune_guard_right_1",
-   "anim": "guard",
-   "facing": "right",
-   "i": 1,
-   "x": 48,
-   "y": 1728,
-   "w": 48,
-   "h": 64
+   "x": 128,
+   "y": 1520,
+   "w": 64,
+   "h": 80
   }
  ]
 }

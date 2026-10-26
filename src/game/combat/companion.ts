@@ -82,7 +82,7 @@ export function hurtAlly(g: Game, d: number, fx: number, fy: number, a: Ally = g
   if (a.hp <= 0) { a.hp = 0; a.ko = true; a.kos++; a.calmT = 0; a.atk = 0; g.say(`${a.name} is down!`, 1.5); }
 }
 
-export const anyBossActive = (g: Game) => g.mb.boss.active || g.mb.boss2.active || g.mb.boss3.active || g.mb.boss4.active || g.mb.boss5.active || g.mb.boss6.active || miniActive(g);
+export const anyBossActive = (g: Game) => g.mb.boss.active || g.mb.boss2.active || g.mb.boss3.active || g.mb.boss4.active || g.mb.boss5.active || g.mb.boss6.active || miniActive(g) || g.mb.boss11.active || g.mb.boss12.active;
 const isBoss = (e: Enemy) => isBigBoss(e.kind);
 
 export function updateAllies(g: Game, dt: number) { for (const a of g.mb.allies) updateAlly(g, a, dt); separate(g); }

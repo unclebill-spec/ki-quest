@@ -1,9 +1,9 @@
 /** Enemy data. Kinds: brute = melee rusher, wisp = ranged shooter, warden = tank/blocker, boss = area boss. Owner: Master Builder. */
 export type FoeKind = "brute" | "wisp" | "warden" | "boss" | "slag" | "aurel" | "vey" | "nell" | "pylon" | "morvant" | "malachar"
   | "reed_wraith" | "witchlight_newt" | "fen_warden" | "mossback_snapper" | "duskhound" | "mossling" | "hush_squire" | "bog_sprout"
-  | "kettle" | "corvin" | "gilt" | "ombrelle";
+  | "kettle" | "corvin" | "gilt" | "ombrelle" | "hollowmere" | "wardenrune";
 /** Arena bosses (big body, boss bar, companions dodge their telegraphs). */
-export const isBigBoss = (k: string) => k === "boss" || k === "slag" || k === "aurel" || k === "vey" || k === "nell" || k === "morvant" || k === "malachar" || MINI_KINDS.has(k);
+export const isBigBoss = (k: string) => k === "boss" || k === "slag" || k === "aurel" || k === "vey" || k === "nell" || k === "morvant" || k === "malachar" || k === "hollowmere" || k === "wardenrune" || MINI_KINDS.has(k);
 /** Mini-bosses (src/game/enemies/minis.ts). */
 export const MINI_KINDS = new Set<string>(["kettle", "corvin", "gilt", "ombrelle"]);
 export type FoeState = "idle" | "chase" | "tele" | "act" | "recover";
@@ -19,20 +19,22 @@ export interface Enemy {
   /** Boss-summoned add: never respawns. */ minion: boolean;
 }
 export interface Orb { x: number; y: number; vx: number; vy: number; v: number; t: number }
-export interface Hazard { x: number; y: number; r: number; t: number; max: number; dmg: number; foe: boolean; /** drawn cyan (Count Aurel tide splashes) */ tide?: boolean; /** drawn red/violet (Cageward Twins) */ cage?: boolean; /** drawn violet/gold (Morvant) */ eclipse?: boolean; /** lit safe zone, no damage */ safe?: boolean; /** Malachar: spring colour 0 red 1 violet 2 cyan 3 green */ dusk?: number }
+export interface Hazard { x: number; y: number; r: number; t: number; max: number; dmg: number; foe: boolean; /** drawn cyan (Count Aurel tide splashes) */ tide?: boolean; /** drawn red/violet (Cageward Twins) */ cage?: boolean; /** drawn violet/gold (Morvant) */ eclipse?: boolean; /** lit safe zone, no damage */ safe?: boolean; /** Malachar: spring colour 0 red 1 violet 2 cyan 3 green */ dusk?: number; /** Hollowmere (boss11): 0 violet 1 teal 2 fog */ mere?: number; /** Warden Rune (boss12): 0 cyan 1 gold */ rune?: number }
 export interface BossState { phase: number; active: boolean; done: boolean; lockT: number; introT: number }
 
 export const FOE_INFO: Record<FoeKind, { name: string; hp: number; exp: number; heavy: number; respawn: number }> = {
   brute: { name: "Scrapjaw", hp: 30, exp: 6, heavy: 1, respawn: 25 },
   wisp: { name: "Glimmer Wisp", hp: 18, exp: 8, heavy: 1.2, respawn: 25 },
   warden: { name: "Stoneward", hp: 70, exp: 14, heavy: 0.35, respawn: 35 },
-  boss: { name: "Warden Rune", hp: 420, exp: 80, heavy: 0.08, respawn: Infinity },
+  boss: { name: "Ashmaw", hp: 420, exp: 80, heavy: 0.08, respawn: Infinity },
   ombrelle: { name: "Lady Ombrelle", hp: 420, exp: 130, heavy: 0.2, respawn: Infinity },
   gilt: { name: "Capmother Gilt", hp: 360, exp: 80, heavy: 0, respawn: Infinity },
   slag: { name: "Slagheart", hp: 620, exp: 140, heavy: 0.05, respawn: Infinity },
   aurel: { name: "Count Aurel", hp: 760, exp: 180, heavy: 0.05, respawn: Infinity },
   morvant: { name: "Morvant, the Eclipse Golem", hp: 900, exp: 240, heavy: 0, respawn: Infinity },
   malachar: { name: "Malachar Vesh, the Last Dusk", hp: 1200, exp: 400, heavy: 0, respawn: Infinity },
+  hollowmere: { name: "Hollowmere", hp: 560, exp: 160, heavy: 0, respawn: Infinity },
+  wardenrune: { name: "Warden Rune", hp: 1500, exp: 500, heavy: 0, respawn: Infinity },
   vey: { name: "Vey of the Cage", hp: 430, exp: 110, heavy: 0.08, respawn: Infinity },
   nell: { name: "Nell of the Cage", hp: 400, exp: 110, heavy: 0.08, respawn: Infinity },
   kettle: { name: "Foreman Kettle", hp: 380, exp: 90, heavy: 0.1, respawn: Infinity },

@@ -1,4 +1,11 @@
 # Changelog
+## MB W17b — 2026-10-26 (bosses: Ashmaw, Hollowmere, Warden Rune; not deployed)
+- Ashmaw (boss1 re-skin, same 420 HP): ember sheet `ashmaw`, renamed banners, ember light; sets `ashmawDown` (old saves synced silently). Gear key `rune` now reads "Drop: Ashmaw".
+- Hollowmere, the Drinking Colossus (boss11, OPTIONAL): Hushwater west meadow (tile 17,22, r 80 px), wakes only on `bell && corvinDown` and stepping onto the ripple. 560 HP, phases 66/33% (lash, drink, fog, sink). Sets `hollowmereWake` / `hollowmereDown`, +4 pts.
+- Stillwater Charm (c7): unique, source B (Hollowmere) only. Never in shops, loot rolls or debug-forced drops (loot.ts MB hook). Fog sight light (r 72) + 1.5 EP/s in hushwater/drowned/undertide only.
+- Warden Rune, the Last Guardian (boss12, true final): husk arena after Malachar. Malachar's beat ends on `malacharFade`; 1500 HP, 6 phases (85/70/55/40/20%), glyph/slam/walls/beams/seal + round-robin echoes of 6 earlier bosses. `runeDown` -> Warden lines -> dawn -> Rook -> credits. +10 pts.
+- menu.ts restore covers boss..boss12; lore entries for all three.
+- Tests: new boss11.mjs (15) + boss12.mjs (13); boss6, malachar-story, fullrun, world, combat, loot updated for the new finale.
 ## W17 story prep — 2026-10-26 (not deployed)
 - Will's answers: Ashmaw keeps the current grotto difficulty; Hollowmere is an OPTIONAL Hushwater side boss (gates nothing) whose unique drop is the Stillwater Charm.
 - story: Ashmaw grotto lead-in (`ashmawSeen`) and defeat beat (`ashmawDown`, mirrored from `mb.boss.done`). The other W17 lines wait for Master Builder's fights (staging w17.md).

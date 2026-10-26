@@ -4,6 +4,7 @@ import { Input } from "./input";
 import { Area, buildArea, moveBody, solidAt } from "./world";
 import { ParticlePool, CH_COMBAT, K_SPARK, K_RING, K_DUST, C_GOLD, C_WHITE, C_RED, C_DUST } from "./vendor/particles";
 import { SaveRecord, readSave, writeSave, SAVE_VERSION } from "./save";
+import { updateW17, w17Abort, w17Active, w17KeepDone } from "./game/combat/w17"; // MB hook (W17)
 import { DEFAULT_GEAR, gearBonus, gearById, GEAR, earned, hasPerk, price, OLD_IDS, SLOT_ORDER, type Equip } from "./gear"; // HD2D W14
 import { newItems, rollKill, updateDrops, quickInput, reviveStep, ITEMS, ITEM_IDS, addHealButton, type Drop } from "./loot"; // HD2D W14
 import { menuStep, openMenu, bindMenuTouch, sfx } from "./menu"; // HD2D W14
@@ -50,7 +51,7 @@ export class Game {
   parts = new ParticlePool();
   stats = { crits: 0, normals: 0, blasts: 0, kills: 0, saves: 0, levelUps: 0, shieldBlocks: 0, hurt: 0, transforms: 0, guarded: 0, guardBreaks: 0, bossKills: 0, foeShots: 0 };
   mb = makeMB();
-  get bossActive() { return this.mb.boss.active || this.mb.boss2.active || this.mb.boss3.active || this.mb.boss4.active || this.mb.boss5.active || this.mb.boss6.active || miniActive(this); } // MB hook: audio boss theme
+  get bossActive() { return this.mb.boss.active || this.mb.boss2.active || this.mb.boss3.active || this.mb.boss4.active || this.mb.boss5.active || this.mb.boss6.active || miniActive(this) || w17Active(this); } // MB hook: audio boss theme
   private hitSerial = 1;
 
   constructor(public input: Input) { this.reset(); }
@@ -96,6 +97,7 @@ export class Game {
     this.say("Knocked out! Back at the save pad.", 2.5);
     if (this.mb.boss.active) { this.enemies = this.enemies.filter((e) => e.kind !== "boss"); this.mb.boss.active = false; this.mb.hazards.length = 0; }
     miniAbort(this); // MB hook
+    w17Abort(this); // MB hook (W17)
     if (this.mb.boss2.active) { this.enemies = this.enemies.filter((e) => e.kind !== "slag" && !e.minion); this.mb.boss2.active = false; this.mb.hazards.length = 0; }
     if (this.mb.boss3.active) { this.enemies = this.enemies.filter((e) => e.kind !== "aurel" && !e.minion); this.mb.boss3.active = false; this.mb.hazards.length = 0; } // MB hook
     if (this.mb.boss4.active) { this.enemies = this.enemies.filter((e) => e.kind !== "vey" && e.kind !== "nell" && e.kind !== "pylon" && !e.minion); this.mb.boss4.active = false; this.mb.hazards.length = 0; } // MB hook
@@ -106,7 +108,8 @@ export class Game {
     this.drops = []; this.useCd = 0; this.stunT = 0;
     Object.assign(this.p, { x: this.area.start.x, y: this.area.start.y });
     this.hp = this.maxHp; this.ep = this.maxEp;
-    const mdone = miniDone(this); const done = this.mb.boss.done, done2 = this.mb.boss2.done, done3 = this.mb.boss3.done, done4 = this.mb.boss4.done, done5 = this.mb.boss5.done, done6 = this.mb.boss6.done; this.mb = makeMB(); this.mb.boss.done = done; this.mb.boss2.done = done2; this.mb.boss3.done = done3; this.mb.boss4.done = done4; this.mb.boss5.done = done5; this.mb.boss6.done = done6; miniRestore(this, mdone); this.tf = 0;
+    const d11 = this.mb.boss11?.done ?? false, d12 = this.mb.boss12?.done ?? false; const mdone = miniDone(this); const done = this.mb.boss.done, done2 = this.mb.boss2.done, done3 = this.mb.boss3.done, done4 = this.mb.boss4.done, done5 = this.mb.boss5.done, done6 = this.mb.boss6.done; this.mb = makeMB(); this.mb.boss.done = done; this.mb.boss2.done = done2; this.mb.boss3.done = done3; this.mb.boss4.done = done4; this.mb.boss5.done = done5; this.mb.boss6.done = done6; miniRestore(this, mdone); this.tf = 0;
+    w17KeepDone(this, d11, d12); // MB hook (W17)
     this.enemies = [...this.area.spawns, ...extraSpawns(this.area)].map((s) => this.makeEnemy(s.kind, s.x, s.y));
   }
   makeEnemy(kind: FoeKind, x: number, y: number): Enemy { return mbMakeEnemy(kind, x, y); }
@@ -156,7 +159,7 @@ export class Game {
     if ((this.syncT -= dt) <= 0) { this.syncT = 0.5; this.syncGear(); }
     if (hasPerk(this.gear, "c2")) this.hp = Math.min(this.maxHp, this.hp + 0.5 * dt); // Linnet's Locket
     if (hasPerk(this.gear, "c4")) this.ep = Math.min(this.maxEp, this.ep + 2 * dt); // Wellspring Drop
-    updatePowerup(this, dt); updateArena(this, dt); updateArena2(this, dt); updateArena3(this, dt); updateArena4(this, dt); updateArena5(this, dt); updateArena6(this, dt); updateMinis(this, dt); // MB hook
+    updatePowerup(this, dt); updateArena(this, dt); updateArena2(this, dt); updateArena3(this, dt); updateArena4(this, dt); updateArena5(this, dt); updateArena6(this, dt); updateMinis(this, dt); updateW17(this, dt); // MB hook
     updateFoes(this, dt);
     updateAllies(this, dt); // MB hook: companions (Mirela, Brann)
     this.projectiles(dt);

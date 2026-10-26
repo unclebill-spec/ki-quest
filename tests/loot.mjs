@@ -29,7 +29,7 @@ try {
   ok("level source unlocks on level-up", s.has && !s.early, JSON.stringify(s));
   // Boss drop source via MB done flag.
   s = await E(async () => { const g = window.__ki.game, it = window.__kiLoot.GEAR.find((x) => x.src === "B" && x.at === "rune"); g.mb.boss.done = true; await new Promise((r) => setTimeout(r, 700)); return { id: it.id, has: g.have.includes(it.id) }; });
-  ok("boss source: Warden Rune downed grants its drop", s.has, s.id);
+  ok("boss source: Ashmaw (boss1, key rune) downed grants its drop", s.has, s.id);
   // Shop: buy needs coins and the right area.
   s = await E(() => { const g = window.__ki.game; const a = g.buy("h1"); g.coins = 999; const b = g.buy("h1"), c = g.buy("h1"), d = g.buy("f3"); const t = g.buyItem("tear"); const m = g.buyItem("morsel"); return { a, b, c, d, t, m, has: g.have.includes("h1"), coins: g.coins, mo: g.items.morsel }; });
   ok("shop buy: coins gate, owned, wrong area", s.a === "not enough coins" && s.b === "" && s.c === "owned" && s.d === "not sold here" && s.has, JSON.stringify(s));

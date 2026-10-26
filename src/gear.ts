@@ -41,6 +41,8 @@ export const GEAR: Gear[] = [
   { id: "c4", slot: "c", name: "Wellspring Drop", src: "Q", at: "spring", lvl: 12, str: 0, pow: 3, end: 1, spd: 0, perk: "Glow regen", icon: [96, 48], desc: "A droplet of Wellspring water. Your Glow refills a little faster." },
   { id: "c5", slot: "c", name: "Capmother Spore", src: "B", at: "capmother", lvl: 14, str: 1, pow: 2, end: 1, spd: 0, perk: "Glow-sting on hit (stub)", icon: [112, 48], desc: "A glowing pink spore from the Glowcap ring. Foes it touches dazzle." },
   { id: "c6", slot: "c", name: "Sunheart", src: "B", at: "malachar", lvl: 20, str: 2, pow: 4, end: -1, spd: 0, perk: "Big blasts (+15%), tiny self-burn", icon: [0, 64], desc: "The Sunheart. The relit sun's warm core, beating slow and steady." },
+  // MB hook (W17): unique optional-boss drop, source B only (never shops/loot/chests); effect in src/game/combat/w17.ts (fog areas). Icon reuses c3's violet glass for now.
+  { id: "c7", slot: "c", name: "Stillwater Charm", src: "B", at: "hollowmere", lvl: 16, str: 0, pow: 1, end: 1, spd: 0, perk: "Fog sight + Glow regen in fog/water", icon: [80, 48], desc: "A smooth violet stone from Hollowmere's throat. Fog parts around whoever wears it." },
 ];
 export const SLOT_ORDER: GearSlot[] = ["h", "a", "w", "f", "c"];
 export const SLOT_NAMES: Record<GearSlot, string> = { h: "Head", a: "Garb", w: "Hands", f: "Feet", c: "Charm" };
@@ -49,7 +51,7 @@ export const DEFAULT_GEAR: Equip = { h: "h0", a: "a0", w: "w0", f: "f0", c: "c0"
 export const SHOP_NAMES: Record<string, string> = { lanternmoss: "Wickhaven", hushwater: "Hushwater", drowned: "Drowned Vesper", kilnreach: "Kilnreach" };
 /** Boss key -> (story flags, mb boss keys). "slag" covers both Slagheart and the spec's "Ashmaw/quarry" (no separate Ashmaw boss in game). */
 export const BOSS: Record<string, { name: string; flag?: string; mb?: string; /** TODO(MB): lead-in/quest flag used until the mini-boss fight exists; then drop it. */ alt?: string }> = {
-  rune: { name: "Warden Rune", mb: "boss" }, slag: { name: "Slagheart", flag: "quarryBossDown", mb: "boss2" }, aurel: { name: "Count Aurel", flag: "tideBossDown", mb: "boss3" },
+  rune: { name: "Ashmaw", mb: "boss" }, /* MB hook (W17) */ hollowmere: { name: "Hollowmere", flag: "hollowmereDown", mb: "boss11" }, wardenrune: { name: "Warden Rune", flag: "runeDown", mb: "boss12" }, slag: { name: "Slagheart", flag: "quarryBossDown", mb: "boss2" }, aurel: { name: "Count Aurel", flag: "tideBossDown", mb: "boss3" },
   twins: { name: "Cageward Twins", flag: "cageDone", mb: "boss4" }, morvant: { name: "Morvant", flag: "morvantDown", mb: "boss5" }, malachar: { name: "Malachar", flag: "malacharDown", mb: "boss6" },
   corvin: { name: "Reedwraith Corvin", flag: "corvinDown" }, kettle: { name: "Foreman Kettle", flag: "kettleDown" }, ombrelle: { name: "Lady Ombrelle", flag: "ombrelleDown" }, capmother: { name: "Capmother Gilt", flag: "capDone" },
 };

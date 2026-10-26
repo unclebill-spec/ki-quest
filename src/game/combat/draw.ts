@@ -13,11 +13,12 @@ import { ROLES } from "./companion";
 import { ARENA4, arena4Center, pylonsOf, twinsOf } from "../enemies/twins";
 import { ARENA5, arena5Center } from "../enemies/morvant";
 import { ARENA6, arena6Center } from "../enemies/malachar";
+import { anim17, drawGround17, skipHazard17, addLights17, drawAdditive17, bar17 } from "./draw17"; // MB hook W17
 
 export let HERO_SHEET = "rook";
 export function setHero(n: string) { HERO_SHEET = n; }
-const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "warden_rune", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "", morvant: "morvant", malachar: "malachar",
-  reed_wraith: "reed_wraith", witchlight_newt: "witchlight_newt", fen_warden: "fen_warden", mossback_snapper: "mossback_snapper", duskhound: "duskhound", mossling: "mossling", hush_squire: "hush_squire", bog_sprout: "bog_sprout", kettle: "kettle", corvin: "corvin", gilt: "gilt", ombrelle: "ombrelle" };
+const FOE_SHEET: Record<Enemy["kind"], string> = { brute: "vesper_squire", wisp: "vesper_hexer", warden: "watch_guard", boss: "ashmaw", slag: "slag_golem", aurel: "count_aurel", vey: "cageward_vey", nell: "cageward_nell", pylon: "", morvant: "morvant", malachar: "malachar",
+  reed_wraith: "reed_wraith", witchlight_newt: "witchlight_newt", fen_warden: "fen_warden", mossback_snapper: "mossback_snapper", duskhound: "duskhound", mossling: "mossling", hush_squire: "hush_squire", bog_sprout: "bog_sprout", kettle: "kettle", corvin: "corvin", gilt: "gilt", ombrelle: "ombrelle", hollowmere: "hollowmere", wardenrune: "warden_rune" }; // MB hook W17: boss = Ashmaw sheet
 export function preloadSheets() { sheet(HERO_SHEET); sheet("mirela"); sheet("brann"); sheet("sable"); Object.values(FOE_SHEET).filter(Boolean).forEach(sheet); preloadFx(); }
 
 function glow(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
@@ -58,7 +59,9 @@ export function drawFoeMB(c: CanvasRenderingContext2D, g: Game, e: Enemy, x: num
   }
   const s = sheet(FOE_SHEET[e.kind]), f = facingOf(g.p.x - e.x, g.p.y - e.y), fl = e.flash > 0;
   let anim = "walk", i = g.time * 7;
-  if (e.hurt > 0) { anim = "hurt"; i = 0; }
+  const a17 = anim17(g, e); if (a17 === "hide") return true; // MB hook W17
+  if (a17) [anim, i] = a17;
+  else if (e.hurt > 0) { anim = "hurt"; i = 0; }
   else if (e.kind === "boss") {
     if (g.mb.boss.lockT > 0) { anim = "guard"; i = g.time * 4; }
     else if (e.move.startsWith("slam")) anim = "stomp", i = e.state === "tele" ? 0 : 2;
@@ -154,8 +157,9 @@ export function drawGround(c: CanvasRenderingContext2D, g: Game, cx: number, cy:
     for (let k = 0; k < 4; k++) { const s0 = g.time * 0.3 * b6.phase + k * 1.5708; c.strokeStyle = cols[k]; c.beginPath(); c.ellipse(AX, AY, R + 8, R + 8, 0, s0, s0 + 1.5708); c.stroke(); }
     c.setLineDash([]);
   }
+  drawGround17(c, g, cx, cy); // MB hook W17
   for (const h of g.mb.hazards) {
-    if (h.max <= 0) continue;
+    if (h.max <= 0 || skipHazard17(h)) continue;
     if (h.dusk != null) { const k = 1 - h.t / h.max, X = h.x - cx, Y = h.y - cy, RGB = ["255,60,80", "190,90,255", "90,230,255", "110,255,150"][h.dusk], HI = ["#ffb0b8", "#f0c0ff", "#d0ffff", "#d0ffe0"][h.dusk];
       if (h.safe) { c.strokeStyle = (g.frame >> 3) & 1 ? "#fff6c0" : "#ffd24a"; c.lineWidth = 2; c.beginPath(); c.ellipse(X, Y, h.r, h.r / 1.6, 0, 0, 7); c.stroke(); c.fillStyle = "rgba(255,230,150,.18)"; c.fill(); continue; }
       c.fillStyle = `rgba(${RGB},${0.14 + k * 0.3})`; c.beginPath(); c.ellipse(X, Y, h.r, h.r / 1.6, 0, 0, 7); c.fill();
@@ -175,7 +179,8 @@ export function drawGround(c: CanvasRenderingContext2D, g: Game, cx: number, cy:
 export function addLights(g: Game, cx: number, cy: number, add: (x: number, y: number, r: number, col: [number, number, number]) => void) {
   if (g.mb.tfOn) add(g.p.x - cx, g.p.y - cy - 14, 64, [0.5, 0.9, 1]);
   for (const o of g.mb.orbs) add(o.x - cx, o.y - cy, 16, [1, 0.85, 0.4]);
-  for (const e of g.enemies) if (!e.dead && e.kind === "boss") add(e.x - cx, e.y - cy - 24, 56, g.mb.boss.phase === 3 ? [1, 0.3, 0.3] : [0.7, 0.4, 1]);
+  for (const e of g.enemies) if (!e.dead && e.kind === "boss") add(e.x - cx, e.y - cy - 24, 56, g.mb.boss.phase === 3 ? [1, 0.3, 0.2] : [1, 0.55, 0.25]); // Ashmaw embers
+  addLights17(g, cx, cy, add); // MB hook W17
   for (const e of g.enemies) if (!e.dead && e.kind === "aurel") add(e.x - cx, e.y - cy - 24, 60, g.mb.boss3.phase >= 4 ? [0.8, 0.45, 1] : [0.35, 0.9, 1]);
   for (const e of g.enemies) if (!e.dead && (e.kind === "vey" || e.kind === "nell")) add(e.x - cx, e.y - cy - 24, 56, e.kind === "vey" ? [1, 0.3, 0.35] : [0.75, 0.4, 1]);
   for (const e of g.enemies) if (!e.dead && e.kind === "morvant") add(e.x - cx, e.y - cy - 26, 70, g.mb.boss5.phase >= 3 ? [1, 0.8, 0.35] : [0.75, 0.4, 1]);
@@ -189,13 +194,14 @@ export function addLights(g: Game, cx: number, cy: number, add: (x: number, y: n
 export function drawAdditive(c: CanvasRenderingContext2D, g: Game, cx: number, cy: number) {
   const p = g.p, X = p.x - cx, Y = p.y - cy, m = g.mb;
   if (m.tfOn) { const pulse = 0.6 + 0.4 * Math.sin(g.time * 14); glow(c, X, Y - 14, 22 + pulse * 4, "rgba(120,240,255,.55)"); glow(c, X, Y - 18, 12, "rgba(210,120,255,.5)", pulse); }
+  drawAdditive17(c, g, cx, cy); // MB hook W17
   if (m.chargingKi) glow(c, X, Y - 12, 18 + Math.sin(g.time * 30) * 2, "rgba(90,220,255,.45)");
   if (m.charging) { const k = m.charge / BEAM_FULL; glow(c, X + p.fx * 10, Y - 14 + p.fy * 8, 5 + k * 10, "rgba(255,120,255,.9)"); glow(c, X + p.fx * 10, Y - 14 + p.fy * 8, 3 + k * 3, "#fff"); }
   for (const o of m.orbs) { glow(c, o.x - cx, o.y - cy, 6, "rgba(255,210,90,.9)"); c.fillStyle = "#fff6c0"; c.fillRect(o.x - cx - 1, o.y - cy - 1, 2, 2); }
   for (const e of g.enemies) if (!e.dead && e.kind === "boss") {
-    const col = m.boss.phase === 3 ? "rgba(255,60,60,.8)" : "rgba(200,90,255,.8)";
+    const col = m.boss.phase === 3 ? "rgba(255,60,40,.8)" : "rgba(255,140,60,.8)"; // Ashmaw embers
     glow(c, e.x - cx, e.y - cy - 40, e.state === "tele" ? 12 + Math.sin(g.time * 30) * 3 : 7, col);
-    if (m.boss.lockT > 0) glow(c, e.x - cx, e.y - cy - 24, 40, "rgba(255,120,200,.35)");
+    if (m.boss.lockT > 0) glow(c, e.x - cx, e.y - cy - 24, 40, "rgba(255,150,80,.35)");
   }
   for (const e of g.enemies) if (!e.dead && e.kind === "aurel") {
     glow(c, e.x - cx, e.y - cy - 46, e.state === "tele" ? 9 + Math.sin(g.time * 30) * 2 : 6, "rgba(120,250,255,.85)"); // cold crown
@@ -320,14 +326,14 @@ export function drawHudMB(c: CanvasRenderingContext2D, g: Game, W: number) {
     return;
   }
   // boss bar
-  const b = g.enemies.find((e) => (e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "morvant" || e.kind === "malachar" || isMini(e.kind)) && !e.dead);
+  const b = g.enemies.find((e) => (e.kind === "boss" || e.kind === "slag" || e.kind === "aurel" || e.kind === "morvant" || e.kind === "malachar" || e.kind === "hollowmere" || e.kind === "wardenrune" || isMini(e.kind)) && !e.dead);
   if (b) {
-    const st = miniState(g, b.kind) ?? (b.kind === "slag" ? g.mb.boss2 : b.kind === "aurel" ? g.mb.boss3 : b.kind === "morvant" ? g.mb.boss5 : b.kind === "malachar" ? g.mb.boss6 : g.mb.boss), fin = b.kind === "malachar", hot = b.kind === "slag", tide = b.kind === "aurel", ecl = b.kind === "morvant";
+    const st = miniState(g, b.kind) ?? (b.kind === "slag" ? g.mb.boss2 : b.kind === "aurel" ? g.mb.boss3 : b.kind === "morvant" ? g.mb.boss5 : b.kind === "malachar" ? g.mb.boss6 : b.kind === "hollowmere" ? g.mb.boss11 : b.kind === "wardenrune" ? g.mb.boss12 : g.mb.boss), b17 = bar17(g, b.kind, st.phase), fin = b.kind === "malachar", hot = b.kind === "slag", tide = b.kind === "aurel", ecl = b.kind === "morvant";
     const w = 200, x = W / 2 - w / 2, y = 202;
     c.fillStyle = "#000c"; c.fillRect(x - 2, y - 9, w + 4, 15);
-    c.font = "bold 6px monospace"; c.textAlign = "center"; c.fillStyle = fin ? "#ffd0e0" : ecl ? "#ffe8a0" : tide ? "#c8fff8" : hot ? "#ffe0b0" : "#ffd0e8"; c.fillText(`${FOE_INFO[b.kind].name} · PHASE ${st.phase}`, W / 2, y - 2);
-    c.fillStyle = "#2a1020"; c.fillRect(x, y, w, 4); c.fillStyle = fin ? ["#ff3a5a", "#ff3a5a", "#c070ff", "#3ee0ff", "#5aff8a", (g.frame >> 2) & 1 ? "#ffffff" : "#ffe08a"][st.phase] : ecl ? (st.phase >= 3 ? ((g.frame >> 3) & 1 ? "#ffd24a" : "#f0a830") : "#b060ff") : tide ? (st.phase >= 4 ? "#c070ff" : st.phase === 3 ? "#7a8aff" : "#3ee0ff") : st.phase === 3 ? "#ff3a5a" : hot ? "#ff9a2a" : "#c050ff"; c.fillRect(x, y, Math.round(w * Math.max(0, b.hp / b.max)), 4);
-    c.fillStyle = "#fff6"; for (const k of fin ? [0.2, 0.4, 0.6, 0.8] : tide || ecl ? [0.25, 0.5, 0.75] : [0.33, 0.66]) c.fillRect(x + Math.round(w * k), y, 1, 4);
+    c.font = "bold 6px monospace"; c.textAlign = "center"; c.fillStyle = b17 ? b17.text : fin ? "#ffd0e0" : ecl ? "#ffe8a0" : tide ? "#c8fff8" : hot ? "#ffe0b0" : "#ffd0e8"; c.fillText(`${FOE_INFO[b.kind].name} · PHASE ${st.phase}`, W / 2, y - 2);
+    c.fillStyle = "#2a1020"; c.fillRect(x, y, w, 4); c.fillStyle = b17 ? b17.fill : fin ? ["#ff3a5a", "#ff3a5a", "#c070ff", "#3ee0ff", "#5aff8a", (g.frame >> 2) & 1 ? "#ffffff" : "#ffe08a"][st.phase] : ecl ? (st.phase >= 3 ? ((g.frame >> 3) & 1 ? "#ffd24a" : "#f0a830") : "#b060ff") : tide ? (st.phase >= 4 ? "#c070ff" : st.phase === 3 ? "#7a8aff" : "#3ee0ff") : st.phase === 3 ? "#ff3a5a" : hot ? "#ff9a2a" : "#c050ff"; c.fillRect(x, y, Math.round(w * Math.max(0, b.hp / b.max)), 4);
+    c.fillStyle = "#fff6"; for (const k of b17 ? b17.ticks : fin ? [0.2, 0.4, 0.6, 0.8] : tide || ecl ? [0.25, 0.5, 0.75] : [0.33, 0.66]) c.fillRect(x + Math.round(w * k), y, 1, 4);
   }
 }
 

@@ -169,6 +169,9 @@ try {
   await E(() => { const g = window.__ki.game; g.p.x = 24 * 16; g.p.y = 21 * 16; }); await p.waitForTimeout(700);
   await p.screenshot({ path: "docs/bill/husk-arena.png" });
   await E(() => { window.__ki.story.flags.malacharDown = true; }); await p.waitForTimeout(400);
+  for (let i = 0; i < 40 && !(await E(() => window.__ki.story.flags.runeSeen === true && !window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
+  ok("W17: Malachar fades into the Warden Rune intro (no dawn yet)", await E(() => window.__ki.story.flags.malacharFade === true && !window.__ki.story.flags.dawn));
+  await E(() => { const g = window.__ki.game, e = globalThis.__kiMB.runeOf(g); if (e) { g.mb.boss12.lockT = 0; e.hurt = 0; g.damageFoe(e, e.hp + 10, 0, 0, false); } else window.__ki.story.flags.runeDown = true; }); await p.waitForTimeout(400);
   for (let i = 0; i < 40 && (await E(() => window.__ki.story.credits <= 0)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
   ok("dawn + credits roll after Malachar", await E(() => window.__ki.story.flags.dawn === true && window.__ki.story.credits > 0));
   await p.waitForTimeout(6000); await p.screenshot({ path: "docs/bill/credits.png" });
