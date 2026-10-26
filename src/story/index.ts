@@ -7,7 +7,7 @@ import { CREDITS_T } from "../areas/art";
 import type { Game } from "../game";
 import type { Input } from "../input";
 import { buildArea, setWardOpen, zoneAt, TILE } from "../world";
-import { INTRO, NPCS, Flags } from "./script";
+import { INTRO, NPCS, Flags, LETTERS } from "./script";
 
 const KEY = "kiquest.story.v1";
 type Box = { who: string; lines: string[]; i: number; t: number; then?: () => void };
@@ -75,6 +75,11 @@ export class Story {
     // world checks (before the sim reads input this frame)
     setWardOpen(g.area.wards.some((w) => g.lvl >= w.lvl));
     this.near = null;
+    { // W17f: hide-until-flag NPCs (NpcDef.show/at), e.g. Linnet appears beside the Lanternmoss spring on linnetWoke
+      const defs = NPCS[g.area.id] ?? {};
+      for (const id in defs) { const d = defs[id]; if (!d.show) continue; const on = d.show(this.flags), i = g.area.npcs.findIndex((n) => n.id === id);
+        if (on && i < 0 && d.at) g.area.npcs.push({ id, x: d.at[0] * TILE + 8, y: d.at[1] * TILE + 8 }); else if (!on && i >= 0) g.area.npcs.splice(i, 1); }
+    }
     for (const n of g.area.npcs) if (Math.hypot(n.x - g.p.x, n.y - g.p.y) < 22) this.near = n.id;
     const z = zoneAt(g.area, g.p.x, g.p.y);
     if (z !== this.zone) { if (this.zone) { g.banner = z; g.bannerT = 2.2; } this.zone = z; }
@@ -106,6 +111,9 @@ export class Story {
     // W17 Hollowmere (optional boss11; fight in src/game/enemies/hollowmere.ts sets hollowmereWake / hollowmereDown). Lines: staging w17.md.
     if (F.hollowmereWake && !F.hollowmereIntro && !F.hollowmereDown && !this.box) return B("hollowmereIntro", "Hollowmere", ["(The marsh drains in a long, slow swallow. Something the size of a hill rises from the reeds, dripping violet light.)", "Ring... the bell... again. I was... so thirsty... and you... called me... to drink.", "Light. Water. Lamplighter. All of it... goes down... the same."]);
     if (F.hollowmereDown && !F.hollowmereBeat && !this.box) return B("hollowmereBeat", "Hollowmere", ["(It sinks, and the water it drank pours back into the marsh in a warm, glowing tide.)", "...Full. At last... full.", "Fen Marrow: The reeds are standing up straight. Haven't seen that since I was a boy. It wasn't the fog, it was the drinking."]);
+    // W17f Linnet's Letters (staging/story/linnets_letters.md): the hidden spring K is at (2,32) in Lanternmoss
+    if (F.oath && F.lettersRead && !F.linnetWoke && at("lanternmoss", 2, 32, 2)) return B("linnetWoke", "The spring", ["(The water brightens. A shape in a faded cloak sits up out of the glow, like someone woken from a nap.)", "Linnet Vant: \"Oh. Visitors. I must have dozed. Is it morning yet?\"", "Mirela: \"Grandmother. It's me. It's Mirela.\"", "Linnet Vant: \"...Little lamp? You're so tall. You've got my boots on. Those are my boots.\"", "Mirela: \"You left them by the door.\"", "Linnet Vant: \"So I did. I meant to come back for them.\""]);
+    if (F.oath && !F.lettersRead && !F.linnetSeen && !F.dawn && at("lanternmoss", 2, 32, 2)) return B("linnetSeen", "Mirela Vant", ["(She stops at the water.) There's someone sleeping here. A wraith. Old. ...She feels familiar. I don't know why yet."]);
     if (F.capQ && !F.capDone && !F.capSeen && at("lanternmoss", 39, 27, 3)) return B("capSeen", "Glowcap Ring", ["(The big caps lean in. Spores drift up like slow snow.)", "Something under the moss is breathing. It sounds annoyed.", "Odile said the Capmother hasn't been nice in weeks."]);
     if (F.reedQ && !F.bell && !F.corvinDown && !F.corvinSeen && at("hushwater", 25, 25, 1)) return B("corvinSeen", "Reedwraith Corvin", ["(A tall shape in a boatman's coat stands in the reeds, violet lantern-eyes half shut.)", "Shh. The bell sleeps. If it rings, the fog parts... and then she'll see you. So will He."]);
     if (F.oath && g.mb.boss.done && !F.ombrelleDown && !F.ombrelleSeen && at("hushwater", 40, 7, 3)) return B("ombrelleSeen", "Mirela", ["(The graves hum. Cold blue light leaks up between the stones.)", "Something is under my graves. Drinking. The wraiths won't say her name.", "Little lamplighter. Little grave-girl... (the voice comes from below) ...come down to my dark?"]);
@@ -143,7 +151,7 @@ export class Story {
       const EPI: { who: string; lines: string[]; needs?: string }[] = [
         { who: "Elder Ama Quill", lines: ["(Wickhaven.) Put your pole down, boy. The sun's doing your rounds today.", "Pip: \"Can we still light them tonight? For fun?\""] },
         { who: "Mirela Vant", lines: ["(Hushwater.) The graves are quiet. Not empty. Quiet. They're watching the sky like everyone else."] },
-        { who: "Linnet Vant", needs: "lettersDone", lines: ["(The hidden spring.) There you are, little lamp. You found the spring I couldn't.", "Mirela: \"Grandmother... you can go now. I'll keep the light.\""] },
+        { who: "Linnet Vant", needs: "lettersDone", lines: ["(The hidden spring.) There you are, little lamp. You found the spring I couldn't.", "Mirela: \"Grandmother... you can go now. I'll keep the light.\"", "(Linnet smiles, becomes a drift of warm glow orbs, and rises into the morning.)"] },
         { who: "Brann Okoro", lines: ["(Kilnreach.) Forge fires are for bread now. First sunrise loaf. Everyone gets the heel."] },
         { who: "Neri Calloway", lines: ["(Drowned Vesper.) The tide's going out. Old Calder says there's a road under there. Says it goes home.", "Old Calder: \"Stubborn, like us Calders.\""] },
         { who: "Sable Kestrel", lines: ["(The Stair.) I keep waiting for the light to ask for something back.", "(She stays in the sun anyway, eyes shut.) ...It doesn't."] },
@@ -152,7 +160,7 @@ export class Story {
       ];
       const chain = (bs: typeof END, done: () => void) => { const q = bs.filter((b) => !b.needs || F[b.needs]); const nx = (i: number): void => { if (i >= q.length) { done(); return; } this.say(q[i].who, q[i].lines, () => nx(i + 1)); }; nx(0); };
       this.say("Warden Rune", ["(Its runes go out one by one: cyan, then gold, then nothing. The ward walls fold down like a closing book.)", "...The world... is warm... and nothing... is burning.", "Then my watch... is over. Keep the lamps... lamplighter. Not all the time. Just... when it's dark."],
-        () => chain(END, () => { F.dawn = true; this.save(); g.gainExp(1000); this.say("Rook", ["(The first grey-gold dawn in three hundred years.)", "Lamps still need lighting. Just not all the time."], () => chain(EPI, () => { this.credits = CREDITS_T; })); })); return true;
+        () => chain(END, () => { F.dawn = true; this.save(); g.gainExp(1000); this.say("Rook", ["(The first grey-gold dawn in three hundred years.)", "Lamps still need lighting. Just not all the time."], () => chain(EPI, () => { if (F.lettersDone) { F.linnetRest = true; this.save(); } this.credits = CREDITS_T; })); })); return true;
     }
     if (g.area.id === "husk" && F.malacharDown && !F.malacharFade && !F.dawn && !this.box) {
       F.poured = true; this.save();
@@ -183,6 +191,13 @@ export class Story {
       g.say(`Meadow quieted ${this.flags.reedN}/8`, 1.5);
     }
     this.lastKills = kills;
+    if (g.area.id === "hushwater" && F.lettersQ && !F.lettersRead) LETTERS.forEach((l, i) => { // W17f letter pickups
+      const k = `letter_${i + 1}`;
+      if (!F[k] && Math.hypot(l.x * 16 + 8 - g.p.x, l.y * 16 + 8 - g.p.y) < 14) {
+        F[k] = true; F.lettersN = ((F.lettersN as number) || 1) + 1; this.save();
+        g.say(`${l.t} (${F.lettersN}/4)${(F.lettersN as number) >= 4 ? " · bring them to Mirela" : ""}`, 3);
+      }
+    });
     for (const s of g.area.springs) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 14) {
       if (!this.flags.spring) { this.flags.spring = true; g.pts += 3; this.save(); g.say("Hidden Wellspring found · +3 stat points", 3); }
       else if (g.hp < g.maxHp || g.ep < g.maxEp) g.say("The spring restores you", 1.2);
@@ -223,7 +238,10 @@ export class Story {
       const F = this.flags;
       if (id === "f" && F.bell && !F.bellDone) { F.bellDone = true; g.gainExp(80); g.say("Ferry Bell returned · +80 EXP", 2.5); }
       if (id === "h") { if (!F.reedQ) F.reedQ = true; else if ((F.reedN as number) >= 8 && !F.reedDone) { F.reedDone = true; g.gainExp(100); g.pts += 2; g.say("Quiet the Meadow complete · +100 EXP, +2 pts", 2.5); } }
-      if (id === "m" && F.bellDone && F.reedDone && !F.oath) { F.oath = true; g.gainExp(150); g.say("Lantern Oath · Mirela will join you · +150 EXP", 3); }
+      if (id === "r" && g.area.id === "hushwater" && F.metMirela && !F.lettersQ) { F.lettersQ = true; F.lettersN = 1; g.say("Quest: Linnet's Letters (1/4)", 2.5); }
+      if (id === "l" && F.linnetWoke && !F.lettersDone) { F.lettersDone = true; g.gainExp(250); g.say("Linnet's Letters complete · Linnet's Locket · +250 EXP", 3); }
+      if (id === "m" && (F.lettersN as number) >= 4 && !F.lettersRead) { F.lettersRead = true; g.gainExp(100); g.say("Mirela read Linnet's letters · +100 EXP", 2.5); }
+      else if (id === "m" && F.bellDone && F.reedDone && !F.oath) { F.oath = true; g.gainExp(150); g.say("Lantern Oath · Mirela will join you · +150 EXP", 3); }
       if (id === "k" && !F.metBrann) { F.metBrann = true; F.brannQ = true; g.gainExp(60); g.say("Quest: Brann's Heart-Ember · +60 EXP", 2.5); }
       if (id === "n" && F.sigil && !F.sigilDone) { F.sigilDone = true; g.gainExp(200); g.pts += 2; g.say("Neri reads the sigil · +200 EXP, +2 pts", 3); }
       else if (id === "k" && F.heart && !F.brann) { F.brann = true; g.gainExp(150); g.pts += 2; g.say("Heart-Ember returned · Brann will join you · +150 EXP", 3); }
@@ -232,6 +250,16 @@ export class Story {
     });
   }
   objective(): string {
+    const f = this.flags, g = this.g, o = this.objMain();
+    // W17f Linnet's Letters: optional, shown after the main step (never replaces it)
+    if (F0(f) || !f.lettersQ || f.lettersDone) return o;
+    const n = (f.lettersN as number) || 1;
+    const lq = !f.lettersRead ? (n >= 4 ? "Letters: bring all 4 to Mirela (Hushwater graveyard)" : g.area.id === "hushwater" ? `Letters ${n}/4: Sunken Meadow and the east boardwalk` : `Letters ${n}/4 in Hushwater`)
+      : !f.oath ? "Letters: after the Lantern Oath, take them to the Lanternmoss spring"
+      : f.linnetWoke ? "Letters: talk to Linnet at the hidden spring" : "Letters: take them to the hidden spring (Lanternmoss, far south-west)";
+    return `${o} · ${lq}`;
+  }
+  objMain(): string {
     const f = this.flags, g = this.g;
     if (F0(f)) return "Dawn · free roam: days are gold, the glow nights still return";
     if (g.area.id === "husk") return f.malacharFade && !f.runeDown ? "Defeat Warden Rune, the last guardian" : f.malacharDown ? "Give the light back" : "Defeat Malachar Vesh at the sun's heart"; // MB hook (W17)

@@ -123,6 +123,7 @@ export const npcBob = (id: string, t: number) => Math.round(Math.sin(t * 2 + id.
 function npc(c: C2, id: string, area: string, x: number, y: number, t: number) {
   const d = NPCS[area]?.[id]; if (!d) return;
   x = Math.round(x); y = Math.round(y);
+  if (d.float) { c.save(); c.globalAlpha = 0.72; y -= 3 + Math.round(Math.sin(t * 2) * 1.5); } // W17f: Linnet, a half-translucent floating wraith (recoloured NPC art)
   const h = 26 + (d.tall ?? 0), bob = npcBob(id, t); NPC_BOB[id] = bob; NPC_BOB[id + "@x"] = x;
   const top = y - h + bob, leg = Math.round(h * 0.38), torso = Math.round(h * 0.34), head = h - leg - torso;
   c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, 6, 2, 0, 0, 7); c.fill();
@@ -140,6 +141,7 @@ function npc(c: C2, id: string, area: string, x: number, y: number, t: number) {
   c.fillStyle = d.skin; c.fillRect(x - 3, top + 1, 6, head - 1);
   c.fillStyle = d.hair; c.fillRect(x - 4, top, 8, 3); c.fillRect(x - 4, top + 1, 1, head - 2); c.fillRect(x + 3, top + 1, 1, head - 2);
   c.fillStyle = "#181018"; c.fillRect(x - 2, top + 4, 1, 1); c.fillRect(x + 1, top + 4, 1, 1);
+  if (d.float) { c.fillStyle = "#cfd2dc"; c.fillRect(x - 4, top + 3, 1, head + 4); c.fillStyle = d.trim; c.fillRect(x, ty + 2, 1, 1); /* braid + locket glint */ c.restore(); }
 }
 
 /** Push props, NPCs, stones into the y-sorted draw list (called from draw.ts). */
