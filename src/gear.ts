@@ -72,7 +72,7 @@ export function srcText(g: Gear) {
   if (g.src === "L") return `Lv ${g.lvl}`;
   if (g.src === "S") return `Shop: ${SHOP_NAMES[g.at] ?? g.at} (Lv ${g.lvl}, ${price(g)} coins)`;
   if (g.src === "B") return `Drop: ${BOSS[g.at]?.name ?? g.at}`;
-  return g.at === "lettersDone" ? "Quest: Linnet's Letters (not in game yet)" : `Quest: ${({ capDone: "Ama's Capmother ring", dawn: "the epilogue chest", visited_kilnreach: "Updraft Cliff", spring: "the hidden Wellspring" } as Record<string, string>)[g.at] ?? g.at}`;
+  return g.at === "lettersDone" ? "Quest: Linnet's Letters" : `Quest: ${({ capDone: "Ama's Capmother ring", dawn: "the epilogue chest", visited_kilnreach: "Updraft Cliff", spring: "the hidden Wellspring" } as Record<string, string>)[g.at] ?? g.at}`;
 }
 export function gearBonus(eq: Partial<Equip>) {
   const b = { str: 0, pow: 0, end: 0, spd: 0 };

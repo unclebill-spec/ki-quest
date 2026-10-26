@@ -223,6 +223,7 @@ function bios(g: Game) {
   if (A("mirela") || F.oath) L.push({ name: "Mirela", tag: "Oathkeeper · ally", text: ["Swore to walk with you to the", "dead sun. Fights close, throws", "teal bolts, never retreats."] });
   if (A("brann") || F.brann) L.push({ name: "Brann", tag: "Shield-wall · ally", text: ["Big, slow, loud. Draws foes off", "you with a taunt and takes", "the hits nobody else can."] });
   if (A("sable") || F.sableJoin) L.push({ name: "Sable", tag: "Caster · healer · ally", text: ["She reads the Lens like a book.", "Hangs back, casts, and mends", "the party when it counts."] });
+  if (F.linnetWoke) L.push({ name: "Linnet Vant", tag: F.linnetRest ? "Sleeping Wraith · at rest" : "Sleeping Wraith · Power 0 lm", text: ["Mirela's grandmother. Followed", "a spring west and stayed to keep", F.linnetRest ? "it company. Saw her sunrise." : "it company. Still waiting for dawn."] }); // W17f
   if (mb.boss?.done) L.push({ name: "Ashmaw", tag: "Grotto Devourer · defeated", text: ["An ember-jawed beast of the grotto.", "Dashes, fans, slams. Its embers", "went cold at last."] }); // MB hook W17
   if (mb.boss2?.done) L.push({ name: "Slagheart", tag: "Quarry boss · defeated", text: ["Molten core in a slag shell.", "The quarry cools without it."] });
   if (mb.boss3?.done) L.push({ name: "Count Aurel", tag: "Undertide · defeated", text: ["Lord of the drowned spring.", "Called the tide to his side."] });

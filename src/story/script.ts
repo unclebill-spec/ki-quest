@@ -1,5 +1,5 @@
 /** Area 1–2 story script (from staging/story: world.md, cast.md, area1.md). Original names and lines only. */
-export interface NpcDef { name: string; coat: string; hair: string; skin: string; trim: string; tall?: number; float?: boolean; lines: (f: Flags) => string[] }
+export interface NpcDef { name: string; coat: string; hair: string; skin: string; trim: string; tall?: number; float?: boolean; /** W17f: hide-until-flag + spawn tile for NPCs not in the map string */ show?: (f: Flags) => boolean; at?: [number, number]; lines: (f: Flags) => string[] }
 export type Flags = Record<string, number | boolean | string>;
 
 export const INTRO = [
@@ -12,6 +12,16 @@ export const INTRO = [
 
 export const NPCS: Record<string, Record<string, NpcDef>> = {
   lanternmoss: {
+    // W17f Linnet's Letters: Linnet Vant, the Sleeping Wraith (staging/story/linnets_letters.md). Not in the map string: spawned beside the hidden spring (K at 2,32) while show(f).
+    l: { name: "Linnet Vant", coat: "#4a5468", hair: "#d8d4e0", skin: "#e0c8c0", trim: "#e8d8ff", float: true, at: [5, 31], show: (f) => !!f.linnetWoke && !f.dawn, lines: (f) =>
+      f.lettersDone ? ["Don't fuss over me. I've waited this long. Go and give the light back.", "Tell the graves I said hello. They'll know which ones."]
+      : ["My letters! I wrote one at every stop so I'd remember the way home. I forgot to post any of them.",
+        "I found the spring, you see. It was so warm. I sat down to rest and keep it company, and the sitting got long.",
+        "Something below it is hungry. I could hear it chewing on the light. I kept singing so the spring wouldn't feel alone.",
+        "You're the lamplighter. Good. Lamps were always the start of things.",
+        "Here, little lamp. My locket. It kept me warm the whole way. Let it keep you warm the rest of yours.",
+        "Mirela: \"Come home. Please.\"",
+        "I came for a sunrise. I'd like to see one before I go. You go and make one, and I'll wait right here."] },
     a: { name: "Elder Ama Quill", coat: "#5a4a7a", hair: "#d8d8e0", skin: "#c89070", trim: "#7ff0ff", lines: (f) =>
       f.metAma ? (f.wardSeen ? ["The sealed ward north of the Watch reads your Glow. Grow stronger, child.", "Past it, an updraft stone. Ride it and see where the wraiths went."]
         : ["The Lens is yours now. Point it at anything that glows and it will tell you its story.", "Follow the dimming orbs east to the Old Watch. Something there still keeps watch."])
@@ -39,13 +49,17 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
       : f.reedQ ? [`The meadow things are still prowling. ${(f.reedN as number) || 0} of 8 down.`]
       : ["Welcome to Hushwater. Mind the boardwalks; the fen takes boots.", "Something's stirring in the Sunken Meadow south of town. Quiet eight of them for me?", "The graveyard's up on the hill. The keeper there talks to people who aren't there. Nicest person in town."] },
     m: { name: "Mirela Vant", coat: "#5a3a8a", hair: "#1e1830", skin: "#e8c8b8", trim: "#c8a0ff", lines: (f) =>
+      (f.lettersN as number) >= 4 && !f.lettersRead ? (f.oath ? LETTERS_READ.slice(0, 4).concat(["We're going that way anyway. Bring them. Please."]) : LETTERS_READ) :
       f.ombrelleDown ? ["She was under my graves the whole time, drinking. The lamps are violet again.", "...Thank you for not letting me go down alone."]
       : f.oath ? ["The dead are calmer since you came. So am I, a little.", "Under your Wickhaven there's a grotto. That's where the spring went. Let's go take it back."]
       : f.bellDone && f.reedDone ? ["Fen's bell is ringing and the meadow is quiet. The wraiths noticed.", "All right, lamp-lighter. Lantern Oath: I'll walk with you to the Wellspring Grotto."]
       : f.metMirela ? ["The wraiths are restless. They keep saying 'drinker'. I'd like to know who taught them that word.", "When you're ready, I'll walk with you. Mind my lantern; it bites."]
         : ["You're the lamp-lighter from Wickhaven. The wraiths told me you'd come. They also said you're loud.", "Mirela Vant. I keep this graveyard. Something drained the spring under your town, and the dead felt it here.", "We'll be travelling together soon, I think. Don't make it weird."] },
-    r: { name: "Orrin Cask", coat: "#3a3a2a", hair: "#806040", skin: "#c89870", trim: "#ffb060", tall: -2, lines: (f) => /* W17 Hollowmere lead-in + bark (staging w17.md) */
-      f.hollowmereDown ? ["Ferry's running again. Still slow. Still a whole thing. But running."]
+    r: { name: "Orrin Cask", coat: "#3a3a2a", hair: "#806040", skin: "#c89870", trim: "#ffb060", tall: -2, lines: (f) => /* W17 Hollowmere lead-in + bark (staging w17.md); W17f Linnet's Letters branches first */
+      f.metMirela && !f.lettersQ ? ["Found this in the reeds by the ferry post. Paper's soaked, ink's held. Someone wrote small to save paper.", "Signed 'L. Vant'. Vant. Like the graveyard girl. Any kin, you think?", "There's more of them out there. Saw the corners sticking up in the meadow, and one out on the east boardwalk. Didn't fancy the walk. It's a whole thing."]
+      : f.lettersQ && !f.lettersRead && !(f.bellDone && f.corvinDown && !f.hollowmereDown) ? ["Found the others yet? Paper doesn't last long in a fen. Neither do I.", "Two in the Sunken Meadow, one out on the east boardwalk. Bring them to the graveyard girl."]
+      : f.lettersRead && !f.hollowmereDown && !(f.bellDone && f.corvinDown) ? ["Her grandmother? Huh. I ferried a woman in a grey cloak once, when I was small. She paid in mushrooms. Never came back for the ride home."]
+      :       f.hollowmereDown ? ["Ferry's running again. Still slow. Still a whole thing. But running."]
       : f.bellDone && f.corvinDown ? ["You rang the Ferry Bell. Good. Bad. Both.", "Something big heard it out past the reeds, in the west meadow. The water's going down, and nobody's drinking it but the fog."]
       : ["Ferry's closed. Bell's gone. Fog's thick. It's a whole thing.", "Fen keeps a bell for the fog. Lose it and the boats go in circles. Ask him about it."] },
   },
@@ -79,3 +93,18 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
       ["Brann says if you press your ear to the rock you can hear it breathing.", "I tried. It just made my ear hot."] },
   },
 };
+
+/** W17f Linnet's Letters: Mirela reads her grandmother's letters (needs lettersN >= 4). */
+export const LETTERS_READ = [
+  "Where did you get these? ...That's my grandmother's hand. She crossed her sevens. Nobody else crosses their sevens.",
+  "'Little lamp.' She called me that. I was six. She said she'd find a spring that never went dark and bring some back in a jar.",
+  "She left the year the graveyard lamps first dimmed. Everyone said the fen took her.",
+  "The last one says she heard a spring singing west of the mountains. That's your Lanternmoss, lamplighter.",
+  "If she's there... I want to be the one who goes. Not before the town is safe, though. She'd never forgive me.",
+];
+/** W17f: the 3 loose letters in Hushwater (tile coords; walkable: meadow grass x2, east boardwalk x1). */
+export const LETTERS = [
+  { x: 14, y: 22, t: "A letter, tucked in a reed-lamp · \"Little lamp, the fen is cold but the orbs are friendly.\"" },
+  { x: 33, y: 24, t: "A letter, pinned under a stone · \"I heard a spring singing west of the mountains.\"" },
+  { x: 44, y: 11, t: "A letter, folded in an old boot · \"If I'm not back by the first frost, keep the graves lit.\"" },
+];
