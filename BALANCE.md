@@ -37,3 +37,19 @@ Boss HP is unchanged everywhere, and Warden Rune keeps his 6 thresholds and echo
 ## 2026-10-26 5:35 PM ET: Rule 19 balance flag (Efficiency Bot, qa-reports/kq-live-crosscheck-20261026.md)
 - Build and game pass. But with no pauses, Hollowmere, the Cageward Twins and Morvant die within about 10 s of the warp, against a 45 s minimum. Earlier times were measured with the game paused.
 - Game Director: not done yet. N64 Style finds out whether warp stats or real balance cause this, fixes it, and records honest times for all 8 bosses. Then QA runs again.
+
+## 2026-10-26 ~6:20 PM ET: honest no-pause re-time (W17g, N64 Style executor)
+Each boss was played from its `?qa=` warp using its repo `qa-keys-<boss>.json`, with no Escape and no pauses. The harness used game-qa's exact input replay (1280x720, swiftshader, same press timing) and polled boss HP every 0.5 s. The fight time runs from the first damage to the kill. Real `game-qa` runs with the same keys all PASS (qa-reports/kq-w17g-*).
+
+**Root cause of the "10 s" flag:** no boss dies in 10 s. The scratch no-Escape keys run about 59 s of input, and the final screenshots show Hollowmere, the Twins and Morvant already dead after that window. Their fights were 46–58 s in that same scratch replay. Warp stats match normal progression: str/pow/end = L+2 each = 3L+6 total points, the same as 3/3/3 start plus 3 per level. The holds and poise do engage: each kill lands after its phase-hold floor. The one real tuning gap was the Twins, at 33 s with only 73 HP lost, because they had a single 50% hold. Fix: the Twins now use 3 phase holds (75/50/25%, 13 s each) and deal x2.2 damage.
+
+| Boss | Warp Lv | Fight (no pause) | HP lost |
+|---|---|---|---|
+| Ashmaw | 8 | 54.2 s | 156/180 (min 24) |
+| Hollowmere | 11 | 52.6 s (47.9 s scratch) | 109/204 |
+| Slagheart | 12 | 69.4 s | 187/212 |
+| Aurel | 15 | 68.8 s | 212/228 |
+| Cageward Twins | 18 | 84.5 s / 60.8 s (after fix; was 32.8 s) | 202 / 115 of 316 |
+| Morvant | 19 | 50.0 s (58.1 s scratch) | 116/324 |
+| Malachar (new ?qa=malachar) | 21 | 54.0 s | 73/308 |
+| Warden Rune | 22 | 70.7 s | 168/308 |
