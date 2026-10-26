@@ -20,10 +20,10 @@ try {
   const E = (f, a) => page.evaluate(f, a);
   ok("Hollowmere is optional (HOLLOWMERE_REQUIRED=false)", await E(() => globalThis.__kiMB.HOLLOWMERE_REQUIRED === false));
   // gate: no bell / corvinDown -> the mere stays still, even standing on the ripple
-  const gate = await E((FL) => { const g = window.__ki.game, s = window.__ki.story, M = globalThis.__kiMB; Object.assign(s.flags, FL); s.flags.bell = false; s.flags.corvinDown = false; s.save(); s.enter("hushwater"); s.box = null;
+  const gate = await E((FL) => { const g = window.__ki.game, s = window.__ki.story, M = globalThis.__kiMB; Object.assign(s.flags, FL); s.flags.bell = s.flags.bellDone = false; s.flags.corvinDown = false; s.save(); s.enter("hushwater"); s.box = null;
     g.enemies.forEach((e) => { e.dead = true; e.respawn = 1e9; }); const A = M.ARENA11; g.p.x = A.tx * 16 + 8; g.p.y = A.ty * 16 + 8; for (let i = 0; i < 60; i++) { s.box = null; g.step(1 / 60); }
-    const a = g.mb.boss11.active; s.flags.bell = true; for (let i = 0; i < 60; i++) { s.box = null; g.step(1 / 60); } return { area: g.area.id, a, b: g.mb.boss11.active }; }, FL);
-  ok("gate: no wake without bell + corvinDown", gate.area === "hushwater" && !gate.a && !gate.b, JSON.stringify(gate));
+    const a = g.mb.boss11.active; s.flags.bell = s.flags.bellDone = true; for (let i = 0; i < 60; i++) { s.box = null; g.step(1 / 60); } return { area: g.area.id, a, b: g.mb.boss11.active }; }, FL);
+  ok("gate: no wake without bellDone + corvinDown", gate.area === "hushwater" && !gate.a && !gate.b, JSON.stringify(gate));
   const wk = await E(() => { const g = window.__ki.game, s = window.__ki.story, M = globalThis.__kiMB, A = M.ARENA11, cx = A.tx * 16 + 8, cy = A.ty * 16 + 8; s.flags.corvinDown = true;
     g.p.x = cx + 50; g.p.y = cy; for (let i = 0; i < 40; i++) { s.box = null; g.step(1 / 60); } const near = { hint: M.hollowLog.hinted, act: g.mb.boss11.active };
     g.p.x = cx; g.p.y = cy + 4; for (let i = 0; i < 6; i++) { s.box = null; g.step(1 / 60); } const m = M.hollowOf(g);

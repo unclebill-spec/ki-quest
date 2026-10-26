@@ -44,8 +44,10 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
       : f.bellDone && f.reedDone ? ["Fen's bell is ringing and the meadow is quiet. The wraiths noticed.", "All right, lamp-lighter. Lantern Oath: I'll walk with you to the Wellspring Grotto."]
       : f.metMirela ? ["The wraiths are restless. They keep saying 'drinker'. I'd like to know who taught them that word.", "When you're ready, I'll walk with you. Mind my lantern; it bites."]
         : ["You're the lamp-lighter from Wickhaven. The wraiths told me you'd come. They also said you're loud.", "Mirela Vant. I keep this graveyard. Something drained the spring under your town, and the dead felt it here.", "We'll be travelling together soon, I think. Don't make it weird."] },
-    r: { name: "Orrin Cask", coat: "#3a3a2a", hair: "#806040", skin: "#c89870", trim: "#ffb060", tall: -2, lines: () =>
-      ["Ferry's closed. Bell's gone. Fog's thick. It's a whole thing.", "Fen keeps a bell for the fog. Lose it and the boats go in circles. Ask him about it."] },
+    r: { name: "Orrin Cask", coat: "#3a3a2a", hair: "#806040", skin: "#c89870", trim: "#ffb060", tall: -2, lines: (f) => /* W17 Hollowmere lead-in + bark (staging w17.md) */
+      f.hollowmereDown ? ["Ferry's running again. Still slow. Still a whole thing. But running."]
+      : f.bellDone && f.corvinDown ? ["You rang the Ferry Bell. Good. Bad. Both.", "Something big heard it out past the reeds, in the west meadow. The water's going down, and nobody's drinking it but the fog."]
+      : ["Ferry's closed. Bell's gone. Fog's thick. It's a whole thing.", "Fen keeps a bell for the fog. Lose it and the boats go in circles. Ask him about it."] },
   },
   stair: {
     o: { name: "Captain Orlo Fenn", coat: "#3a2a4a", hair: "#c08040", skin: "#e0b090", trim: "#ff3a5a", lines: (f) =>
@@ -56,7 +58,8 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
     s: { name: "Marlo Quayle", coat: "#2a4a5a", hair: "#e0d0b0", skin: "#a87858", trim: "#80e0e0", lines: (f) =>
       f.shopOpen ? ["Welcome aboard again. Mind the step; the sea moved it."] : ["Marlo Quayle, chandler. Oilskins, greaves, and Tears in glass.", "The city drowned. Business didn't. Please, browse."] },
     n: { name: "Neri Calloway", coat: "#1e4a52", hair: "#d0e8e0", skin: "#b88a70", trim: "#7affe0", lines: (f) =>
-      f.sigilDone ? ["This sigil belonged to the Sunwarden's own guard. The man who kept the sun lit.", "If a Sunwarden is draining the Wellsprings... then he isn't keeping the light anymore. He's hoarding it.", "The tide stair on Sigil Quay goes down to our Wellspring. Your sigil opens it. Mind the girl in the black coat; she's been watching you."]
+      f.hollowmereDown && f.sigilDone ? ["The tide in Drowned Vesper rose a hand's width tonight. Something upriver stopped drinking."]
+      : f.sigilDone ? ["This sigil belonged to the Sunwarden's own guard. The man who kept the sun lit.", "If a Sunwarden is draining the Wellsprings... then he isn't keeping the light anymore. He's hoarding it.", "The tide stair on Sigil Quay goes down to our Wellspring. Your sigil opens it. Mind the girl in the black coat; she's been watching you."]
         : f.sigil ? ["Let me see it. Hold it to the light. Oh."]
         : ["You came down the slab from the mountain? Nobody's used it since the tide rose.", "Neri Calloway. I keep the records of Vesper, what the sea left of them.", "There's a sun-sigil on Sigil Quay, south-east. The shades won't let me near it. Bring it and I'll tell you what it means."] },
     x: { name: "Old Calder", coat: "#3a4a48", hair: "#a0a0a0", skin: "#c8a080", trim: "#c8b060", tall: -2, lines: (f) => f.tideBossDown ? ["He used to walk the Court, you know. The warden. Kind voice. That's the worst part."] :

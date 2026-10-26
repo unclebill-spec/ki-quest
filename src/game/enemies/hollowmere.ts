@@ -2,7 +2,7 @@
  * OPTIONAL boss11: HOLLOWMERE, THE DRINKING COLOSSUS (sheet public/art/chars/hollowmere.*, tools/art/build_hollowmere.py).
  * A violet reed-backed colossus that drinks the Hushwater mere. NOT required: HOLLOWMERE_REQUIRED = false, nothing gates on
  * hollowmereDown except its own reward. Arena HUSH_ARENA (defined here, not in maps.ts): the west meadow of Hushwater,
- * tile 17,22 r5, off the main path. Wakes only when story `bell && corvinDown` and the hero steps onto the still ripple at the
+ * tile 17,22 r5, off the main path. Wakes only when story `bellDone && corvinDown` (bell returned to Fen = it rings) and the hero steps onto the still ripple at the
  * centre (opt-in; a hint fires nearby). Sets hollowmereWake on wake, hollowmereDown on defeat (+ kiquest-mb-v1 boss11).
  * 560 HP, 3 phases (66 / 33 %); each change = banner, teal shockwave + knockback, 1.2 s invulnerability. Ground warnings
  * carry `mere: 0 violet | 1 teal | 2 fog` (drawn by src/game/combat/draw17.ts).
@@ -33,10 +33,10 @@ export let fogDark = 0;
 export const arena11Center = () => center;
 export const hollowOf = (g: Game) => g.enemies.find((e) => e.kind === "hollowmere" && !e.dead);
 const story = () => (window as unknown as { __ki?: { story?: { flags: Record<string, unknown>; save(): void; box: unknown } } }).__ki?.story;
-/** Wakeable now (opt-in ripple shows): bell rung and Corvin down, not yet beaten. */
+/** Wakeable now (opt-in ripple shows): bell rung (bellDone) and Corvin down, not yet beaten. */
 export function hollowReady(g: Game) {
   const s = story(), b = g.mb.boss11;
-  return !!s && g.area.id === ARENA11.area && !!s.flags.bell && !!s.flags.corvinDown && !s.flags.hollowmereDown && !b.done && !b.active;
+  return !!s && g.area.id === ARENA11.area && !!s.flags.bellDone && !!s.flags.corvinDown && !s.flags.hollowmereDown && !b.done && !b.active;
 }
 /** True while the colossus is under the water (all hits are ignored). */
 export const hollowSunk = (e: Enemy) => e.kind === "hollowmere" && e.move === "sink" && (e.state === "act" || (e.state === "tele" && e.t < 0.35));
