@@ -9,7 +9,7 @@
   - finale/epilogue/credits/THE END
   - New Game button
   - ?qa=ashmaw|hollowmere|warden|ending
-- **Rollback:** ROLLBACK_PLACEHOLDER
+- **Rollback:** `git -C /workspace/games/ki-rpg push -f origin 7c7c834e870a:gh-pages` (gh-pages before the W17d deploy of main@3f5b253, 4:49 PM ET)
 - **Open items:**
   - Slagheart, Aurel, Twins and Morvant fight times aren't measured yet (no warps). The Twins only have poise.
   - Pre-existing: tests/artpack3 "Hush Squire lunges" fails 13/14. I didn't touch it.
