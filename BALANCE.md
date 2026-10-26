@@ -28,3 +28,12 @@ Boss HP is unchanged everywhere, and Warden Rune keeps his 6 thresholds and echo
 - **Floors:** 3-phase bosses can't die before 2×min (Ashmaw 34 s). Rune's floor is 45 s of holds plus his final phase.
 - **XP:** `expNext` is x0.5 below Lv 8. Reaching Lv 8 now takes ~268 EXP, about 38 kills at 7 EXP (~21 with Pip's +120 orb), down from ~536 (~77 kills).
 - **Round 2 (Oct 26):** all 8 bosses now have ?qa= warps and mash-timed inside 43–68 s with real HP cost. Times are from a scripted approach-and-mash bot (/tmp/kqm/mash.mjs, not kept), so they are rough. Twins anti-mash: each twin's HP is held at 50% for 14 s, on top of poise.
+
+## 2026-10-26 5:20 PM ET: Game Director sign-off on retune round 2
+- Mash-test band of 43-68 s per boss, each costing real HP: accepted.
+- Ashmaw at 43.5 s is 1.5 s under the 45 s target. Accepted as is, because it's the first boss and players won't feel the gap. Revisit only if QA or Will finds it too easy.
+- Before Will is told it's done, it still needs a Rule 19 game-qa PASS from Efficiency Bot.
+
+## 2026-10-26 5:35 PM ET: Rule 19 balance flag (Efficiency Bot, qa-reports/kq-live-crosscheck-20261026.md)
+- Build and game pass. But with no pauses, Hollowmere, the Cageward Twins and Morvant die within about 10 s of the warp, against a 45 s minimum. Earlier times were measured with the game paused.
+- Game Director: not done yet. N64 Style finds out whether warp stats or real balance cause this, fixes it, and records honest times for all 8 bosses. Then QA runs again.
