@@ -40,6 +40,12 @@ installBtn.onclick = async () => { if (inst?.state() === "ios") { document.getEl
 fsBtn.hidden = !canFullscreen(); fsBtn.onclick = () => void enterFullscreen();
 const begin = () => { title.hidden = true; const cont = !!readSave(); game.start(true); story.begin(cont); };
 startBtn.onclick = begin;
+// W17d: New Game (keeps slots 1-3) + back to the title after the credits' THE END card
+const newBtn = document.getElementById("newBtn") as HTMLButtonElement; newBtn.hidden = !readSave();
+newBtn.onclick = () => { if (!confirm("Start a new game? Your current save is erased (Save slots 1-3 are kept).")) return;
+  for (const k of ["kiquest-save-v1", "kiquest-autosave-v1", "kiquest.story.v1", "kiquest-mb-v1"]) try { localStorage.removeItem(k); } catch { /* private mode */ }
+  location.reload(); };
+addEventListener("kq-credits-end", () => { title.hidden = false; startBtn.textContent = "Continue"; newBtn.hidden = false; startBtn.focus(); });
 startBtn.focus();
 
 // Tap a status row on the canvas

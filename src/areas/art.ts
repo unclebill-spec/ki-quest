@@ -18,7 +18,6 @@ const PAL = {
 const GPAL = { moss: { spore: "#6ad8ff", plaza: "#544c5a" }, marsh: { spore: "#b48aff", plaza: "#4c4652" }, ember: { spore: "#ff8a4a", plaza: "#6a5650" }, tide: { spore: "#7affe0", plaza: "#4e5e60" }, violet: { spore: "#d4a0ff", plaza: "#6e6284" }, husk: { spore: "#ffb050", plaza: "#5a3236" } };
 const GSETS: Partial<Record<"moss" | "marsh" | "ember" | "tide" | "violet" | "husk", GroundSet>> = {};
 const gset = (t: "moss" | "marsh" | "ember" | "tide" | "violet" | "husk") => (GSETS[t] ??= groundSet({ floor: PAL[t].floor[0], moss: PAL[t].moss[0], path: PAL[t].path[0], water: PAL[t].water[0], ...GPAL[t] }, t === "moss" ? 1 : t === "marsh" ? 2 : t === "ember" ? 3 : 4));
-export const CREDITS_T = 64; // ~58 lines at 16 px/s (W17d: Burning Bush / Created by Will / Also starring)
 const CREDITS = ["#KINDLE QUEST", "", "an original game for Bill Weathersbee", "", "#Lamps still need lighting.", "#Just not all the time.", "", "",
   "#A Burning Bush Productions game", "", "#Created by", "Will (Bill Weathersbee)", "",
   "#Story & World", "the World/Story team", "Hearthmoor Story", "", "#Combat, Heroes & Bosses", "the Master Builder team", "",
@@ -29,6 +28,8 @@ const CREDITS = ["#KINDLE QUEST", "", "an original game for Bill Weathersbee", "
   "#Also starring", "Ashmaw, Grotto Devourer", "Slagheart", "Count Aurel, Tide General", "the Cageward Twins", "Morvant, the Eclipse Golem", "Hollowmere, the Drinking Colossus", "",
   "#Final boss", "Warden Rune, the Last Guardian of the Wellsprings", "", "",
   "#Thank you for playing.", "", "The glow nights still come each evening.", "Everyone gathers close, by choice now."];
+/** W17d: scroll just past the last line, then a 4 s THE END card (was ~10 s of empty gradient). */
+export const CREDITS_T = Math.ceil((216 /* view H */ + 24 + CREDITS.length * 14) / 16) + 4;
 const KIND: Record<number, Kind> = { [T_FLOOR]: "floor", [T_MOSS]: "moss", [T_PATH]: "path", [T_PLAZA]: "plaza", [T_WATER]: "water", [T_HIDDEN]: "water", [T_WARD]: "floor" };
 
 export function tile(c: C2, theme: "moss" | "marsh" | "ember" | "tide" | "violet" | "husk", v: number, X: number, Y: number, tx: number, ty: number, time: number, tiles?: Uint8Array) {
@@ -240,6 +241,7 @@ export function storyOverlay(c: C2, g: Game, s: Story, W: number, H: number) {
     const t = CREDITS_T - s.credits, a = Math.min(1, t / 1.5);
     const gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, `rgba(255,214,140,${a})`); gr.addColorStop(0.5, `rgba(200,150,170,${a})`); gr.addColorStop(1, `rgba(40,30,70,${a})`);
     c.fillStyle = gr; c.fillRect(0, 0, W, H); c.textAlign = "center";
+    if (s.credits < 4) { c.globalAlpha = Math.min(1, (4 - s.credits) / 0.8); c.fillStyle = "#fff6dc"; c.font = "bold 16px monospace"; c.fillText("THE END", W / 2, H / 2 - 6); c.font = "8px monospace"; c.fillStyle = "#3a2440"; c.fillText("A Burning Bush Productions game", W / 2, H / 2 + 12); c.globalAlpha = 1; }
     CREDITS.forEach((l, i) => { const y = H + 10 + i * 14 - t * 16; if (y < -12 || y > H + 12) return; c.fillStyle = l.startsWith("#") ? "#fff6dc" : "#3a2440"; c.font = l.startsWith("#") ? "bold 10px monospace" : "8px monospace"; c.fillText(l.replace(/^#/, ""), W / 2, y); });
     c.font = "8px monospace"; c.fillStyle = "rgba(58,36,64,.8)"; c.fillText("(J / Start to skip)", W / 2, H - 10); c.restore(); return;
   }
