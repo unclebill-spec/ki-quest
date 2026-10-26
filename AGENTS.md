@@ -35,6 +35,7 @@ Publishing needs Bill's approval.
 - Damage/HP math must use `g.eStr/ePow/eEnd/eSpd` (gear-inclusive), not raw `g.str` etc., if gear should count.
 
 ## W16 notes (2026-10-24)
+- Boss roster (W17): boss1 Ashmaw, Grotto Devourer (grotto; gear key `rune`; `ashmawDown`, synced silently for old saves; lines `ashmawSeen`/`ashmawBeat`) · boss2 Slagheart · … · boss10 Malachar (now ends on `malacharFade`) · boss11 Hollowmere (OPTIONAL Hushwater west meadow; wakes on `bellDone && corvinDown` + ripple; `hollowmereWake`/`hollowmereIntro`/`hollowmereDown`/`hollowmereBeat`; unique drop Stillwater Charm c7) · boss12 Warden Rune, TRUE FINAL (husk; kind/gear key `wardenrune`; `runeSeen` -> `runeDown` -> `dawn` -> credits).
 - Story flags: `ombrelleBeat` (Sable, hushwater, after `ombrelleDown`). Ombrelle gear needs `ombrelleDown` only.
 - Drowned Vesper shopkeeper Marlo Quayle = NPC `s` on DROWNED (5,3); `KEEPERS.drowned.npc = "s"` in menu.ts.
 - W16 is LIVE (2026-10-25). Corvin/boss4 flakes fixed by MB via test hooks (forceMiniMove, forceTwinMove). Rule 19: game-qa by another bot before telling Bill a build is done.

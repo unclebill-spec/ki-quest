@@ -1,4 +1,8 @@
 # Changelog
+## W17b release — 2026-10-26 (executor review + deploy)
+- Hollowmere wake gate is `bellDone && corvinDown` (the Ferry Bell rings once returned to Fen), not `bell` (picked up).
+- Story: Hollowmere intro/defeat, Orrin lead-in + bark, Neri bark; Ashmaw defeat lines on `ashmawBeat`; credits list Warden Rune as the final boss.
+- Stillwater Charm gets its own violet/teal icon (gear-icons [64,64]).
 ## MB W17b — 2026-10-26 (bosses: Ashmaw, Hollowmere, Warden Rune; not deployed)
 - Ashmaw (boss1 re-skin, same 420 HP): ember sheet `ashmaw`, renamed banners, ember light; sets `ashmawDown` (old saves synced silently). Gear key `rune` now reads "Drop: Ashmaw".
 - Hollowmere, the Drinking Colossus (boss11, OPTIONAL): Hushwater west meadow (tile 17,22, r 80 px), wakes only on `bell && corvinDown` and stepping onto the ripple. 560 HP, phases 66/33% (lash, drink, fog, sink). Sets `hollowmereWake` / `hollowmereDown`, +4 pts.

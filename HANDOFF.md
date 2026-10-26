@@ -17,6 +17,8 @@
 - Executor W3 (done, live): hidden spring — `K` spring behind `V` false water (SW corner Lanternmoss); first visit +3 stat points (flag spring), always full heal; Joss hints it.
 - Executor 22:40: integrated MB combat (add5a79) — world 17/17, smoke 19/19, combat 18/18, scans clean, deployed + live OK. world.mjs honors KI_PORT. Shots for Bill in docs/bill/. Tile art/renderer frozen for MB rework. Next: Hushwater quests, Wellspring Grotto arena (update ARENA in src/game/enemies/boss.ts if moved), flight screen.
 
+- 2026-10-26 executor W17b release: reviewed MB 1b2b116 (rebased as f67db87). Fixes in 087bea9: Hollowmere wakes on `bellDone` (the bell rings once returned to Fen; `bell` = only picked up), Hollowmere intro/defeat lines (`hollowmereIntro`/`hollowmereBeat`) + Orrin lead-in/bark + Neri bark, Ashmaw defeat lines now `ashmawBeat` (MB sets `ashmawDown` itself), credits 'Final boss: Warden Rune...', Stillwater Charm own icon [64,64] (tools/art/build_stillwater_icon.py). Ama's Ashmaw bark still unhooked.
+
 ## Ground textures (2026-10-23, Master Builder)
 - Ground was flat 16x16 colour squares on a 2-tone checker with hard grid edges. Now `src/areas/groundgen.ts` (reusable generator) builds, per theme, 4 seeded variants of floor/moss/path/plaza/water with 3-step Bayer-dithered noise + detail pixels (tufts, pebbles, cracks, seam moss, spores), plus ragged edge/corner fringes by priority (moss > path > floor > plaza > water; dark rim on shores). Variant chosen by position hash. Nearest-neighbour only.
 - `art.ts tile()` takes optional `tiles` (draw.ts passes `a.tiles`); without it the old flat path still runs. Walls, collision, maps unchanged.
