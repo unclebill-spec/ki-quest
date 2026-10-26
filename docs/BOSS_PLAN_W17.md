@@ -48,6 +48,7 @@ Will's decision (2026-10-26 8:19 AM ET): "Ashmaw and hollowmere get turned into 
 7. Story hookup: lead-ins, defeat lines, barks, credits, gear drops.
 8. Tests/docs: boss11/boss12 tests, update story/fullrun tests, full serial suite, CHANGELOG/HANDOFF/CANON, deploy.
 
-## Open questions for Will
-1. Should the grotto fight keep its current difficulty as Ashmaw, or get a little harder now that it's no longer "the Warden"?
-2. Should Hollowmere be required (blocking the quarry) or optional (side boss in Hushwater)? The plan assumes required.
+## Open questions for Will (answered 2026-10-26)
+1. Ashmaw difficulty: **keep the current difficulty** (Will).
+2. Hollowmere: **OPTIONAL** side boss in Hushwater; it does not gate the quarry or anything else. It drops a unique reward, the **Stillwater Charm**, available only from Hollowmere (Will).
+3. Does Ashmaw gate the Kilnreach stone? No change: the stone keeps its current `oath` gate (pending Will).

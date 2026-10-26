@@ -1,4 +1,7 @@
 # Changelog
+## W17 story prep — 2026-10-26 (not deployed)
+- Will's answers: Ashmaw keeps the current grotto difficulty; Hollowmere is an OPTIONAL Hushwater side boss (gates nothing) whose unique drop is the Stillwater Charm.
+- story: Ashmaw grotto lead-in (`ashmawSeen`) and defeat beat (`ashmawDown`, mirrored from `mb.boss.done`). The other W17 lines wait for Master Builder's fights (staging w17.md).
 ## W17 plan — 2026-10-26 (plan + cleanup, not deployed)
 - docs/BOSS_PLAN_W17.md: Ashmaw = grotto boss (re-skin), Hollowmere = Hushwater boss (new), Warden Rune = true final boss after Malachar (Will's call, 2026-10-26).
 - Canon names: /workspace/masters/kindle-quest/CANON.md.
