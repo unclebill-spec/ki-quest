@@ -16,15 +16,15 @@ Boss HP is unchanged everywhere, and Warden Rune keeps his 6 thresholds and echo
 
 | Boss | Expected Lv | HP | Before: min / out | After: min / out | Before (mash) | After (mash, harness2/kqreplay) |
 |---|---|---|---|---|---|---|
-| Ashmaw | 8–9 | 420 | none / x1 | 17 s / x1.4 | ~16 s at Lv 14, ~no HP lost | ~43 s at Lv 8 (before the 17 s bump; 16 s hold), 110/180 HP lost |
+| Ashmaw | 8–9 | 420 | none / x1 | 17 s / x1.4 | ~16 s at Lv 14, ~no HP lost | 43.5 s at Lv 8 (?qa=ashmaw), 147/180 HP lost |
 | Hollowmere | 11 | (unchanged) | none / x1 | 14 s / x1.5 | 34 s at Lv 15 | ~48 s at Lv 11, 51/204 lost (scripted keys) |
-| Slagheart | 12 | (unchanged) | none / x1 | 15 s / x1.4 | not timed | not timed (no warp) |
-| Aurel | 15 | (unchanged) | none / x1 | 12 s / x1.5 | not timed | not timed |
-| Cageward Twins (vey/nell) | 18 | (unchanged) | none / x1 | poise only / x1.5 | not timed | not timed |
-| Morvant | 19 | (unchanged) | none / x1 | 12 s / x1.6 | not timed | not timed |
+| Slagheart | 12 | 620 | none / x1 | 20 s / x1.5 (was 15 s / x1.4) | 38 s, 133/212 lost (Lv 12) | 44–63 s at Lv 12 (?qa=slagheart), 152–171/212 HP lost |
+| Aurel | 15 | 760 | none / x1 | 14 s / x1.5 (was 12 s) | 43 s, 89/228 lost (Lv 15) | 49.5 s at Lv 15 (?qa=aurel), 163/228 HP lost |
+| Cageward Twins (vey/nell) | 18 | 430 each | none / x1 | poise + each twin held at 50% for 14 s / x1.8 (was poise only / x1.5) | 42–56 s, ~77/316 lost | 50–55 s at Lv 18 (?qa=twins), 112–120/316 HP lost |
+| Morvant | 19 | 900 | none / x1 | 13 s / x3.2 (was 12 s / x1.6) | 52 s, 15/324 lost (no HP cost) | 68 s at Lv 19 (?qa=morvant), 67/324 HP lost |
 | Malachar | 21 | 1200 | none / x1 | 10 s / x2.2 | ~14 s | ~49 s at Lv 21, 86/284 lost |
 | Warden Rune | 22 | 1500 | none / x1 | 9 s / x3 | ~16–18 s, ~5 HP lost | ~58 s at Lv 22, ~200/308 lost (hardest) |
 
 - **Floors:** 3-phase bosses can't die before 2×min (Ashmaw 34 s). Rune's floor is 45 s of holds plus his final phase.
 - **XP:** `expNext` is x0.5 below Lv 8. Reaching Lv 8 now takes ~268 EXP, about 38 kills at 7 EXP (~21 with Pip's +120 orb), down from ~536 (~77 kills).
-- **Todo:** build warps for Slagheart, Aurel, the Twins and Morvant, and time them. The Twins have no phase hold, so check they aren't a mash win.
+- **Round 2 (Oct 26):** all 8 bosses now have ?qa= warps and mash-timed inside 43–68 s with real HP cost. Times are from a scripted approach-and-mash bot (/tmp/kqm/mash.mjs, not kept), so they are rough. Twins anti-mash: each twin's HP is held at 50% for 14 s, on top of poise.
