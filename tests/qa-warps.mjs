@@ -1,4 +1,4 @@
-// QA warps (?qa=ashmaw|hollowmere|warden): node tests/qa-warps.mjs (after npm run build). KI_PORT.
+// QA warps (?qa=ashmaw|hollowmere|warden|ending): node tests/qa-warps.mjs (after npm run build). KI_PORT.
 // Each warp must start next to the right boss, wake it, and never touch the real localStorage save slots.
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
@@ -28,6 +28,16 @@ try {
       return { a0, lvl, obj, act: g.mb[key].active, qa: window.__kiQA, banner: g.banner };
     }, [key, dir]);
     ok(`${w}: starts in ${area} (quest line not stuck) and wakes ${key}`, r.a0 === area && r.act && r.qa === w && !/Elder Ama|graveyard keeper/.test(r.obj), JSON.stringify(r));
+  }
+  { // ending: rune at low HP -> defeat -> runeDown -> dawn -> credits
+    await page.goto(`${URL0}?qa=ending`); await page.click("#startBtn");
+    await page.waitForFunction(() => window.__ki?.game && window.__ki?.story, null, { timeout: 10000 }); await page.waitForTimeout(1500);
+    let st = {};
+    for (let i = 0; i < 120 && !st.credits; i++) {
+      await page.keyboard.press(i % 2 ? "Enter" : "j"); await page.waitForTimeout(250);
+      st = await page.evaluate(() => { const g = window.__ki.game, s = window.__ki.story; return { area: g.area.id, runeDown: !!s.flags.runeDown, dawn: !!s.flags.dawn, credits: !!s.credits }; });
+    }
+    ok("ending: Warden Rune falls -> runeDown -> dawn -> credits", st.area === "husk" && st.runeDown && st.credits, JSON.stringify(st));
   }
   const p2 = await ctx.newPage(); await p2.goto(URL0);
   const real = await p2.evaluate(() => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; });
