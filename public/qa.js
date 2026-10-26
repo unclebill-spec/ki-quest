@@ -1,12 +1,16 @@
-// QA warp: ?qa=ashmaw|hollowmere|warden|ending. Swaps localStorage for an in-memory store seeded with a
+// QA warp: ?qa=ashmaw|hollowmere|slagheart|aurel|twins|morvant|warden|ending. Swaps localStorage for an in-memory store seeded with a
 // fixed save next to that boss, so real save slots are never read or written. Not linked from any UI.
 (function () {
-  var w = (location.search.match(/[?&]qa=(ashmaw|hollowmere|warden|ending)\b/) || [])[1]; if (!w) return;
+  var w = (location.search.match(/[?&]qa=(ashmaw|hollowmere|slagheart|aurel|twins|morvant|warden|ending)\b/) || [])[1]; if (!w) return;
   var base = { introSeen: 1, oath: 1, brann: 1, brannQ: 1, heart: 1, quarryBossDown: 1, quarryBeat: 1, sigilDone: 1, sable1: 1, sable2: 1, tideBossDown: 1 };
   var late = { sable3: 1, twist: 1, malachar: 1, stairIn: 1, cageDone: 1, sableJoin: 1, morvantDown: 1, threshold: 1, huskIn: 1, malacharDown: 1, poured: 1, malacharFade: 1 };
   var F = {
     ashmaw: { area: "lanternmoss", x: 536, y: 280, lvl: 8, mb: 0, fl: { introSeen: 1, metAma: 1, metMirela: 1, bell: 1, bellDone: 1, reedQ: 1, reedDone: 1, oath: 1, visited_wickhaven: 1, visited_hushwater: 1 }, g: { w: "w1", a: "a2", c: "c1", h: "h2", f: "f2" } },
     hollowmere: { area: "hushwater", x: 328, y: 360, lvl: 11, mb: 3, fl: Object.assign({ metAma: 1, metMirela: 1, bell: 1, bellDone: 1, reedQ: 1, reedDone: 1, corvinDown: 1 }, base), g: { w: "w3", a: "a2", c: "c3", h: "h2", f: "f2" } },
+    slagheart: { area: "emberquarry", x: 616, y: 322, lvl: 12, mb: 1, fl: { introSeen: 1, metAma: 1, metMirela: 1, bell: 1, bellDone: 1, reedQ: 1, reedDone: 1, oath: 1, brann: 1, brannQ: 1, heart: 1 }, g: { w: "w3", a: "a2", c: "c3", h: "h2", f: "f2" } },
+    aurel: { area: "undertide", x: 600, y: 334, lvl: 15, mb: 2, fl: { introSeen: 1, metAma: 1, oath: 1, brann: 1, brannQ: 1, heart: 1, quarryBossDown: 1, quarryBeat: 1, sigilDone: 1, sable1: 1, sable2: 1 }, g: { w: "w4", a: "a3", c: "c4", h: "h3", f: "f3" } },
+    twins: { area: "stair", x: 392, y: 304, lvl: 18, mb: 3, fl: Object.assign({ sable3: 1, twist: 1, malachar: 1, stairIn: 1 }, base), g: { w: "w5", a: "a4", c: "c5", h: "h4", f: "f4" } },
+    morvant: { area: "stair", x: 520, y: 140, lvl: 19, mb: 4, fl: Object.assign({ sable3: 1, twist: 1, malachar: 1, stairIn: 1, cageDone: 1, sableJoin: 1 }, base), g: { w: "w5", a: "a4", c: "c5", h: "h4", f: "f4" } },
     warden: { area: "husk", x: 392, y: 312, lvl: 22, mb: 10, fl: Object.assign({}, base, late), g: { w: "w6", a: "a5", c: "c6", h: "h6", f: "f6" } },
     ending: { area: "husk", x: 392, y: 312, lvl: 22, mb: 10, fl: Object.assign({ runeSeen: 1 }, base, late), g: { w: "w6", a: "a5", c: "c6", h: "h6", f: "f6" } }
   }[w];

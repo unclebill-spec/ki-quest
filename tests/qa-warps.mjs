@@ -1,4 +1,4 @@
-// QA warps (?qa=ashmaw|hollowmere|warden|ending): node tests/qa-warps.mjs (after npm run build). KI_PORT.
+// QA warps (?qa=ashmaw|hollowmere|slagheart|aurel|twins|morvant|warden|ending): node tests/qa-warps.mjs (after npm run build). KI_PORT.
 // Each warp must start next to the right boss, wake it, and never touch the real localStorage save slots.
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
@@ -9,7 +9,7 @@ const srv = spawn("npx", ["vite", "preview", "--port", String(PORT), "--strictPo
 await new Promise((r) => setTimeout(r, 1500));
 const results = []; const ok = (n, c, d = "") => results.push([c ? "PASS" : "FAIL", n, d]);
 const URL0 = `http://localhost:${PORT}/ki-quest/`;
-const W = { ashmaw: ["lanternmoss", "boss", [1, 0]], hollowmere: ["hushwater", "boss11", [-1, 0]], warden: ["husk", "boss12", [0, -1]] };
+const W = { ashmaw: ["lanternmoss", "boss", [1, 0]], hollowmere: ["hushwater", "boss11", [-1, 0]], slagheart: ["emberquarry", "boss2", [0, -1]], aurel: ["undertide", "boss3", [0, -1]], twins: ["stair", "boss4", [0, -1]], morvant: ["stair", "boss5", [0, -1]], warden: ["husk", "boss12", [0, -1]] };
 const browser = await chromium.launch();
 try {
   const ctx = await browser.newContext({ viewport: { width: 1152, height: 648 } });
