@@ -23,12 +23,12 @@ export class Story {
   constructor(public g: Game, public input: Input) {
     try { this.flags = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch { this.flags = {}; }
   }
-  save() { try { localStorage.setItem(KEY, JSON.stringify(this.flags)); } catch { /* full */ } }
+  save() { try { localStorage.setItem(KEY, JSON.stringify(this.flags)); } catch { /* full */ } if (this.g.mode === "play") this.g.autosave(); } // W17d: autosave with flags so a crash can't leave flags ahead of level/gear
   get active() { return this.credits > 0 || !!this.box || this.intro >= 0 || this.fly > 0; }
 
   /** Called after game.start(). New game: reset story, show intro. Continue: restore area. */
   begin(cont: boolean) {
-    if (!cont) { this.flags = { introSeen: this.flags.introSeen ?? false }; this.save(); }
+    if (!cont) { this.flags = { introSeen: this.flags.introSeen ?? false }; this.save(); } // stale kiquest-mb-v1 is cleared by the title New Game button (main.ts)
     const id = (this.flags.area as string) || "lanternmoss";
     if (id !== this.g.area.id) this.enter(id, !cont);
     if (!this.flags.introSeen) { this.intro = 0; this.introT = 0; }
@@ -56,7 +56,7 @@ export class Story {
       }
       return true;
     }
-    if (this.credits > 0) { inp.poll(); this.credits -= dt; if ((this.ok() || inp.pressed("pause")) && this.credits < CREDITS_T - 2) this.credits = 0; if (this.credits <= 0) { this.credits = 0; g.banner = "Dawn over " + g.area.name; g.bannerT = 3; } return true; }
+    if (this.credits > 0) { inp.poll(); this.credits -= dt; if ((this.ok() || inp.pressed("pause")) && this.credits < CREDITS_T - 2) this.credits = 0; if (this.credits <= 0) { this.credits = 0; g.banner = "Dawn over " + g.area.name; g.bannerT = 3; g.autosave(); dispatchEvent(new Event("kq-credits-end")); } return true; }
     if (this.fly > 0) {
       this.fly -= dt; inp.poll();
       if (this.fly <= 0.6 && this.flyTo) { this.enter(this.flyTo); this.flyTo = ""; const st = g.stats as Record<string, number>; st.travels = (st.travels ?? 0) + 1; }
@@ -196,6 +196,7 @@ export class Story {
         if (g.area.id === "stair") { if (!this.flags.crownShard) { this.flags.crownShard = true; g.gainExp(150); this.save(); g.say("Found a shard of the Sunwardens' crown · +150 EXP", 2.5); } continue; }
         if (g.area.id === "drowned") { this.flags.sigil = true; this.save(); g.say("Found a sun-sigil · show it to Neri", 2.5); continue; }
         if (g.area.id === "emberquarry") { this.flags.heart = true; this.save(); g.say("Found Brann's Heart-Ember · bring it to Brann", 2.5); continue; }
+        if (g.area.id !== "lanternmoss" && g.area.id !== "hushwater") { g.gainExp(40); this.save(); g.say("Found a stray glow orb · +40 EXP", 2.5); continue; } // W17d: Kilnreach etc. no longer say "Ferry Bell"
         if (g.area.id !== "lanternmoss") { this.flags.bell = true; this.save(); g.say("Found the Ferry Bell · bring it to Fen Marrow", 2.5); continue; }
         this.flags.orbs = ((this.flags.orbs as number) || 0) + 1; this.save();
         const st = g.stats as Record<string, number>; st.talks = (st.talks ?? 0) + 1;
@@ -241,19 +242,23 @@ export class Story {
     if (g.area.id === "undertide" && f.tideBossDown && !f.twist) return "Return to Neri in Vesper: the Archive is open";
     if (g.area.id === "undertide") return f.tideBossDown ? "The drowned Wellspring breathes again · Sable is wavering" : "Reach the drowned Wellspring (east, over the south bridge)";
     if (g.area.id === "drowned") return f.sigilDone ? "Take the tide stair on Sigil Quay down to the drowned Wellspring" : f.sigil ? "Show the sun-sigil to Neri in Tidewarden Court" : f.metNeri ? "Find the sun-sigil on Sigil Quay (SE)" : "Find the tide-keeper in Tidewarden Court";
+    if (g.area.id === "kilnreach" && f.quarryBossDown) return "The Quarry Heart is quiet · take the quarry lift to the drowned-sun slab";
     if (g.area.id === "kilnreach") return f.brann ? "Brann is with you · the Quarry Heart waits below" : f.heart ? "Bring the Heart-Ember to Brann" : f.metBrann ? "Take the quarry lift (Quarry Road east) · find the Heart-Ember" : "Find the quarry-smith in Forge Square";
     if (g.area.id === "emberquarry" && f.quarryBossDown) return "The Quarry Heart is quiet · the drowned-sun slab is awake";
     if (g.area.id === "emberquarry") return f.heart ? (f.brann ? "The Quarry Heart: something drinks the embers" : "Return the Heart-Ember to Brann") : "Find Brann's Heart-Ember in the seam";
     if (g.area.id === "hushwater") {
       if (!f.metMirela) return "Find the graveyard keeper on the hill";
-      if (f.oath) return "Mirela is with you · Grotto in Lanternmoss · east stone wakes";
+      if (f.oath) return !g.mb.boss.done && !f.ashmawDown ? "Mirela is with you · clear the Wellspring Grotto in Lanternmoss" : "Mirela is with you · the east stone wakes for Kilnreach";
       const q: string[] = [];
       if (!f.bellDone) q.push(f.bell ? "Bring the bell to Fen" : "Find Fen's Ferry Bell");
       if (!f.reedDone) q.push(!f.reedQ ? "Talk to Tallis Reed" : `Quiet the Meadow ${(f.reedN as number) || 0}/8`);
       return q.length ? q.join(" · ") : "Tell Mirela the town is safe";
     }
     if (!f.metAma) return "Talk to Elder Ama in Wickhaven";
-    if (g.lvl < 4) return "Train in Glowcap Woods · reach Lv 8 (sealed ward)";
+    // W17d: one clear next step per state (was "Pass the sealed ward" from Lv 4 while it was still shut, and after the oath)
+    if (f.oath) return !g.mb.boss.done && !f.ashmawDown ? "Wellspring Grotto (east): something eats the spring's light · or ride to Hushwater's east stone" : "Ride the updraft to Hushwater · the east stone wakes for Kilnreach";
+    if (f.metMirela) return "Ride the updraft back to Hushwater · help the marsh town";
+    if (g.lvl < 8) return `Train in Glowcap Woods · Lv ${g.lvl}/8 opens the sealed ward`;
     return "Pass the sealed ward at the Old Watch · ride the updraft";
   }
 }
