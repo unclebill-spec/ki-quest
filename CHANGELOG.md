@@ -1,4 +1,6 @@
 # Changelog
+## W17c.1 QA warp fixes — 2026-10-26
+- ?qa=ashmaw: Lv 14 + Tidebreaker/Slagplate/Kiln/Wellspring gear and pre-Grotto quest flags (metAma, metMirela, bell/reed done, oath); keys fight ~60 s to reach PHASE 2 and ENRAGED. ?qa=hollowmere also gets the Hushwater quest flags. qa-keys-hollowmere ends in Gear > Charm with the Stillwater Charm highlighted (it is granted on defeat, not a floor pickup). qa-warps asserts the quest line is not stuck.
 ## W17c QA warps — 2026-10-26
 - `?qa=ashmaw|hollowmere|warden` (public/qa.js): isolated in-memory save next to each boss; real save slots untouched. No UI.
 - qa-keys-ashmaw.json / qa-keys-hollowmere.json / qa-keys-warden.json for game-qa boss runs; tests/qa-warps.mjs (6).

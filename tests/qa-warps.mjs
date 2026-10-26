@@ -23,11 +23,11 @@ try {
     await page.goto(`${URL0}?qa=${w}`); await page.click("#startBtn");
     await page.waitForFunction(() => window.__ki?.game && window.__ki?.story, null, { timeout: 10000 }); await page.waitForTimeout(300);
     const r = await page.evaluate(([key, dir]) => {
-      const g = window.__ki.game, s = window.__ki.story, a0 = g.area.id, lvl = g.lvl;
+      const g = window.__ki.game, s = window.__ki.story, a0 = g.area.id, lvl = g.lvl, obj = s.objective();
       for (let i = 0; i < 900 && !g.mb[key].active; i++) { if (s.box) s.box = null; g.p.x += dir[0] * 1.5; g.p.y += dir[1] * 1.5; g.p.inv = 1; g.step(1 / 60); }
-      return { a0, lvl, act: g.mb[key].active, qa: window.__kiQA, banner: g.banner };
+      return { a0, lvl, obj, act: g.mb[key].active, qa: window.__kiQA, banner: g.banner };
     }, [key, dir]);
-    ok(`${w}: starts in ${area} and wakes ${key}`, r.a0 === area && r.act && r.qa === w, JSON.stringify(r));
+    ok(`${w}: starts in ${area} (quest line not stuck) and wakes ${key}`, r.a0 === area && r.act && r.qa === w && !/Elder Ama|graveyard keeper/.test(r.obj), JSON.stringify(r));
   }
   const p2 = await ctx.newPage(); await p2.goto(URL0);
   const real = await p2.evaluate(() => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; });
