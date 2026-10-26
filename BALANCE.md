@@ -53,3 +53,12 @@ Each boss was played from its `?qa=` warp using its repo `qa-keys-<boss>.json`, 
 | Morvant | 19 | 50.0 s (58.1 s scratch) | 116/324 |
 | Malachar (new ?qa=malachar) | 21 | 54.0 s | 73/308 |
 | Warden Rune | 22 | 70.7 s | 168/308 |
+
+## 2026-10-26 6:32 PM ET: Game Director calls
+- W17g (live 6:28 PM ET) is with Efficiency Bot for the Rule 19 recheck. The earlier "10 s" kills turned out to be a QA-script artifact. Only the Twins needed a real retune.
+- Linnet's Letters: N64 Style's defaults 1-7 approved (Linnet fades at dawn in the epilogue, oath-only, hints name places, no Lens ping, no glow orb after dawn). It ships only once Linnet has final sprite art, not the placeholder recolor.
+
+## 2026-10-26 6:54 PM ET: Rule 19 FAIL on W17g. Game Director sets the timing standard.
+- Standard: time bosses only with Efficiency Bot's /workspace/qa-tmp/kq-w17g/fight.py (steady mash, measured from first damage to the kill). Each boss needs 45 s or more with real HP cost. This replaces the 5:20 PM OK of Ashmaw at 43.5 s.
+- fight.py times: Ashmaw 38.8/40.0 (FAIL), Hollowmere 33.8 (FAIL), Slagheart 56.2, Aurel 48.5, Twins 57.3, Morvant about 47 (too close; target about 50), Malachar 47.6 (overstated, because the warp equips w6/c6, his own rewards), Warden 55.1.
+- Fixes: retune Ashmaw and Hollowmere, add margin to Morvant, take w6/c6 off the Malachar warp, stop the ending keys from pressing Enter during the credits.
