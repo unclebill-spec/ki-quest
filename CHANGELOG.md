@@ -1,4 +1,7 @@
 # Changelog
+## W17c QA warps — 2026-10-26
+- `?qa=ashmaw|hollowmere|warden` (public/qa.js): isolated in-memory save next to each boss; real save slots untouched. No UI.
+- qa-keys-ashmaw.json / qa-keys-hollowmere.json / qa-keys-warden.json for game-qa boss runs; tests/qa-warps.mjs (6).
 ## W17b release — 2026-10-26 (executor review + deploy)
 - Hollowmere wake gate is `bellDone && corvinDown` (the Ferry Bell rings once returned to Fen), not `bell` (picked up).
 - Story: Hollowmere intro/defeat, Orrin lead-in + bark, Neri bark; Ashmaw defeat lines on `ashmawBeat`; credits list Warden Rune as the final boss.

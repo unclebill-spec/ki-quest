@@ -39,3 +39,11 @@ Publishing needs Bill's approval.
 - Story flags: `ombrelleBeat` (Sable, hushwater, after `ombrelleDown`). Ombrelle gear needs `ombrelleDown` only.
 - Drowned Vesper shopkeeper Marlo Quayle = NPC `s` on DROWNED (5,3); `KEEPERS.drowned.npc = "s"` in menu.ts.
 - W16 is LIVE (2026-10-25). Corvin/boss4 flakes fixed by MB via test hooks (forceMiniMove, forceTwinMove). Rule 19: game-qa by another bot before telling Bill a build is done.
+
+## QA (game-qa, Rule 19)
+- game-qa is run by another bot. Default run: `game-qa https://unclebill-spec.github.io/ki-quest/ --keys games/ki-rpg/qa-keys.json --name kindle-quest-<tag>`.
+- Boss warps (W17b+): `?qa=ashmaw|hollowmere|warden` (public/qa.js, classic script loaded before main.ts). It swaps `window.localStorage` for an in-memory store seeded with a fixed save, so real slots (kiquest-save/autosave/slot1-3, mb, story) are never read or written; reload without `?qa=` and the real save is back. Not linked from any UI.
+  - ashmaw: lanternmoss (33,17), lvl 10, walk east into the grotto. hollowmere: hushwater (20,22), lvl 15, bellDone+corvinDown, walk west onto the ripple. warden: husk arena, lvl 22, malacharFade, wakes on its own.
+- Boss runs (game-qa passes the URL through untouched; query strings are fine on URLs, not on folder targets):
+  `game-qa "https://unclebill-spec.github.io/ki-quest/?qa=ashmaw" --keys games/ki-rpg/qa-keys-ashmaw.json --name kq-ashmaw` (same for hollowmere, warden). ~40 s each; J starts (Continue), Enter clears dialog, then J/K/Shift fight loop.
+- Test: tests/qa-warps.mjs (each warp wakes its boss; sentinel real save keys unchanged).
