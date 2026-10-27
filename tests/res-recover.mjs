@@ -1,5 +1,5 @@
-// W17l.2: Auto resolution recovers. Two one-off 300 ms stalls must not drop the scale; sustained slowness (CPU throttle)
-// steps it down; ~5 s of steady fps steps it back up toward the cap. Manual presets never move.
+// W17l.2/.3: Auto resolution recovers. Two one-off 300 ms stalls must not drop the scale; sustained slowness (CPU throttle)
+// steps it down; ~10 s of steady fps (W17l.3) steps it back up toward the cap. Manual presets never move.
 // KI_PORT=4522 node tests/res-recover.mjs   (needs `npm run build`; Playwright from /workspace/tools/game/node)
 import { createRequire } from "node:module";
 import { spawn } from "node:child_process";
@@ -24,8 +24,12 @@ try {
   let low = r0; for (let i = 0; i < 20 && low >= r0; i++) { await wait(500); low = await r(); }
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
   ok("sustained slowness steps down", low < r0, `r=${low}`);
-  let back = low, t0 = Date.now(); for (let i = 0; i < 30 && back < r0; i++) { await wait(500); back = await r(); }
+  let back = low, t0 = Date.now(); for (let i = 0; i < 40 && back < r0; i++) { await wait(500); back = await r(); }
   ok("steady fps steps back up to the cap", back === r0, `r=${back} after ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  // W17l.3 flap check: a step-up that fails ~5 s later bans that level (30 s), so 15 s of good fps must NOT retry it.
+  const drop = async () => { await cdp.send("Emulation.setCPUThrottlingRate", { rate: 40 }); let x = r0; for (let i = 0; i < 20 && x >= r0; i++) { await wait(500); x = await r(); } await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 }); return x; };
+  await wait(5000); const d2 = await drop(); await wait(15000); const held = await r();
+  ok("a step-up that fails within 10 s is banned (no retry in the next 15 s)", d2 < r0 && held === d2, `drop=${d2} after15s=${held}`);
   await page.evaluate(() => localStorage.setItem("kiquest-opt-res", "Sharp")); await page.evaluate(() => dispatchEvent(new Event("kq-res")));
   const rb = await r(); await cdp.send("Emulation.setCPUThrottlingRate", { rate: 40 }); await wait(3000); await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
   ok("manual preset (Sharp) never steps", (await r()) === rb, `r=${rb}->${await r()}`);
