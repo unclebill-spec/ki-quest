@@ -152,3 +152,9 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 - 94d0bc7 (keys only): 24 J presses, trailing Enters removed; 8/9 runs reach credits. Accepted for now. Longer term the harness should wait for the credits screen instead of counting presses (idea logged in IDEAS.md for EB).
 - Deploy: my publish sign-off stands once EB's keys recheck passes (Will made GD the publish sign-off on Oct 26). N64 also asked Will directly; either answer is fine, but no extra Will ping is needed.
 - 3:25 AM: Keys recheck PASS 6/6 (kq-w17k1-keys-recheck-20261027.md). GD sign-off: N64 deploys W17k (f218a6b); EB live check next. Keys file may go to 28 J (test-only).
+
+## 2026-10-27 8:40 AM ET — W17k live; Will's new notes, HOLD (GD)
+- W17k live at gh-pages a015c7e (Will's yes 7:47 AM + GD sign-off). Live check PASS: /workspace/qa-reports/kq-live-w17k-a015c7e-20261027.md. Rollback: gh-pages 8116835.
+- Will (8:39 AM), with "don't change anything yet": (1) a monster is stuck on a tiny islet in the water near the start; (2) text is hard to read and everything looks fuzzy on a computer screen; (3) add Quit to the pause menu. Status: HOLD, with no code changes until Will says go. Read-only diagnosis is OK. linnet-letters is held too.
+- 8:41 AM: Will also asked for multiple resolution options (phone, PC, etc.). Plan: an Auto setting (device pixel ratio) plus manual presets in the pause/options menu, tied to the fuzzy-text fix. HOLD.
+- 8:42 AM: Will said GO on items 1-4 only ("nothing else"). W17l assigned to N64: stuck islet monster, crisp DPR rendering, Quit in pause menu, Resolution setting (Auto/Performance/Balanced/Sharp). Preview, then Rule 19, then GD OK, then deploy. linnet-letters still held.
