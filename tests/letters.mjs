@@ -10,7 +10,7 @@ const results = []; const ok = (n, c, d = "") => results.push([c ? "PASS" : "FAI
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
-  const errs = []; page.on("pageerror", (e) => errs.push(String(e))); page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
+  const errs = []; page.on("pageerror", (e) => errs.push(String(e) + " @ " + (e.stack || "").split("\n").slice(1, 4).join(" | "))); page.on("console", (m) => m.type() === "error" && errs.push(m.text()));
   await page.goto(`http://localhost:${PORT}/ki-quest/`);
   await page.evaluate(() => { localStorage.clear(); localStorage.setItem("kiquest.story.v1", JSON.stringify({ introSeen: true, metAma: true, metMirela: true, visited_hushwater: true })); });
   await page.reload(); await page.click("#startBtn"); await page.waitForTimeout(600);
@@ -47,8 +47,12 @@ try {
   for (let i = 0; i < 14 && (await E(() => !!window.__ki.story.box)); i++) { await page.keyboard.press("KeyJ"); await page.waitForTimeout(160); }
   await step(2);
   ok("Linnet NPC shown after waking", await E(() => window.__ki.game.area.npcs.some((n) => n.id === "l")));
+  await page.waitForFunction(() => !!window.__kiMB?.drawLog?.linnet, null, { timeout: 15000 }).catch(() => {});
+  ok("Linnet drawn from her final sheet by frame name (linnet.json, not the placeholder)", await E(() => /^idle_down_[0-3]$/.test(window.__kiMB?.drawLog?.linnet?.key ?? "")), JSON.stringify(await E(() => window.__kiMB?.drawLog?.linnet ?? null)));
+  await page.screenshot({ path: "/tmp/kq-linnet-ingame.png" });
   const li = await talk("l");
   ok("Linnet gives the Locket (lettersDone)", li?.who === "Linnet Vant" && (await E(() => window.__ki.story.flags.lettersDone === true)), JSON.stringify(li?.who));
+  await page.waitForFunction(() => window.__ki.game.have.includes("c2"), null, { timeout: 5000 }).catch(() => {});
   ok("Linnet's Locket (c2) unlocked", await E(() => { const g = window.__ki.game; return g.have.includes("c2"); }));
   // epilogue: Linnet scene plays when lettersDone is set
   await E(() => { const s = window.__ki.story; Object.assign(s.flags, { malacharDown: true, malacharFade: true, runeDown: true, runeSeen: true, huskIn: true, poured: true }); s.save(); });

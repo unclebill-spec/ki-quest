@@ -1,5 +1,5 @@
 /** Area 1–2 story script (from staging/story: world.md, cast.md, area1.md). Original names and lines only. */
-export interface NpcDef { name: string; coat: string; hair: string; skin: string; trim: string; tall?: number; float?: boolean; /** W17f: hide-until-flag + spawn tile for NPCs not in the map string */ show?: (f: Flags) => boolean; at?: [number, number]; lines: (f: Flags) => string[] }
+export interface NpcDef { name: string; coat: string; hair: string; skin: string; trim: string; tall?: number; float?: boolean; /** sprite sheet in public/art/chars (idle/walk rows); falls back to the drawn NPC until it loads */ sprite?: string; /** W17f: hide-until-flag + spawn tile for NPCs not in the map string */ show?: (f: Flags) => boolean; at?: [number, number]; lines: (f: Flags) => string[] }
 export type Flags = Record<string, number | boolean | string>;
 
 export const INTRO = [
@@ -13,7 +13,7 @@ export const INTRO = [
 export const NPCS: Record<string, Record<string, NpcDef>> = {
   lanternmoss: {
     // W17f Linnet's Letters: Linnet Vant, the Sleeping Wraith (staging/story/linnets_letters.md). Not in the map string: spawned beside the hidden spring (K at 2,32) while show(f).
-    l: { name: "Linnet Vant", coat: "#4a5468", hair: "#d8d4e0", skin: "#e0c8c0", trim: "#e8d8ff", float: true, at: [5, 31], show: (f) => !!f.linnetWoke && !f.dawn, lines: (f) =>
+    l: { name: "Linnet Vant", coat: "#4a5468", hair: "#d8d4e0", skin: "#e0c8c0", trim: "#e8d8ff", float: true, sprite: "linnet", at: [5, 31], show: (f) => !!f.linnetWoke && !f.dawn, lines: (f) =>
       f.lettersDone ? ["Don't fuss over me. I've waited this long. Go and give the light back.", "Tell the graves I said hello. They'll know which ones."]
       : ["My letters! I wrote one at every stop so I'd remember the way home. I forgot to post any of them.",
         "I found the spring, you see. It was so warm. I sat down to rest and keep it company, and the sitting got long.",
