@@ -266,10 +266,10 @@ export class Game {
    *  th = its PHASE_AT thresholds; min = seconds each phase must last before HP can cross the next threshold (no 2 s banner flips);
    *  out = damage multiplier on hits the hero takes while that boss is alive. Poise (all): 7+ hits in 2 s -> 1.6 s guard
    *  (25% damage) + a push-back shockwave, so mashing stalls and dodging/skills win. */
-  static TUNE: Record<string, { th: number[]; min: number; out: number }> = {
-    boss: { th: [0.66, 0.33], min: 17, out: 1.4 }, hollowmere: { th: [0.66, 0.33], min: 14, out: 1.5 }, slag: { th: [0.66, 0.33], min: 20, out: 1.5 },
-    aurel: { th: [0.75, 0.5, 0.25], min: 14, out: 1.5 }, vey: { th: [0.75, 0.5, 0.25], min: 13, out: 2.2 }, nell: { th: [0.75, 0.5, 0.25], min: 13, out: 2.2 },
-    morvant: { th: [0.75, 0.5, 0.25], min: 13, out: 3.2 }, malachar: { th: [0.8, 0.6, 0.4, 0.2], min: 10, out: 2.2 }, wardenrune: { th: [0.85, 0.7, 0.55, 0.4, 0.2], min: 9, out: 3 },
+  static TUNE: Record<string, { th: number[]; min: number; out: number; inv?: number; dIn?: number }> = {
+    boss: { th: [0.66, 0.33], min: 19, out: 1.5, inv: 3, dIn: 0.8 }, hollowmere: { th: [0.66, 0.33], min: 21, out: 1.6, inv: 3, dIn: 0.75 }, slag: { th: [0.66, 0.33], min: 20, out: 1.5 },
+    aurel: { th: [0.75, 0.5, 0.25], min: 14, out: 1.5 }, vey: { th: [0.75, 0.5, 0.25], min: 15, out: 2.4 }, nell: { th: [0.75, 0.5, 0.25], min: 15, out: 2.4 },
+    morvant: { th: [0.75, 0.5, 0.25], min: 14, out: 3.6, inv: 2, dIn: 0.9 }, malachar: { th: [0.8, 0.6, 0.4, 0.2], min: 10, out: 2.2 }, wardenrune: { th: [0.85, 0.7, 0.55, 0.4, 0.2], min: 9, out: 3 },
   };
   bossOut() { let m = 1; for (const e of this.enemies) if (!e.dead && Game.TUNE[e.kind]) m = Math.max(m, Game.TUNE[e.kind].out); return m; }
   finaleGuard(e: Enemy, d: number) {
@@ -279,6 +279,8 @@ export class Game {
     if ((x._guard ?? 0) > now) d *= 0.25;
     else if (x._hits.length >= 7) { x._guard = now + 1.6; x._hits = []; this.mb.hazards.push({ x: e.x, y: e.y, r: 48, t: 0.5, max: 0.5, dmg: 10, foe: true } as never); this.shake = 4; d *= 0.25; }
     const ph = th.filter((t) => e.hp / e.max <= t).length; if (x._ph !== ph) { x._ph = ph; x._pt = now; }
+    if (T.dIn) d *= T.dIn; // W17h: tougher hide (acts as a modest HP bump)
+    if (T.inv && ph > 0 && now - (x._pt ?? now) < T.inv) return 0; // W17h: brief invulnerable regroup after each phase change
     if (ph < th.length && now - (x._pt ?? now) < T.min) { const floor = th[ph] * e.max + 1; d = Math.min(d, Math.max(0, e.hp - floor)); }
     return d;
   }
