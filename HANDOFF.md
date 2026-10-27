@@ -1,4 +1,8 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
+## W17j (executor, 2026-10-26 ~11:45 PM ET) — NOT LIVE
+- Main = W17j (Slagheart/Aurel/Malachar tuning, ending keys reach the title, hint/typo cleanup). See CHANGELOG + BALANCE.md. Live is still W17h; deploy only after Rule 19 PASS + GD OK.
+- Preview: http://localhost:4702/ki-quest/ served from worktree /tmp/kq-w17j (keep it while the preview runs). linnet-letters rebased on W17j, not merged.
+
 ## W17i.1 (executor, 2026-10-26 ~10:15 PM ET) — NOT LIVE
 - Main adds the stale "Talk:" target crash fix on top of W17i (CHANGELOG). Preview of W17i.1: http://localhost:4701/ki-quest/ (served from worktree /tmp/kq-w171 dist; :4700 still W17i for Efficiency Bot). Live is still W17h. Deploy only after Rule 19 PASS + GD OK.
 - linnet-letters is rebased on this main (fix not duplicated); not merged.

@@ -1,4 +1,10 @@
 # Changelog
+## W17j Rule 19 follow-ups — 2026-10-26 (executor) — NOT YET LIVE (awaiting Rule 19 + GD OK)
+- Slagheart HP 620 -> 660 and phase floor min 21 -> 23 s (fight.py 55.5-61.8 s); Aurel HP 760 -> 840 (50.4-58.4 s); Malachar HP 1200 -> 1250 (47.1-48.9 s). No other boss changed. Runs in BALANCE.md.
+- qa-keys-ending.json: +12 KeyJ/400 ms after the fight; verified it reaches credits, credits end and the title (game-qa PASS).
+- Removed dead `threshold` arm in the stair hint (story/index.ts); fixed "heartbeat's heartbeat" (script.ts:73). boss6 test expects 1250 HP.
+- Preview: http://localhost:4702/ki-quest/ (worktree /tmp/kq-w17j). :4700 = W17i, :4701 = W17i.1.
+
 ## W17i.1 stale Talk-target fix — 2026-10-26 (executor) — NOT YET LIVE (awaiting Rule 19 + GD OK)
 - HUD "Talk:" prompt no longer crashes when its target NPC isn't in the current area (a rare zero-update frame after an area change threw "reading 'x'" and stopped the game loop). Guard in src/areas/art.ts; Story.enter() clears the target. From linnet-letters a69d328 (fix only, no Linnet code).
 - tests/smoke.mjs: stale Talk target regression check (20/20). Full suites pass. QA preview: http://localhost:4701/ki-quest/ (W17i stays on :4700).
