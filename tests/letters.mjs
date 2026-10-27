@@ -62,6 +62,9 @@ try {
   ok("epilogue plays the Linnet scene with lettersDone", who.has("Linnet Vant"), [...who].join(","));
   ok("linnetRest set after the epilogue", await E(() => window.__ki.story.flags.linnetRest === true));
   ok("Linnet gone after dawn", await E(() => { const s = window.__ki.story; s.enter("lanternmoss"); s.box = null; window.__ki.game.step(1 / 60); return !window.__ki.game.area.npcs.some((n) => n.id === "l"); }));
+  // regression (flaky epilogue "reading 'x'"): a stale Talk target (NPC not in this area) must not crash the HUD or stop the loop
+  { const t0 = await E(() => { const s = window.__ki.story; s.credits = 0; s.box = null; window.__ki.game.mode = "play"; s.enter("husk"); s.near = "l"; return window.__ki.game.time; });
+    await page.waitForTimeout(400); ok("stale Talk target is ignored (no crash, loop keeps running)", await E((t0) => window.__ki.game.time > t0, t0)); }
   ok("no page errors", errs.length === 0, errs.slice(0, 3).join(" | "));
 } finally { await browser.close(); srv.kill(); }
 for (const [s, n, d] of results) console.log(`${s}  ${n}  ${d}`);
