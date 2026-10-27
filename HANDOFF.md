@@ -1,7 +1,7 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
 ## 2026-10-27 1:25 PM ET: W17l.3 LIVE
 - gh-pages 8ea6077e1856ed8c24cb14f412004d55aaeeb015 (deploy main@dd78dc8, bundle index-Rm9xQPBf.js). GD OK after EB PASS (qa-reports/kq-w17l3-recheck-20261027.md).
-- **Rollback (to W17l.2 build):** `git -C /workspace/games/ki-rpg push -f origin ea755d90638c89299a76c223baf2bb6f2f5e5493:gh-pages`. Older W17k rollback is tagged `rollback-w17k` (a015c7e).
+- **Rollback (to W17l.2 build):** `git -C /workspace/games/ki-rpg push -f origin ea755d90638c89299a76c223baf2bb6f2f5e5493:gh-pages`. Tagged `rollback-w17l2`; older W17k rollback is tagged `rollback-w17k` (a015c7e).
 - Parked ideas (GD): faster desktop step-up below cap-2; ban step-ups that fail after >10 s. linnet-letters still held.
 
 ## W17j (executor, 2026-10-26 ~11:45 PM ET) — NOT LIVE
