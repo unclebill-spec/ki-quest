@@ -109,5 +109,13 @@
 {"wait": 400},
 {"key": "KeyJ"},
 {"wait": 400},
+{"key": "KeyJ"},
+{"wait": 400},
+{"key": "KeyJ"},
+{"wait": 400},
+{"key": "KeyJ"},
+{"wait": 400},
+{"key": "KeyJ"},
+{"wait": 400},
 {"wait": 85000}
 ]
