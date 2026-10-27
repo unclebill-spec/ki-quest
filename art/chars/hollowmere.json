@@ -1,0 +1,575 @@
+{
+ "name": "hollowmere",
+ "role": "boss",
+ "palette": "violet-teal-wet",
+ "frame": [
+  64,
+  64
+ ],
+ "pivot": [
+  32,
+  63
+ ],
+ "facings": [
+  "down",
+  "up",
+  "left",
+  "right"
+ ],
+ "anims": {
+  "idle": {
+   "count": 2
+  },
+  "walk": {
+   "count": 4
+  },
+  "attack": {
+   "count": 3
+  },
+  "hurt": {
+   "count": 1
+  },
+  "sink": {
+   "count": 3
+  }
+ },
+ "layout": "row = anim x facing (anim order as listed, facings down,up,left,right), col = frame index; right = left mirrored",
+ "fx_palette": {
+  "fog": [
+   "#2a2448",
+   "#3e3a6a",
+   "#5a5a8e"
+  ],
+  "ripple": [
+   "#7affea",
+   "#3ac8c0",
+   "#b070ff"
+  ],
+  "wet_glow": [
+   "#e0a0ff",
+   "#7affea"
+  ]
+ },
+ "frames": [
+  {
+   "name": "hollowmere_idle_down_0",
+   "anim": "idle",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 0,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_idle_down_1",
+   "anim": "idle",
+   "facing": "down",
+   "i": 1,
+   "x": 64,
+   "y": 0,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_idle_up_0",
+   "anim": "idle",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 64,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_idle_up_1",
+   "anim": "idle",
+   "facing": "up",
+   "i": 1,
+   "x": 64,
+   "y": 64,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_idle_left_0",
+   "anim": "idle",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 128,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_idle_left_1",
+   "anim": "idle",
+   "facing": "left",
+   "i": 1,
+   "x": 64,
+   "y": 128,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_idle_right_0",
+   "anim": "idle",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 192,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_idle_right_1",
+   "anim": "idle",
+   "facing": "right",
+   "i": 1,
+   "x": 64,
+   "y": 192,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_down_0",
+   "anim": "walk",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 256,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_down_1",
+   "anim": "walk",
+   "facing": "down",
+   "i": 1,
+   "x": 64,
+   "y": 256,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_down_2",
+   "anim": "walk",
+   "facing": "down",
+   "i": 2,
+   "x": 128,
+   "y": 256,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_down_3",
+   "anim": "walk",
+   "facing": "down",
+   "i": 3,
+   "x": 192,
+   "y": 256,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_up_0",
+   "anim": "walk",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 320,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_up_1",
+   "anim": "walk",
+   "facing": "up",
+   "i": 1,
+   "x": 64,
+   "y": 320,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_up_2",
+   "anim": "walk",
+   "facing": "up",
+   "i": 2,
+   "x": 128,
+   "y": 320,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_up_3",
+   "anim": "walk",
+   "facing": "up",
+   "i": 3,
+   "x": 192,
+   "y": 320,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_left_0",
+   "anim": "walk",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 384,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_left_1",
+   "anim": "walk",
+   "facing": "left",
+   "i": 1,
+   "x": 64,
+   "y": 384,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_left_2",
+   "anim": "walk",
+   "facing": "left",
+   "i": 2,
+   "x": 128,
+   "y": 384,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_left_3",
+   "anim": "walk",
+   "facing": "left",
+   "i": 3,
+   "x": 192,
+   "y": 384,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_right_0",
+   "anim": "walk",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 448,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_right_1",
+   "anim": "walk",
+   "facing": "right",
+   "i": 1,
+   "x": 64,
+   "y": 448,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_right_2",
+   "anim": "walk",
+   "facing": "right",
+   "i": 2,
+   "x": 128,
+   "y": 448,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_walk_right_3",
+   "anim": "walk",
+   "facing": "right",
+   "i": 3,
+   "x": 192,
+   "y": 448,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_down_0",
+   "anim": "attack",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 512,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_down_1",
+   "anim": "attack",
+   "facing": "down",
+   "i": 1,
+   "x": 64,
+   "y": 512,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_down_2",
+   "anim": "attack",
+   "facing": "down",
+   "i": 2,
+   "x": 128,
+   "y": 512,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_up_0",
+   "anim": "attack",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 576,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_up_1",
+   "anim": "attack",
+   "facing": "up",
+   "i": 1,
+   "x": 64,
+   "y": 576,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_up_2",
+   "anim": "attack",
+   "facing": "up",
+   "i": 2,
+   "x": 128,
+   "y": 576,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_left_0",
+   "anim": "attack",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 640,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_left_1",
+   "anim": "attack",
+   "facing": "left",
+   "i": 1,
+   "x": 64,
+   "y": 640,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_left_2",
+   "anim": "attack",
+   "facing": "left",
+   "i": 2,
+   "x": 128,
+   "y": 640,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_right_0",
+   "anim": "attack",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 704,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_right_1",
+   "anim": "attack",
+   "facing": "right",
+   "i": 1,
+   "x": 64,
+   "y": 704,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_attack_right_2",
+   "anim": "attack",
+   "facing": "right",
+   "i": 2,
+   "x": 128,
+   "y": 704,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_hurt_down_0",
+   "anim": "hurt",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 768,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_hurt_up_0",
+   "anim": "hurt",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 832,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_hurt_left_0",
+   "anim": "hurt",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 896,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_hurt_right_0",
+   "anim": "hurt",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 960,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_down_0",
+   "anim": "sink",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 1024,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_down_1",
+   "anim": "sink",
+   "facing": "down",
+   "i": 1,
+   "x": 64,
+   "y": 1024,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_down_2",
+   "anim": "sink",
+   "facing": "down",
+   "i": 2,
+   "x": 128,
+   "y": 1024,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_up_0",
+   "anim": "sink",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 1088,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_up_1",
+   "anim": "sink",
+   "facing": "up",
+   "i": 1,
+   "x": 64,
+   "y": 1088,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_up_2",
+   "anim": "sink",
+   "facing": "up",
+   "i": 2,
+   "x": 128,
+   "y": 1088,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_left_0",
+   "anim": "sink",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 1152,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_left_1",
+   "anim": "sink",
+   "facing": "left",
+   "i": 1,
+   "x": 64,
+   "y": 1152,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_left_2",
+   "anim": "sink",
+   "facing": "left",
+   "i": 2,
+   "x": 128,
+   "y": 1152,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_right_0",
+   "anim": "sink",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 1216,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_right_1",
+   "anim": "sink",
+   "facing": "right",
+   "i": 1,
+   "x": 64,
+   "y": 1216,
+   "w": 64,
+   "h": 64
+  },
+  {
+   "name": "hollowmere_sink_right_2",
+   "anim": "sink",
+   "facing": "right",
+   "i": 2,
+   "x": 128,
+   "y": 1216,
+   "w": 64,
+   "h": 64
+  }
+ ]
+}

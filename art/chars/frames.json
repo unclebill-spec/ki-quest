@@ -1,0 +1,223 @@
+{
+ "note": "Ki Quest character sheets. Each <name>.json lists every frame (x,y,w,h). Layout: one row per anim x facing (facings down,up,left,right), column = frame index. right = left mirrored. pivot = feet.",
+ "sheets": {
+  "brann": {
+   "png": "art/chars/brann.png",
+   "json": "art/chars/brann.json",
+   "role": "hero",
+   "frame": [
+    24,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "count": 4
+    },
+    "walk": {
+     "count": 4
+    },
+    "punch1": {
+     "count": 3
+    },
+    "punch2": {
+     "count": 3
+    },
+    "kick": {
+     "count": 3
+    },
+    "blast": {
+     "count": 3
+    },
+    "block": {
+     "count": 2
+    },
+    "hurt": {
+     "count": 2
+    },
+    "fly": {
+     "count": 2
+    }
+   }
+  },
+  "mirela": {
+   "png": "art/chars/mirela.png",
+   "json": "art/chars/mirela.json",
+   "role": "hero",
+   "frame": [
+    24,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "count": 4
+    },
+    "walk": {
+     "count": 4
+    },
+    "punch1": {
+     "count": 3
+    },
+    "punch2": {
+     "count": 3
+    },
+    "kick": {
+     "count": 3
+    },
+    "blast": {
+     "count": 3
+    },
+    "block": {
+     "count": 2
+    },
+    "hurt": {
+     "count": 2
+    },
+    "fly": {
+     "count": 2
+    }
+   }
+  },
+  "rook": {
+   "png": "art/chars/rook.png",
+   "json": "art/chars/rook.json",
+   "role": "hero",
+   "frame": [
+    24,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "count": 4
+    },
+    "walk": {
+     "count": 4
+    },
+    "punch1": {
+     "count": 3
+    },
+    "punch2": {
+     "count": 3
+    },
+    "kick": {
+     "count": 3
+    },
+    "blast": {
+     "count": 3
+    },
+    "block": {
+     "count": 2
+    },
+    "hurt": {
+     "count": 2
+    },
+    "fly": {
+     "count": 2
+    }
+   }
+  },
+  "vesper_hexer": {
+   "png": "art/chars/vesper_hexer.png",
+   "json": "art/chars/vesper_hexer.json",
+   "role": "shooter",
+   "frame": [
+    24,
+    32
+   ],
+   "anims": {
+    "stand": {
+     "count": 1
+    },
+    "walk": {
+     "count": 4
+    },
+    "attack": {
+     "count": 3
+    },
+    "hurt": {
+     "count": 1
+    }
+   }
+  },
+  "vesper_squire": {
+   "png": "art/chars/vesper_squire.png",
+   "json": "art/chars/vesper_squire.json",
+   "role": "rusher",
+   "frame": [
+    24,
+    32
+   ],
+   "anims": {
+    "stand": {
+     "count": 1
+    },
+    "walk": {
+     "count": 4
+    },
+    "attack": {
+     "count": 3
+    },
+    "hurt": {
+     "count": 1
+    }
+   }
+  },
+  "warden_rune": {
+   "png": "art/chars/warden_rune.png",
+   "json": "art/chars/warden_rune.json",
+   "role": "boss",
+   "frame": [
+    48,
+    64
+   ],
+   "anims": {
+    "stand": {
+     "count": 1
+    },
+    "walk": {
+     "count": 4
+    },
+    "attack": {
+     "count": 3
+    },
+    "hurt": {
+     "count": 1
+    },
+    "stomp": {
+     "count": 3
+    },
+    "beam": {
+     "count": 3
+    },
+    "guard": {
+     "count": 2
+    }
+   }
+  },
+  "watch_guard": {
+   "png": "art/chars/watch_guard.png",
+   "json": "art/chars/watch_guard.json",
+   "role": "tank",
+   "frame": [
+    24,
+    32
+   ],
+   "anims": {
+    "stand": {
+     "count": 1
+    },
+    "walk": {
+     "count": 4
+    },
+    "attack": {
+     "count": 3
+    },
+    "block": {
+     "count": 2
+    },
+    "hurt": {
+     "count": 1
+    }
+   }
+  }
+ }
+}
