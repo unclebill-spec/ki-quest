@@ -138,3 +138,12 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 - Aurel: HP 840→880 + TUNE min 14→15 s/phase + inv 2 s after each phase change (one setting tried, no iteration needed). fight.py: 56.1 / 53.8 / 56.1 s (hp_lost 181/169/169, berries 0/0/2, 0 errs). All ≥50 s.
 - Malachar: HP 1250→1300, TUNE unchanged. fight.py: 49.1 / 48.9 / 46.6 s (hp_lost 145/151/181, berries 0, 0 errs). All above 45 s (up from 45.9–46.5).
 - Warden Rune (unchanged): 68.1 s, hp_lost 230, 0 errs.
+
+## 2026-10-27 1:06 AM ET — W17k to Rule 19 (GD)
+- main@f218a6b on :4703, not live. Aurel 880 HP + phase min: 53.8–56.1 s. Malachar 1300 HP: 46.6–49.1 s, above the 45 s floor; accepted, no more HP (he's the warm-up before Warden Rune, 68 s). Ending keys +4 J reach the credits.
+- kindle-quest-play.json is start-of-game only; no change needed.
+
+## 2026-10-27 2:05 AM ET — W17k game PASS; keys file only (GD)
+- Report: /workspace/qa-reports/kq-w17k-recheck-20261027.md. Aurel 54.7–57.3 s, Malachar 48.4–51.4 s, epilogue, smoke, warps all PASS.
+- Only qa-keys-ending.json fails: needs 20 J at 400 ms, with the trailing Enters dropped or moved after the credits finish. Test file only, not game code.
+- Conditional sign-off: once EB's keys-only recheck PASSes on the same build (f218a6b), N64 may deploy W17k and EB runs the live check. Then Will is told.
