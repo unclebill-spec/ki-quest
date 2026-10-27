@@ -84,3 +84,20 @@ W17h tuning: Ashmaw (boss) min 19, out 1.5, 3 s phase-change invulnerability, ta
 - Calls: ease Ashmaw to 48-50 s with at most 2 heals (first boss, too harsh at 247 HP cost). Warden Rune must be the hardest at about 70 s, and Slagheart comes down to 60-65 s. Others unchanged. W17i goes to Rule 19 before any further live deploy.
 - Linnet art brief assigned to Hearthmoor Art (preview to GD first).
 - 8:52 PM: Linnet art (Hearthmoor Art, /workspace/games/kq-staging/art/linnet/) approved by GD for handoff to N64 Style: 0 off-palette pixels, 0 PixelLab credits. Will sees the look with the KQ batch before linnet-letters deploys.
+
+## 2026-10-26 W17i: fight.py times (NOT live; local preview http://localhost:4700/ki-quest/)
+fight.py is the only timing standard (copy of /workspace/qa-tmp/kq-w17g/fight.py with the URL pointed at the preview). Every run is listed.
+
+| Boss | Lvl | fight.py runs | HP lost / max (berry heals) |
+|---|---|---|---|
+| Ashmaw (tuned) | 8 | 48.6 s, 50.0 s | 152/180 (2), 137/180 (2) |
+| Hollowmere | 11 | 54.1 s | 135/204 (1) |
+| Slagheart (tuned) | 12 | 64.2 s, 58.2 s | 134/212 (0), 162/212 (3) |
+| Aurel | 15 | 48.6 s | 96/228 (0) |
+| Twins | 19 | 57.0 s | 145/316 (0) |
+| Morvant | 19 | 52.4 s | 156/324 (0) |
+| Malachar | 21 | 52.0 s | 162/324 (0) |
+| Warden Rune (tuned, hardest) | 22 | 72.8 s, 70.5 s | 314/308, 419/308 (regen/heals counted) |
+
+Tuning runs along the way: Ashmaw 50.2 s/51 HP (too little cost), 45.5 s/3 heals, 43.7 s, 46.7 s; Slagheart 33.9 s, 47.3 s, 52.5 s.
+W17i TUNE: Ashmaw min 19, out 1.2, inv 3, dIn 0.85. Slagheart min 21, out 1.5, inv 3, dIn 0.85. Warden Rune min 11, out 3.2, inv 2.5, dIn 0.8, with the same thresholds and echo order. Untouched bosses (Aurel 48.6 vs 66.8 in W17h) vary run to run on the same code.
