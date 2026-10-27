@@ -1,4 +1,8 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
+## W17i.1 (executor, 2026-10-26 ~10:15 PM ET) — NOT LIVE
+- Main adds the stale "Talk:" target crash fix on top of W17i (CHANGELOG). Preview of W17i.1: http://localhost:4701/ki-quest/ (served from worktree /tmp/kq-w171 dist; :4700 still W17i for Efficiency Bot). Live is still W17h. Deploy only after Rule 19 PASS + GD OK.
+- linnet-letters is rebased on this main (fix not duplicated); not merged.
+
 ## RESUME HERE (executor, W17i, 2026-10-26 ~9:30 PM ET) — NOT LIVE
 - **New process:** no live deploys until Efficiency Bot's Rule 19 PASS + Game Director OK. Live is still W17h (gh-pages 78fda2213e6c rollback target; W17h build deployed 8:47 PM ET).
 - **W17i on main (not deployed):** Ashmaw eased (~49-51 s, 2 heals), Slagheart ~61 s, Warden Rune ~71 s (hardest; thresholds and echo order kept). Table in BALANCE.md.

@@ -1,4 +1,8 @@
 # Changelog
+## W17i.1 stale Talk-target fix — 2026-10-26 (executor) — NOT YET LIVE (awaiting Rule 19 + GD OK)
+- HUD "Talk:" prompt no longer crashes when its target NPC isn't in the current area (a rare zero-update frame after an area change threw "reading 'x'" and stopped the game loop). Guard in src/areas/art.ts; Story.enter() clears the target. From linnet-letters a69d328 (fix only, no Linnet code).
+- tests/smoke.mjs: stale Talk target regression check (20/20). Full suites pass. QA preview: http://localhost:4701/ki-quest/ (W17i stays on :4700).
+
 ## W17i Game Director calls — 2026-10-26 (executor) — NOT YET LIVE (awaiting Rule 19 + GD OK)
 - Ashmaw eased to ~49-51 s on fight.py with at most 2 berry heals. Slagheart down to ~61 s. Warden Rune is now clearly the hardest at ~71 s (same thresholds and echo order).
 - All other bosses are untouched; the fight.py re-run for all 9 fights is in BALANCE.md.
