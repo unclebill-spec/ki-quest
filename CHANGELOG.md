@@ -1,8 +1,8 @@
 # Changelog
-## W17k.1 — 2026-10-27 (executor) — NOT LIVE
+## W17k.1 — 2026-10-27 (executor) — LIVE 2026-10-27 ~7:55 AM ET (gh-pages a015c7e, main@94d0bc7)
 - qa-keys-ending.json only: 24 KeyJ@400 ms after the fight (20 was 2 short in replays), trailing Enters dropped, then an 85 s wait so nothing can skip the credits (~68 s). Verified on :4703 (f218a6b): credits → kq-credits-end → title. No game code changed.
 
-## W17k Rule 19 follow-ups — 2026-10-27 (executor) — NOT LIVE (live is still W17h)
+## W17k Rule 19 follow-ups — 2026-10-27 (executor) — LIVE 2026-10-27 ~7:55 AM ET (with W17k.1)
 - Aurel HP 840 -> 880, per-phase min 14 -> 15 s + 2 s invuln after each phase change (fight.py 53.8-56.1 s). Malachar HP 1250 -> 1300 (46.6-49.1 s); boss6 test expects 1300 HP. Runs in BALANCE.md.
 - qa-keys-ending.json: +4 KeyJ/400 ms (16 total); verified it reaches credits, kq-credits-end, and the title. qa/keys/kindle-quest-play.json is start-of-game only, so it stays unchanged.
 - tests/smoke.mjs spawns its preview detached and kills the process group on exit, failure, SIGINT/SIGTERM/SIGHUP, and uncaught errors.

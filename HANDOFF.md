@@ -7,7 +7,13 @@
 - Main adds the stale "Talk:" target crash fix on top of W17i (CHANGELOG). Preview of W17i.1: http://localhost:4701/ki-quest/ (served from worktree /tmp/kq-w171 dist; :4700 still W17i for Efficiency Bot). Live is still W17h. Deploy only after Rule 19 PASS + GD OK.
 - linnet-letters is rebased on this main (fix not duplicated); not merged.
 
-## RESUME HERE (executor, W17k, 2026-10-27 ~1:30 AM ET) — NOT LIVE
+## RESUME HERE (executor, W17k LIVE, 2026-10-27 ~7:55 AM ET)
+- **LIVE:** W17k + W17k.1 deployed from main@94d0bc7 to gh-pages a015c7e (bundle index-C9c5Ryyx.js), approved by Will 7:47 AM ET + GD sign-off after EB Rule 19 PASS. Live title screenshot: /workspace/qa-reports/kq-w17k-live-title-20261027.png. Next: EB live check.
+- **Rollback (to W17h build, gh-pages 8116835c2cd6 = deploy main@e355985):** `git -C /workspace/games/ki-rpg push -f origin 8116835c2cd6f3ae6049422faf9936ac16c74a2e:gh-pages` (commit exists locally in ki-rpg). Note: the older W17i note naming 78fda2213e6c was the deploy before W17h.
+- If box DNS for github.com fails, prefix git with `-c http.curloptResolve=github.com:443:140.82.112.3` (per command only); publish-game.sh's Pages wait uses `gh api` and hangs without DNS.
+- Ending keys raised to 28 J (test-only, GD OK).
+
+## (previous) RESUME HERE (executor, W17k, 2026-10-27 ~1:30 AM ET) — NOT LIVE
 - W17k on main: Aurel 880 HP + min 15/inv 2, Malachar 1300 HP, ending keys +4 J, smoke.mjs server cleanup. Preview http://localhost:4703/ki-quest/ (/tmp/kq-w17k). :4702 = W17j. Live is still W17h. Next: Rule 19 recheck of W17k. Note: other tests (not smoke) still leak their vite preview servers; kill them after the suites run.
 
 ## (previous) RESUME HERE (executor, W17i, 2026-10-26 ~9:30 PM ET) — NOT LIVE
