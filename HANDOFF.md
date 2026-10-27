@@ -7,7 +7,10 @@
 - Main adds the stale "Talk:" target crash fix on top of W17i (CHANGELOG). Preview of W17i.1: http://localhost:4701/ki-quest/ (served from worktree /tmp/kq-w171 dist; :4700 still W17i for Efficiency Bot). Live is still W17h. Deploy only after Rule 19 PASS + GD OK.
 - linnet-letters is rebased on this main (fix not duplicated); not merged.
 
-## RESUME HERE (executor, W17i, 2026-10-26 ~9:30 PM ET) — NOT LIVE
+## RESUME HERE (executor, W17k, 2026-10-27 ~1:30 AM ET) — NOT LIVE
+- W17k on main: Aurel 880 HP + min 15/inv 2, Malachar 1300 HP, ending keys +4 J, smoke.mjs server cleanup. Preview http://localhost:4703/ki-quest/ (/tmp/kq-w17k). :4702 = W17j. Live is still W17h. Next: Rule 19 recheck of W17k. Note: other tests (not smoke) still leak their vite preview servers; kill them after the suites run.
+
+## (previous) RESUME HERE (executor, W17i, 2026-10-26 ~9:30 PM ET) — NOT LIVE
 - **New process:** no live deploys until Efficiency Bot's Rule 19 PASS + Game Director OK. Live is still W17h (gh-pages 78fda2213e6c rollback target; W17h build deployed 8:47 PM ET).
 - **W17i on main (not deployed):** Ashmaw eased (~49-51 s, 2 heals), Slagheart ~61 s, Warden Rune ~71 s (hardest; thresholds and echo order kept). Table in BALANCE.md.
 - **QA preview (stays running):** http://localhost:4700/ki-quest/ — started with `cd /workspace/games/ki-rpg && npm run build && setsid nohup npx vite preview --port 4700 --strictPort >/dev/null 2>&1 &`. Restart with the same command after `pkill -f "vite preview --port 4700"`.

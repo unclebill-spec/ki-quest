@@ -1,4 +1,10 @@
 # Changelog
+## W17k Rule 19 follow-ups — 2026-10-27 (executor) — NOT LIVE (live is still W17h)
+- Aurel HP 840 -> 880, per-phase min 14 -> 15 s + 2 s invuln after each phase change (fight.py 53.8-56.1 s). Malachar HP 1250 -> 1300 (46.6-49.1 s); boss6 test expects 1300 HP. Runs in BALANCE.md.
+- qa-keys-ending.json: +4 KeyJ/400 ms (16 total); verified it reaches credits, kq-credits-end, and the title. qa/keys/kindle-quest-play.json is start-of-game only, so it stays unchanged.
+- tests/smoke.mjs spawns its preview detached and kills the process group on exit, failure, SIGINT/SIGTERM/SIGHUP, and uncaught errors.
+- Preview :4703 (/tmp/kq-w17k), not live.
+
 ## W17j Rule 19 follow-ups — 2026-10-26 (executor) — NOT YET LIVE (awaiting Rule 19 + GD OK)
 - Slagheart HP 620 -> 660 and phase floor min 21 -> 23 s (fight.py 55.5-61.8 s); Aurel HP 760 -> 840 (50.4-58.4 s); Malachar HP 1200 -> 1250 (47.1-48.9 s). No other boss changed. Runs in BALANCE.md.
 - qa-keys-ending.json: +12 KeyJ/400 ms after the fight; verified it reaches credits, credits end and the title (game-qa PASS).

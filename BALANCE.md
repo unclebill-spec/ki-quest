@@ -133,3 +133,8 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 - Malachar: 45.9–46.5 s, too close to the 45 s floor. W17k: HP 1250→1300 (+4%) (Will approved the tougher retune).
 - Ending keys: add ~4 more J presses so the run doesn't depend on the trailing Enters. N64 decides whether kindle-quest-play.json (start-of-game keys) needs the new sequence and says so.
 - Housekeeping: smoke.mjs must stop its preview server on exit; clear the ~23 stale servers on 4801–4832.
+
+## 2026-10-27 ~1:20 AM ET — W17k executor runs (fight.py, local preview :4703, /tmp/kq-w17k)
+- Aurel: HP 840→880 + TUNE min 14→15 s/phase + inv 2 s after each phase change (one setting tried, no iteration needed). fight.py: 56.1 / 53.8 / 56.1 s (hp_lost 181/169/169, berries 0/0/2, 0 errs). All ≥50 s.
+- Malachar: HP 1250→1300, TUNE unchanged. fight.py: 49.1 / 48.9 / 46.6 s (hp_lost 145/151/181, berries 0, 0 errs). All above 45 s (up from 45.9–46.5).
+- Warden Rune (unchanged): 68.1 s, hp_lost 230, 0 errs.
