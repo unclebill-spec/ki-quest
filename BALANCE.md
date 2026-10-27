@@ -62,3 +62,19 @@ Each boss was played from its `?qa=` warp using its repo `qa-keys-<boss>.json`, 
 - Standard: time bosses only with Efficiency Bot's /workspace/qa-tmp/kq-w17g/fight.py (steady mash, measured from first damage to the kill). Each boss needs 45 s or more with real HP cost. This replaces the 5:20 PM OK of Ashmaw at 43.5 s.
 - fight.py times: Ashmaw 38.8/40.0 (FAIL), Hollowmere 33.8 (FAIL), Slagheart 56.2, Aurel 48.5, Twins 57.3, Morvant about 47 (too close; target about 50), Malachar 47.6 (overstated, because the warp equips w6/c6, his own rewards), Warden 55.1.
 - Fixes: retune Ashmaw and Hollowmere, add margin to Morvant, take w6/c6 off the Malachar warp, stop the ending keys from pressing Enter during the credits.
+
+## 2026-10-26 W17h: fight.py times (the ONLY timing standard)
+Timing standard: Game Director's /workspace/qa-tmp/kq-w17g/fight.py (steady J/K mash, berries under 35%, timed from first damage to the kill). Runs used an unmodified copy pointed at the local W17h build. Only fight.py numbers are listed here.
+
+| Boss | Lvl | fight.py | HP lost / max |
+|---|---|---|---|
+| Ashmaw | 8 | 55.5 s | 247/180 (5 berry heals) |
+| Hollowmere | 11 | 54.2 s | 160/204 |
+| Slagheart | 12 | 80.8 s | 181/212 |
+| Aurel | 15 | 66.8 s | 206/228 |
+| Twins | 19 | 61.7 s | 220/316 |
+| Morvant | 19 | 55.2 s | 267/324 |
+| Malachar (warp gear w5/a5/c5/h6/f6) | 21 | 51.2 s | 136/324 |
+| Warden Rune | 22 | 55.5 s | 198/308 |
+
+W17h tuning: Ashmaw (boss) min 19, out 1.5, 3 s phase-change invulnerability, takes 0.8x damage. Hollowmere min 21, out 1.6, inv 3, takes 0.75x. Morvant min 14, out 3.6, inv 2, takes 0.9x. Twins min 15, out 2.4. Warden Rune unchanged (thresholds and echo order kept).
