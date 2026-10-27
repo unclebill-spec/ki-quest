@@ -267,9 +267,9 @@ export class Game {
    *  out = damage multiplier on hits the hero takes while that boss is alive. Poise (all): 7+ hits in 2 s -> 1.6 s guard
    *  (25% damage) + a push-back shockwave, so mashing stalls and dodging/skills win. */
   static TUNE: Record<string, { th: number[]; min: number; out: number; inv?: number; dIn?: number }> = {
-    boss: { th: [0.66, 0.33], min: 19, out: 1.5, inv: 3, dIn: 0.8 }, hollowmere: { th: [0.66, 0.33], min: 21, out: 1.6, inv: 3, dIn: 0.75 }, slag: { th: [0.66, 0.33], min: 20, out: 1.5 },
+    boss: { th: [0.66, 0.33], min: 19, out: 1.2, inv: 3, dIn: 0.85 }, hollowmere: { th: [0.66, 0.33], min: 21, out: 1.6, inv: 3, dIn: 0.75 }, slag: { th: [0.66, 0.33], min: 21, out: 1.5, inv: 3, dIn: 0.85 },
     aurel: { th: [0.75, 0.5, 0.25], min: 14, out: 1.5 }, vey: { th: [0.75, 0.5, 0.25], min: 15, out: 2.4 }, nell: { th: [0.75, 0.5, 0.25], min: 15, out: 2.4 },
-    morvant: { th: [0.75, 0.5, 0.25], min: 14, out: 3.6, inv: 2, dIn: 0.9 }, malachar: { th: [0.8, 0.6, 0.4, 0.2], min: 10, out: 2.2 }, wardenrune: { th: [0.85, 0.7, 0.55, 0.4, 0.2], min: 9, out: 3 },
+    morvant: { th: [0.75, 0.5, 0.25], min: 14, out: 3.6, inv: 2, dIn: 0.9 }, malachar: { th: [0.8, 0.6, 0.4, 0.2], min: 10, out: 2.2 }, wardenrune: { th: [0.85, 0.7, 0.55, 0.4, 0.2], min: 11, out: 3.2, inv: 2.5, dIn: 0.8 },
   };
   bossOut() { let m = 1; for (const e of this.enemies) if (!e.dead && Game.TUNE[e.kind]) m = Math.max(m, Game.TUNE[e.kind].out); return m; }
   finaleGuard(e: Enemy, d: number) {
