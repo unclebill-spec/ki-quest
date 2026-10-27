@@ -6,7 +6,12 @@ const require = createRequire("/workspace/tools/game/node/");
 const { chromium } = require("playwright");
 const PORT = Number(process.env.KI_PORT || 4173);
 const gif = process.argv.includes("--gif");
-const srv = spawn("npx", ["vite", "preview", "--port", String(PORT), "--strictPort"], { stdio: "ignore" });
+const srv = spawn("npx", ["vite", "preview", "--port", String(PORT), "--strictPort"], { stdio: "ignore", detached: true });
+// W17k: always stop the preview server (npx + its vite child, via the process group), even on failure or a signal
+const stopSrv = () => { try { process.kill(-srv.pid, "SIGTERM"); } catch {} };
+process.on("exit", stopSrv);
+for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(sig, () => { stopSrv(); process.exit(130); });
+process.on("uncaughtException", (e) => { console.error(e); stopSrv(); process.exit(1); });
 await new Promise((r) => setTimeout(r, 1500));
 const results = []; const ok = (n, c, d = "") => { results.push([c ? "PASS" : "FAIL", n, d]); };
 const browser = await chromium.launch();
@@ -90,7 +95,7 @@ try {
   { const t0 = await page.evaluate(() => { const s = window.__ki.story; s.box = null; window.__ki.game.mode = "play"; s.near = "zz"; return window.__ki.game.time; });
     await page.waitForTimeout(400); ok("stale Talk target is ignored (loop keeps running)", await page.evaluate((t0) => window.__ki.game.time > t0, t0)); }
   ok("no page errors", errs.length === 0, errs.join(" | "));
-} finally { await browser.close(); srv.kill(); }
+} finally { await browser.close(); stopSrv(); }
 if (gif) { execSync(`ffmpeg -loglevel error -y -framerate 10 -i /tmp/kiq/f%02d.png -vf "scale=384:-1:flags=neighbor,split[a][b];[a]palettegen=max_colors=64[p];[b][p]paletteuse" docs/stage1.gif`); rmSync("/tmp/kiq", { recursive: true, force: true }); }
 for (const r of results) console.log(r.join("  "));
 const fails = results.filter((r) => r[0] === "FAIL").length;
