@@ -119,3 +119,17 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 | Aurel | HP 810 | 54.8/148/0, 51.4/163/2, 48.4/140/0 | dropped: 48.4 < 50 |
 | **Aurel** | **HP 840 (final)** | **58.4/145/0, 50.4/174/2, 51.9/163/1** | all ≥ 50 |
 | **Malachar** | **HP 1250 (final)** | **48.5/122/0, 48.9/150/0, 47.1/141/0** | all ≥ 45 (min 47.1 vs W17i 46.5) |
+
+## 2026-10-26 11:33 PM ET — W17j accepted for Rule 19 (GD)
+- main@db37836 on preview :4702, not live.
+- Slagheart HP 660: 55.5–61.8 s over 4 runs; all ≥55 s. That meets the bar; the 58–65 band was a target, not a gate. Accepted.
+- Aurel HP 840 (+10.5%, not my +6%, since +6% only gave 48.4 s): 50.4–58.4 s. Accepted.
+- Malachar HP 1250 (+4%): 47.1–48.9 s. Above the 45 s standard; accepted as is. Revisit only if Rule 19 or Will finds it short.
+- Ending keys (12 J presses, 400 ms waits) reach the credits. Stair `threshold` dead arm removed; script.ts:73 typo fixed.
+
+## 2026-10-27 12:37 AM ET — W17j Rule 19 FAIL (narrow), W17k calls (GD)
+- Report: /workspace/qa-reports/kq-w17j-recheck-20261026.md. Slagheart, Ashmaw, Warden, ending, epilogue all PASS.
+- Aurel: avg 52.2 s but 2/5 runs under 50 s. W17k: HP 840→880 AND a per-phase minimum like Slagheart's so every run is ≥50 s.
+- Malachar: 45.9–46.5 s, too close to the 45 s floor. W17k: HP 1250→1300 (+4%) (Will approved the tougher retune).
+- Ending keys: add ~4 more J presses so the run doesn't depend on the trailing Enters. N64 decides whether kindle-quest-play.json (start-of-game keys) needs the new sequence and says so.
+- Housekeeping: smoke.mjs must stop its preview server on exit; clear the ~23 stale servers on 4801–4832.
