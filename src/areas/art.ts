@@ -249,7 +249,8 @@ export function storyOverlay(c: C2, g: Game, s: Story, W: number, H: number) {
     const o = s.objective(); c.textAlign = "right";
     c.fillStyle = "rgba(10,8,20,.55)"; c.fillRect(W - c.measureText(o).width - 8, H - 12, c.measureText(o).width + 8, 12);
     c.fillStyle = "#ffe9a8"; c.fillText(o, W - 4, H - 10);
-    if (s.near) { const d = NPCS[g.area.id]?.[s.near], n = g.area.npcs.find((q) => q.id === s.near)!; const X = n.x - Math.round(Math.max(0, Math.min(48 * 16 - W, g.p.x - W / 2))), Y = n.y - Math.round(Math.max(0, Math.min(34 * 16 - H, g.p.y - 16 - H / 2))) - 36;
+    const n = s.near ? g.area.npcs.find((q) => q.id === s.near) : undefined; /* guard: near can be stale for one frame after an area change or a hide-until-flag NPC leaving */
+    if (n) { const d = NPCS[g.area.id]?.[n.id]; const X = n.x - Math.round(Math.max(0, Math.min(48 * 16 - W, g.p.x - W / 2))), Y = n.y - Math.round(Math.max(0, Math.min(34 * 16 - H, g.p.y - 16 - H / 2))) - 36;
       if (d) { c.textAlign = "center"; c.fillStyle = "rgba(10,8,20,.75)"; const t = "Talk: " + d.name.split(" ")[0]; const w = c.measureText(t).width + 6; c.fillRect(X - w / 2, Y - 1, w, 10); c.fillStyle = "#9fe8ff"; c.fillText(t, X, Y); } }
   }
   if (s.box) {

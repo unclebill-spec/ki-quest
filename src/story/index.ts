@@ -35,7 +35,7 @@ export class Story {
   }
   enter(id: string, atStart = true) {
     const g = this.g, hp = g.hp, ep = g.ep, keep = { x: g.p.x, y: g.p.y };
-    g.area = buildArea(id); g.reset(); g.hp = hp; g.ep = ep;
+    g.area = buildArea(id); g.reset(); g.hp = hp; g.ep = ep; this.near = null; // never point the Talk prompt at an NPC from the previous area
     if (!atStart) { g.p.x = keep.x; g.p.y = keep.y; }
     g.shots = []; g.banner = g.area.name; g.bannerT = 3;
     this.flags.area = id; this.flags["visited_" + id] = true; this.save();

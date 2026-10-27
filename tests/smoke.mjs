@@ -86,6 +86,9 @@ try {
     for (let i = 0; i < 36; i++) { if (i % 6 === 0) await page.keyboard.press(i % 12 ? "KeyJ" : "KeyK"); await page.screenshot({ path: `/tmp/kiq/f${String(i).padStart(2, "0")}.png`, clip: await page.locator("canvas").boundingBox() }); }
     await page.keyboard.up("KeyD");
   }
+  // W17i.1: a stale Talk target (NPC not in this area) must not crash the HUD or stop the game loop
+  { const t0 = await page.evaluate(() => { const s = window.__ki.story; s.box = null; window.__ki.game.mode = "play"; s.near = "zz"; return window.__ki.game.time; });
+    await page.waitForTimeout(400); ok("stale Talk target is ignored (loop keeps running)", await page.evaluate((t0) => window.__ki.game.time > t0, t0)); }
   ok("no page errors", errs.length === 0, errs.join(" | "));
 } finally { await browser.close(); srv.kill(); }
 if (gif) { execSync(`ffmpeg -loglevel error -y -framerate 10 -i /tmp/kiq/f%02d.png -vf "scale=384:-1:flags=neighbor,split[a][b];[a]palettegen=max_colors=64[p];[b][p]paletteuse" docs/stage1.gif`); rmSync("/tmp/kiq", { recursive: true, force: true }); }
