@@ -91,5 +91,11 @@
 {"wait": 900},
 {"key": "Enter"},
 {"wait": 900},
+{"key": "Enter"},
+{"wait": 900},
+{"key": "Enter"},
+{"wait": 900},
+{"key": "Enter"},
+{"wait": 900},
 {"wait": 75000}
 ]

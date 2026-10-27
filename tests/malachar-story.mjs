@@ -41,7 +41,7 @@ try {
   ok("Warden Rune's last words + Rook's dawn line", seen.has("Warden Rune") && seen.has("Rook"), [...seen].join(","));
   ok("dawn flag + credits rolling", await E(() => window.__ki.story.flags.dawn === true && window.__ki.story.credits > 0));
   await page.waitForTimeout(4000); await page.screenshot({ path: "docs/bill/credits.png" });
-  await page.keyboard.press("KeyJ"); await page.waitForTimeout(400);
+  await page.waitForFunction(() => window.__ki.story.credits < 55, null, { timeout: 60000 }); await page.keyboard.press("KeyJ"); /* W17h: skip opens after 8 s */ await page.waitForTimeout(400);
   ok("credits end, dawn objective", await E(() => window.__ki.story.credits === 0 && window.__ki.story.objective().startsWith("Dawn")));
   ok("no page errors", errs.length === 0, errs.slice(0, 3).join(" | "));
 } finally { await browser.close(); srv.kill(); }

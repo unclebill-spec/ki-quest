@@ -56,7 +56,7 @@ export class Story {
       }
       return true;
     }
-    if (this.credits > 0) { inp.poll(); this.credits -= dt; if ((this.ok() || inp.pressed("pause")) && this.credits < CREDITS_T - 2) this.credits = 0; if (this.credits <= 0) { this.credits = 0; g.banner = "Dawn over " + g.area.name; g.bannerT = 3; g.autosave(); dispatchEvent(new Event("kq-credits-end")); } return true; }
+    if (this.credits > 0) { inp.poll(); this.credits -= dt; if ((this.ok() || inp.pressed("pause")) && this.credits < CREDITS_T - 8) this.credits = 0; /* W17h: 8 s before skip so stray dialogue presses never eat the credits */ if (this.credits <= 0) { this.credits = 0; g.banner = "Dawn over " + g.area.name; g.bannerT = 3; g.autosave(); dispatchEvent(new Event("kq-credits-end")); } return true; }
     if (this.fly > 0) {
       this.fly -= dt; inp.poll();
       if (this.fly <= 0.6 && this.flyTo) { this.enter(this.flyTo); this.flyTo = ""; const st = g.stats as Record<string, number>; st.travels = (st.travels ?? 0) + 1; }

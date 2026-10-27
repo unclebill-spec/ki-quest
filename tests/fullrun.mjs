@@ -185,7 +185,7 @@ try {
   for (let i = 0; i < 40 && (await E(() => window.__ki.story.credits <= 0)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
   ok("dawn + credits roll after Warden Rune (runeDown)", await E(() => window.__ki.story.flags.dawn === true && window.__ki.story.credits > 0));
   await p.waitForTimeout(6000); await p.screenshot({ path: "/tmp/full-credits.png" });
-  await p.keyboard.press("KeyJ"); await p.waitForTimeout(400);
+  await p.waitForFunction(() => window.__ki.story.credits < 55, null, { timeout: 60000 }); await p.keyboard.press("KeyJ"); /* W17h: skip opens after 8 s */ await p.waitForTimeout(400);
   ok("credits skippable", await E(() => window.__ki.story.credits === 0));
   await E(() => { window.__ki.story.box = null; window.__ki.story.enter("lanternmoss"); window.__ki.game.time = 60; }); await p.waitForTimeout(900);
   for (let i = 0; i < 30 && (await E(() => !!window.__ki.story.box)); i++) { await p.keyboard.press("KeyJ"); await p.waitForTimeout(150); }
