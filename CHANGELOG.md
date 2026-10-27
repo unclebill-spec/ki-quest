@@ -1,4 +1,8 @@
 # Changelog
+## W17l.1 — 2026-10-27 (executor) — NOT LIVE (preview :4705, GD-approved tweak after EB Rule 19 WARN)
+- Resolution item only: Auto's step-down can now reach 1x, and it reacts faster: two back-to-back 250 ms samples under 48 fps (was 1 s at 500 ms). It jumps straight to the scale the measured fps can afford (cost ~ r^2), at least one step. Performance/Balanced/Sharp unchanged (never step). No other changes.
+- Headless Pixel 7, Auto (before c5791da -> after): boss6 4x 49 -> 59 fps, boss4 4x 52 -> 59, boss6 6x 38-40 -> 53-57, boss4 6x 31-35 -> 48-52; first-3 s fps 23-41 -> 29-50.
+
 ## W17l — 2026-10-27 (executor) — NOT LIVE (preview :4704, awaiting Rule 19 + GD OK + Will)
 - Will's 4 items only. Lanternmoss wisp moved off the water-locked islet (maps.ts row y18: x4 -> x16 on land; spawn count unchanged).
 - Crisp text: canvas backing store now scaled to device pixels (src/resolution.ts layout(), main.ts fit() + ctx.setTransform each frame); game still draws in 384x216 logical units, smoothing off.

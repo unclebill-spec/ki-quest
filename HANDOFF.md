@@ -7,7 +7,11 @@
 - Main adds the stale "Talk:" target crash fix on top of W17i (CHANGELOG). Preview of W17i.1: http://localhost:4701/ki-quest/ (served from worktree /tmp/kq-w171 dist; :4700 still W17i for Efficiency Bot). Live is still W17h. Deploy only after Rule 19 PASS + GD OK.
 - linnet-letters is rebased on this main (fix not duplicated); not merged.
 
-## RESUME HERE (executor, W17l, 2026-10-27 ~9:05 AM ET) — NOT LIVE
+## RESUME HERE (executor, W17l.1, 2026-10-27 ~10:00 AM ET) — NOT LIVE
+- W17l + W17l.1 on main. Preview :4705 from /tmp/kq-w17l1 (bundle index-B8i6xjjh.js). :4704 = W17l (c5791da). Live is still W17k (gh-pages a015c7e); the rollback target is unchanged.
+- W17l.1: Auto steps down to 1x and reacts faster (main.ts loop, resolution.ts autoSlow). Next: GD quick recheck, then Will's yes, then publish-game.sh kq.
+
+## (previous) RESUME HERE (executor, W17l, 2026-10-27 ~9:05 AM ET) — NOT LIVE
 - W17l on main (stuck islet wisp, crisp DPR rendering, Resolution option, Quit to title). Preview :4704 from /tmp/kq-w17l (main@c5791da). Report: /workspace/qa-reports/kq-will-issues-diagnosis-20261027.md. Live is still W17k (gh-pages a015c7e).
 - Next: Rule 19 on :4704, GD OK, Will's yes, then publish-game.sh kq. Rollback for live stays gh-pages 8116835 (W17h) / a015c7e (W17k).
 - Perf note: fps gate tests (boss4/boss6 at 1152x648, 4x throttle) failed at fixed Auto 3x (35-38 fps) before the Auto step-down; with it they pass (49/53). Under parallel load they can still dip; rerun alone.
