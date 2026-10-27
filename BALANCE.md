@@ -101,3 +101,8 @@ fight.py is the only timing standard (copy of /workspace/qa-tmp/kq-w17g/fight.py
 
 Tuning runs along the way: Ashmaw 50.2 s/51 HP (too little cost), 45.5 s/3 heals, 43.7 s, 46.7 s; Slagheart 33.9 s, 47.3 s, 52.5 s.
 W17i TUNE: Ashmaw min 19, out 1.2, inv 3, dIn 0.85. Slagheart min 21, out 1.5, inv 3, dIn 0.85. Warden Rune min 11, out 3.2, inv 2.5, dIn 0.8, with the same thresholds and echo order. Untouched bosses (Aurel 48.6 vs 66.8 in W17h) vary run to run on the same code.
+
+## 2026-10-26 10:48 PM ET (Game Director): W17i + W17i.1 FAIL (close)
+- PASS: Ashmaw (about 50 s, 1-3 heals, accepted), Hollowmere, Twins, Morvant, Rune (average 71 s, hardest), warp, credits lock, hints, the crash fix.
+- FAIL: Slagheart 51.9-59.9 s, Aurel 44.9-48.3 s, the ending keys don't reach the credits. Malachar 46.5 s is near the floor.
+- Calls for W17j: Slagheart +12%, Aurel +6%, Malachar +4% HP, plus the ending keys, dead hint branch and typo fixes.
