@@ -159,3 +159,4 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 - 8:41 AM: Will also asked for multiple resolution options (phone, PC, etc.). Plan: an Auto setting (device pixel ratio) plus manual presets in the pause/options menu, tied to the fuzzy-text fix. HOLD.
 - 8:42 AM: Will said GO on items 1-4 only ("nothing else"). W17l assigned to N64: stuck islet monster, crisp DPR rendering, Quit in pause menu, Resolution setting (Auto/Performance/Balanced/Sharp). Preview, then Rule 19, then GD OK, then deploy. linnet-letters still held.
 - 9:36 AM: W17l Rule 19 PASS (kq-w17l-rule19-20261027.md). GD call on WARN: Auto may step down to 1x on slow devices, fix boss-start hitch; quick recheck, then Will's yes.
+- 9:48 AM: Will's standing rule: GD may OK publishes once they pass Rule 19.
