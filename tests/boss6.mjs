@@ -27,7 +27,7 @@ try {
     const cx = M.ARENA6.tx * 16 + 8, cy = M.ARENA6.ty * 16 + 8; g.p.x = cx; g.p.y = cy + 40; for (let i = 0; i < 10; i++) g.step(1 / 60);
     const m = M.malacharOf(g), banner = g.banner; for (let i = 0; i < 80; i++) { g.p.y += 6; g.p.inv = 1; g.step(1 / 60); } const far = Math.hypot(g.p.x - cx, g.p.y - cy);
     return { tile: [M.ARENA6.tx, M.ARENA6.ty], act: g.mb.boss6.active, m: !!m, hp: m?.max, phase: g.mb.boss6.phase, far: Math.round(far), r: M.ARENA6.r, banner }; });
-  ok("stepping onto the heart ring (Husk 24,15 r8) wakes Malachar, 1200 HP, phase 1 + banner", st.tile.join() === "24,15" && st.r === 128 && st.act && st.m && st.hp === 1200 && st.phase === 1 && /MALACHAR/.test(st.banner), JSON.stringify(st));
+  ok("stepping onto the heart ring (Husk 24,15 r8) wakes Malachar, 1250 HP, phase 1 + banner", st.tile.join() === "24,15" && st.r === 128 && st.act && st.m && st.hp === 1250 && st.phase === 1 && /MALACHAR/.test(st.banner), JSON.stringify(st));
   ok("arena barrier keeps the hero on the ring", st.far <= st.r + 4, JSON.stringify(st));
   const p1 = await E(() => { const g = window.__ki.game, M = globalThis.__kiMB, m = M.malacharOf(g); g.mb.boss6.lockT = 0; const seq = []; let last = "", hz = 0; const sp0 = M.malacharLog.sparkles;
     for (let i = 0; i < 60 * 20; i++) { g.p.inv = 1; g.hp = g.maxHp; m.hp = m.max; const h0 = g.mb.hazards.length; g.step(1 / 60); if (g.mb.hazards.length > h0 && g.mb.hazards.at(-1).dusk != null) hz++; if (m.state !== last) { seq.push(m.state + ":" + m.move); last = m.state; } }

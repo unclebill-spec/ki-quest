@@ -106,3 +106,16 @@ W17i TUNE: Ashmaw min 19, out 1.2, inv 3, dIn 0.85. Slagheart min 21, out 1.5, i
 - PASS: Ashmaw (about 50 s, 1-3 heals, accepted), Hollowmere, Twins, Morvant, Rune (average 71 s, hardest), warp, credits lock, hints, the crash fix.
 - FAIL: Slagheart 51.9-59.9 s, Aurel 44.9-48.3 s, the ending keys don't reach the credits. Malachar 46.5 s is near the floor.
 - Calls for W17j: Slagheart +12%, Aurel +6%, Malachar +4% HP, plus the ending keys, dead hint branch and typo fixes.
+
+## W17j (executor, 2026-10-26, fight.py copy -> http://localhost:4702/ki-quest/) — NOT LIVE
+Changes: Slagheart HP 620 -> 660 (+6.5%) and phase floor min 21 -> 23 s; Aurel HP 760 -> 840 (+10.5%); Malachar HP 1200 -> 1250 (+4.2%). No other boss touched.
+Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run).
+| Boss | Setting | Runs | Verdict |
+|---|---|---|---|
+| Slagheart | HP 700, min 21 | 59.3/147/1, 57.7/124/0, 55.8/142/2 | dropped: 2 runs < 58 |
+| Slagheart | HP 720, min 21 | 54.3/129/0, 56.1/121/0, 53.7/170/2 | dropped: < 55 (HP alone doesn't move it; variance) |
+| Slagheart | HP 700, min 24 | 66.3/174/1, 86.1/195/1, 59.2/161/2 | dropped: overshoot |
+| **Slagheart** | **HP 660, min 23 (final)** | **61.1/177/2, 61.8/171/2, 55.5/142/2, 57.6/123/0** | all ≥ 55, avg 59.0 |
+| Aurel | HP 810 | 54.8/148/0, 51.4/163/2, 48.4/140/0 | dropped: 48.4 < 50 |
+| **Aurel** | **HP 840 (final)** | **58.4/145/0, 50.4/174/2, 51.9/163/1** | all ≥ 50 |
+| **Malachar** | **HP 1250 (final)** | **48.5/122/0, 48.9/150/0, 47.1/141/0** | all ≥ 45 (min 47.1 vs W17i 46.5) |

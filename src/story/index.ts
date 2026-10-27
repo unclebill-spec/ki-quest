@@ -236,7 +236,7 @@ export class Story {
     if (F0(f)) return "Dawn · free roam: days are gold, the glow nights still return";
     if (g.area.id === "husk") return f.malacharFade && !f.runeDown ? "Defeat Warden Rune, the last guardian" : f.malacharDown ? "Give the light back" : "Defeat Malachar Vesh at the sun's heart"; // MB hook (W17)
     if (g.area.id === "stair" && f.threshold) return "Ride the top-ring stone up into the husk sun";
-    if (g.area.id === "stair") return f.threshold ? "The husk sun is starving. Finale: give back every spring" : f.morvantDown ? "Climb to the top ring" : f.sableJoin ? "Top ring: get past Morvant, the Eclipse Golem" : "Free Sable from the Red Cage (centre ring)";
+    if (g.area.id === "stair") return f.morvantDown ? "Climb to the top ring" : f.sableJoin ? "Top ring: get past Morvant, the Eclipse Golem" : "Free Sable from the Red Cage (centre ring)";
     if (g.area.id === "drowned" && f.malachar) return "Malachar Vesh is named · the Undertide stone now points north to the Stair";
     if (g.area.id === "undertide" && f.malachar) return "Ride the Undertide stone (by the tide stair) north to the Sunwarden's Stair";
     if (g.area.id === "undertide" && f.tideBossDown && !f.twist) return "Return to Neri in Vesper: the Archive is open";
