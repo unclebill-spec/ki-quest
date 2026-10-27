@@ -10,7 +10,7 @@ preloadSheets();
 import { Audio } from "./audio";
 import { Story } from "./story";
 import { storyOverlay, bindStory } from "./areas/art";
-import { layout, autoSlow } from "./resolution";
+import { layout, autoTick } from "./resolution";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
@@ -68,9 +68,8 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) { gam
 
 let last = performance.now(), acc = 0;
 const DT = 1 / 60;
-let slowN = 0, fpsT = 0, frames = 0; // W17l.1: Auto steps down when 2 back-to-back 250 ms samples run under 48 fps (was 1 s at 500 ms)
 function loop(now: number) {
-  if (game.mode === "play" && RS > 1) { fpsT += now - last; frames++; if (fpsT >= 250) { const f = frames / (fpsT / 1000); slowN = f < 48 ? slowN + 1 : 0; fpsT = 0; frames = 0; if (slowN >= 2 && autoSlow(f)) { slowN = 0; fit(); } } }
+  if (autoTick(now - last, game.mode === "play", game.area.id)) fit(); // W17l.2: Auto resolution sampling lives in resolution.ts
   acc += Math.min(0.1, (now - last) / 1000); last = now;
   while (acc >= DT) {
     if (!story.update(DT)) { game.step(DT); story.after(); } acc -= DT;
