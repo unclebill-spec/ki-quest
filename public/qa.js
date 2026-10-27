@@ -11,7 +11,7 @@
     aurel: { area: "undertide", x: 600, y: 334, lvl: 15, mb: 2, fl: { introSeen: 1, metAma: 1, oath: 1, brann: 1, brannQ: 1, heart: 1, quarryBossDown: 1, quarryBeat: 1, sigilDone: 1, sable1: 1, sable2: 1 }, g: { w: "w4", a: "a3", c: "c4", h: "h3", f: "f3" } },
     twins: { area: "stair", x: 392, y: 304, lvl: 18, mb: 3, fl: Object.assign({ sable3: 1, twist: 1, malachar: 1, stairIn: 1 }, base), g: { w: "w5", a: "a4", c: "c5", h: "h4", f: "f4" } },
     morvant: { area: "stair", x: 520, y: 140, lvl: 19, mb: 4, fl: Object.assign({ sable3: 1, twist: 1, malachar: 1, stairIn: 1, cageDone: 1, sableJoin: 1 }, base), g: { w: "w5", a: "a4", c: "c5", h: "h4", f: "f4" } },
-    malachar: { area: "husk", x: 392, y: 312, lvl: 21, mb: 5, fl: Object.assign({ sable3: 1, twist: 1, malachar: 1, stairIn: 1, cageDone: 1, sableJoin: 1, morvantDown: 1, threshold: 1, huskIn: 1 }, base), g: { w: "w6", a: "a5", c: "c6", h: "h6", f: "f5" } },
+    malachar: { area: "husk", x: 392, y: 312, lvl: 21, mb: 5, fl: Object.assign({ sable3: 1, twist: 1, malachar: 1, stairIn: 1, cageDone: 1, sableJoin: 1, morvantDown: 1, threshold: 1, huskIn: 1 }, base), g: { w: "w5", a: "a5", c: "c5", h: "h6", f: "f6" } },
     warden: { area: "husk", x: 392, y: 312, lvl: 22, mb: 10, fl: Object.assign({}, base, late), g: { w: "w6", a: "a5", c: "c6", h: "h6", f: "f6" } },
     ending: { area: "husk", x: 392, y: 312, lvl: 22, mb: 10, fl: Object.assign({ runeSeen: 1 }, base, late), g: { w: "w6", a: "a5", c: "c6", h: "h6", f: "f6" } }
   }[w];
