@@ -83,3 +83,4 @@ W17h tuning: Ashmaw (boss) min 19, out 1.5, 3 s phase-change invulnerability, ta
 - W17h fight.py times: Ashmaw 55.5, Hollowmere 54.2, Slagheart 80.8, Aurel 66.8, Twins 61.7, Morvant 55.2, Malachar 51.2, Warden 55.5 s.
 - Calls: ease Ashmaw to 48-50 s with at most 2 heals (first boss, too harsh at 247 HP cost). Warden Rune must be the hardest at about 70 s, and Slagheart comes down to 60-65 s. Others unchanged. W17i goes to Rule 19 before any further live deploy.
 - Linnet art brief assigned to Hearthmoor Art (preview to GD first).
+- 8:52 PM: Linnet art (Hearthmoor Art, /workspace/games/kq-staging/art/linnet/) approved by GD for handoff to N64 Style: 0 off-palette pixels, 0 PixelLab credits. Will sees the look with the KQ batch before linnet-letters deploys.
