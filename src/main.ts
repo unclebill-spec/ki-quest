@@ -68,9 +68,9 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) { gam
 
 let last = performance.now(), acc = 0;
 const DT = 1 / 60;
-let slowT = 0, fpsT = 0, frames = 0; // W17l: Auto resolution steps down if the game runs under ~48 fps for 1 s
+let slowN = 0, fpsT = 0, frames = 0; // W17l.1: Auto steps down when 2 back-to-back 250 ms samples run under 48 fps (was 1 s at 500 ms)
 function loop(now: number) {
-  if (game.mode === "play" && RS > 2) { fpsT += now - last; frames++; if (fpsT >= 500) { slowT = frames / (fpsT / 1000) < 48 ? slowT + fpsT : 0; fpsT = 0; frames = 0; if (slowT >= 1000 && autoSlow()) { slowT = 0; fit(); } } }
+  if (game.mode === "play" && RS > 1) { fpsT += now - last; frames++; if (fpsT >= 250) { const f = frames / (fpsT / 1000); slowN = f < 48 ? slowN + 1 : 0; fpsT = 0; frames = 0; if (slowN >= 2 && autoSlow(f)) { slowN = 0; fit(); } } }
   acc += Math.min(0.1, (now - last) / 1000); last = now;
   while (acc >= DT) {
     if (!story.update(DT)) { game.step(DT); story.after(); } acc -= DT;

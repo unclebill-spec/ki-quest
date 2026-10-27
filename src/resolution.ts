@@ -12,8 +12,12 @@ export function setRes(m: ResMode) { try { localStorage.setItem(KEY, m); } catch
 export function cycleRes() { const m = RES_MODES[(RES_MODES.indexOf(getRes()) + 1) % RES_MODES.length]; setRes(m); return m; }
 
 /** Layout for a W x H game in a vw x vh window. Returns CSS size and backing scale r (integer). */
-let autoCap = 99; // Auto steps down (never below 2) when frames run slow; per session only
-export function autoSlow(): boolean { if (getRes() !== "Auto" || autoCap <= 2) return false; autoCap = Math.max(2, lastAutoR - 1); return true; }
+let autoCap = 99; // Auto steps down (down to 1x) when frames run slow; per session only. Manual presets never step.
+/** W17l.1: jump straight to the scale the measured fps can afford (cost ~ r^2), at least one step, floor 1x. */
+export function autoSlow(fps: number): boolean {
+  if (getRes() !== "Auto" || lastAutoR <= 1) return false;
+  autoCap = Math.max(1, Math.min(lastAutoR - 1, Math.floor(lastAutoR * Math.sqrt(Math.max(fps, 1) / 58)))); return true;
+}
 let lastAutoR = 1;
 export function layout(W: number, H: number, vw: number, vh: number, dpr: number, coarse: boolean, mode: ResMode = getRes()) {
   const s = Math.min(vw / W, vh / H);
