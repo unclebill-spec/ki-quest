@@ -1,5 +1,10 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W17h fight.py retune, 2026-10-26 8:47 PM ET)
+## RESUME HERE (executor, W17i, 2026-10-26 ~9:30 PM ET) — NOT LIVE
+- **New process:** no live deploys until Efficiency Bot's Rule 19 PASS + Game Director OK. Live is still W17h (gh-pages 78fda2213e6c rollback target; W17h build deployed 8:47 PM ET).
+- **W17i on main (not deployed):** Ashmaw eased (~49-51 s, 2 heals), Slagheart ~61 s, Warden Rune ~71 s (hardest; thresholds and echo order kept). Table in BALANCE.md.
+- **QA preview (stays running):** http://localhost:4700/ki-quest/ — started with `cd /workspace/games/ki-rpg && npm run build && setsid nohup npx vite preview --port 4700 --strictPort >/dev/null 2>&1 &`. Restart with the same command after `pkill -f "vite preview --port 4700"`.
+- **QA commands against the preview:** fight.py: `sed 's#https://unclebill-spec.github.io/ki-quest/#http://localhost:4700/ki-quest/#' /workspace/qa-tmp/kq-w17g/fight.py > /tmp/fight4700.py && for b in ashmaw hollowmere slagheart aurel twins morvant malachar warden; do python3 /tmp/fight4700.py $b; done`. game-qa: `cd /workspace/games/ki-rpg && for b in ashmaw hollowmere slagheart aurel twins morvant malachar warden ending; do game-qa "http://localhost:4700/ki-quest/?qa=$b" --keys qa-keys-$b.json --name kq-$b; done`
+## (previous) RESUME HERE (executor, W17h fight.py retune, 2026-10-26 8:47 PM ET)
 - **Live:** main@e355985 deployed at 8:47 PM ET (bundle index-CsK2-jQ_.js). **Rollback:** `git -C /workspace/games/ki-rpg push -f origin 78fda2213e6c:gh-pages` (back to the W17g build).
 - **W17h:** fight.py is the only timing standard (table in BALANCE.md). Ashmaw 55.5 s, Hollowmere 54.2 s (55.6 s live), Morvant 55.2 s, Malachar 51.2 s, all 8 bosses + Malachar 51-81 s. New TUNE fields `inv` (s invulnerable after each phase change) and `dIn` (damage-taken scale). Warden Rune untouched.
 - Malachar warp gear is w5/a5/c5/h6/f6 (no w6/c6). Credits skip opens 8 s in. qa-keys-ending.json = 8 Enters at 2.5 s (all before credits) then 75 s idle; credits play to the end.

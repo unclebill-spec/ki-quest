@@ -1,4 +1,7 @@
 # Changelog
+## W17i Game Director calls — 2026-10-26 (executor) — NOT YET LIVE (awaiting Rule 19 + GD OK)
+- Ashmaw eased to ~49-51 s on fight.py with at most 2 berry heals. Slagheart down to ~61 s. Warden Rune is now clearly the hardest at ~71 s (same thresholds and echo order).
+- All other bosses are untouched; the fight.py re-run for all 9 fights is in BALANCE.md.
 ## W17h fight.py retune — 2026-10-26 (executor, live 8:47 PM ET)
 - Timed with Game Director's fight.py only. Ashmaw 55.5 s, Hollowmere 54.2 s, Morvant 55.2 s, Twins 61.7 s, Malachar 51.2 s; every boss is 51-81 s with real HP lost.
 - Bosses get a short invulnerable regroup after each phase change, and Ashmaw/Hollowmere/Morvant take less damage. Twins hold 15 s at x2.4.
