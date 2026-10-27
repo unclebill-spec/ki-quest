@@ -1,4 +1,7 @@
 # Changelog
+## W17l.3 — 2026-10-27 (executor) — LIVE 1:25 PM ET (gh-pages 8ea6077, bundle index-Rm9xQPBf.js; GD OK after EB PASS)
+- Auto resolution: a level whose step-up fails within 10 s is banned (30 s, doubling per repeat, cap 8 min; cleared on area change); step-up needs ~10 s at 58+ fps. Fixes the busy-phone sharp/blurry flapping. resolution.ts only; tests/res-recover.mjs flap check.
+
 ## W17l.2 — 2026-10-27 (executor) — LIVE 11:43 AM ET (gh-pages ea755d9, bundle index-8H6LtezM.js; GD OK after EB PASS)
 - Resolution item only. Auto now steps back up one level after ~5 s at 58+ fps (20 x 250 ms samples). If a level it stepped up to fails again within 3 s, it isn't retried for 30 s. It re-checks from the cap on every area change. Single frames over 250 ms (GC/tab hiccups) are ignored, and it doesn't sample while the tab is hidden. Step-down unchanged (2 samples < 48 fps). Performance/Balanced/Sharp never move. Boss-start hitch untouched.
 - All sampling lives in src/resolution.ts autoTick(); main.ts only swaps the old W17l.1 block for a 1-line hook. New tests/res-recover.mjs (6 checks).
