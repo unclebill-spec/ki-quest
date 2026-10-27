@@ -160,3 +160,5 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 - 8:42 AM: Will said GO on items 1-4 only ("nothing else"). W17l assigned to N64: stuck islet monster, crisp DPR rendering, Quit in pause menu, Resolution setting (Auto/Performance/Balanced/Sharp). Preview, then Rule 19, then GD OK, then deploy. linnet-letters still held.
 - 9:36 AM: W17l Rule 19 PASS (kq-w17l-rule19-20261027.md). GD call on WARN: Auto may step down to 1x on slow devices, fix boss-start hitch; quick recheck, then Will's yes.
 - 9:48 AM: Will's standing rule: GD may OK publishes once they pass Rule 19.
+- 10:00 AM: W17l.1 (64eb956) boss fps at 6x throttle is 48-57. The leftover 0.2-0.5 s resize frame on slow phones is accepted. GD OK conditional on EB's recheck PASS; then deploy and live check.
+- 10:21 AM: W17l.1 recheck PASS but WARN: Auto never steps back up (stalls leave the PC blurry). Advance OK withdrawn; W17l.2 adds step-up after ~5 s at 58+ fps, ignores hidden-tab and single stalls. Boss-start hitch left alone (not resize; out of scope).
