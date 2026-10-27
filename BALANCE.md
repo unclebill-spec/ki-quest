@@ -162,3 +162,8 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 - 9:48 AM: Will's standing rule: GD may OK publishes once they pass Rule 19.
 - 10:00 AM: W17l.1 (64eb956) boss fps at 6x throttle is 48-57. The leftover 0.2-0.5 s resize frame on slow phones is accepted. GD OK conditional on EB's recheck PASS; then deploy and live check.
 - 10:21 AM: W17l.1 recheck PASS but WARN: Auto never steps back up (stalls leave the PC blurry). Advance OK withdrawn; W17l.2 adds step-up after ~5 s at 58+ fps, ignores hidden-tab and single stalls. Boss-start hitch left alone (not resize; out of scope).
+
+## 2026-10-27 11:42 ET | Game Director | W17l.2 deploy OK
+- EB recheck kq-w17l2-recheck-20261027.md: PASS (abbdbdd, index-8H6LtezM.js). Desktop step-up goal met.
+- Non-blocking WARN: phone Auto scale flaps between levels 2-4x/min in busy scenes. It's still better than W17l.1, so I'm shipping now under Will's standing publish rule.
+- Follow-up W17l.3 (resolution.ts only, part of Will's resolution ask): ban a level for ~10 s after a failed step-up. It gets its own EB recheck before deploy.
