@@ -1,4 +1,11 @@
 # Changelog
+## W17l — 2026-10-27 (executor) — NOT LIVE (preview :4704, awaiting Rule 19 + GD OK + Will)
+- Will's 4 items only. Lanternmoss wisp moved off the water-locked islet (maps.ts row y18: x4 -> x16 on land; spawn count unchanged).
+- Crisp text: canvas backing store now scaled to device pixels (src/resolution.ts layout(), main.ts fit() + ctx.setTransform each frame); game still draws in 384x216 logical units, smoothing off.
+- Options tab: Resolution (Auto default / Performance = old 1x / Balanced = half / Sharp = full device pixels), per device in localStorage "kiquest-opt-res" (not in saves). Auto caps 6x desktop, 4x touch, and steps down (min 2x) if play runs <48 fps for 1 s.
+- Options tab: Quit to title (autosaves like leaving the page, shows the title with Continue). Options rows: Sound, Screen shake, Resolution, Quit to title, Resume.
+- tests/options.mjs (10 checks). No balance, art or story changes.
+
 ## W17k.1 — 2026-10-27 (executor) — LIVE 2026-10-27 ~7:55 AM ET (gh-pages a015c7e, main@94d0bc7)
 - qa-keys-ending.json only: 24 KeyJ@400 ms after the fight (20 was 2 short in replays), trailing Enters dropped, then an 85 s wait so nothing can skip the credits (~68 s). Verified on :4703 (f218a6b): credits → kq-credits-end → title. No game code changed.
 
