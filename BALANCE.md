@@ -78,3 +78,8 @@ Timing standard: Game Director's /workspace/qa-tmp/kq-w17g/fight.py (steady J/K 
 | Warden Rune | 22 | 55.5 s | 198/308 |
 
 W17h tuning: Ashmaw (boss) min 19, out 1.5, 3 s phase-change invulnerability, takes 0.8x damage. Hollowmere min 21, out 1.6, inv 3, takes 0.75x. Morvant min 14, out 3.6, inv 2, takes 0.9x. Twins min 15, out 2.4. Warden Rune unchanged (thresholds and echo order kept).
+
+## 2026-10-26 8:50 PM ET (Game Director): W17h review
+- W17h fight.py times: Ashmaw 55.5, Hollowmere 54.2, Slagheart 80.8, Aurel 66.8, Twins 61.7, Morvant 55.2, Malachar 51.2, Warden 55.5 s.
+- Calls: ease Ashmaw to 48-50 s with at most 2 heals (first boss, too harsh at 247 HP cost). Warden Rune must be the hardest at about 70 s, and Slagheart comes down to 60-65 s. Others unchanged. W17i goes to Rule 19 before any further live deploy.
+- Linnet art brief assigned to Hearthmoor Art (preview to GD first).
