@@ -10,6 +10,7 @@ preloadSheets();
 import { Audio } from "./audio";
 import { Story } from "./story";
 import { storyOverlay, bindStory } from "./areas/art";
+import { layout } from "./resolution";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
@@ -21,12 +22,15 @@ const story = new Story(game, input);
 bindStory(story);
 addEventListener("pointerdown", () => audio.unlock()); addEventListener("keydown", () => audio.unlock());
 
-// Landscape layout: keep 16:9, integer scale when it fits, fractional on small phones.
+// Landscape layout: keep 16:9. W17l: backing store scaled to device pixels per the Resolution option (src/resolution.ts).
+let RS = 1;
 function fit() {
-  const s = Math.min(innerWidth / W, innerHeight / H);
-  const k = s >= 2 ? Math.floor(s) : s;
-  canvas.style.width = W * k + "px"; canvas.style.height = H * k + "px";
+  const L = layout(W, H, innerWidth, innerHeight, devicePixelRatio || 1, matchMedia("(pointer: coarse)").matches);
+  RS = L.r;
+  if (canvas.width !== W * RS) { canvas.width = W * RS; canvas.height = H * RS; }
+  canvas.style.width = L.cssW + "px"; canvas.style.height = L.cssH + "px";
 }
+addEventListener("kq-res", fit);
 addEventListener("resize", fit); fit();
 
 // Title, Install (Gravewake installer copy) and fullscreen
@@ -46,6 +50,9 @@ newBtn.onclick = () => { if (!confirm("Start a new game? Your current save is er
   for (const k of ["kiquest-save-v1", "kiquest-autosave-v1", "kiquest.story.v1", "kiquest-mb-v1"]) try { localStorage.removeItem(k); } catch { /* private mode */ }
   location.reload(); };
 addEventListener("kq-credits-end", () => { title.hidden = false; startBtn.textContent = "Continue"; newBtn.hidden = false; startBtn.focus(); });
+// W17l: Quit to title from the pause menu (autosaves first, same as leaving the page).
+let quitAt = -1e9; // the confirm press must not also start the game on the same frame
+addEventListener("kq-quit", () => { quitAt = performance.now(); game.autosave(); game.mode = "title"; title.hidden = false; startBtn.textContent = readSave() ? "Continue" : startBtn.textContent; newBtn.hidden = !readSave(); startBtn.focus(); });
 startBtn.focus();
 
 // Tap a status row on the canvas
@@ -65,10 +72,10 @@ function loop(now: number) {
   acc += Math.min(0.1, (now - last) / 1000); last = now;
   while (acc >= DT) {
     if (!story.update(DT)) { game.step(DT); story.after(); } acc -= DT;
-    if (game.mode === "title" && (input.pressed("melee") || input.pressed("pause")) && !title.hidden) begin();
+    if (game.mode === "title" && (input.pressed("melee") || input.pressed("pause")) && !title.hidden && performance.now() - quitAt > 400) begin();
   }
   { const F = story.flags as Record<string, unknown>; audio.watch(game as never, story.credits > 0 || (game.area.id === "husk" && !!F.malacharDown && (!F.dawn || !!story.box))); } // dawn epilogue + credits -> finale-theme
-  if (game.mode !== "title") { render(ctx, game); storyOverlay(ctx, game, story, W, H); }
+  if (game.mode !== "title") { ctx.setTransform(RS, 0, 0, RS, 0, 0); ctx.imageSmoothingEnabled = false; render(ctx, game); storyOverlay(ctx, game, story, W, H); }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);

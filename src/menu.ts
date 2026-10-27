@@ -10,6 +10,7 @@ import { GEAR, GearSlot, SLOT_NAMES, SLOT_ORDER, SHOP_NAMES, gearById, owned, ge
 import { ITEMS, ITEM_IDS, useItem, drawItemIcon, reviveTap, type ItemId } from "./loot";
 import { SLOT_COUNT, readSlot, writeSlot, exportCode, importCode, SaveRecord, slotKey } from "./save";
 import { areaMap } from "./areas/art";
+import { getRes, cycleRes } from "./resolution";
 
 export const TABS = ["Status", "Gear", "Items", "Shop", "Lens", "Map", "Options", "Save"] as const;
 export const W = 384, H = 216;
@@ -59,7 +60,7 @@ function rowCount(g: Game) {
     case "Shop": return Math.max(1, shopRows(g).length);
     case "Lens": return Math.max(1, bios(g).length);
     case "Map": return 1;
-    case "Options": return 3;
+    case "Options": return 5;
     case "Save": return ui.sub === "slot" ? SLOT_ACTS.length : SLOT_COUNT + 1;
   }
   return 1;
@@ -106,9 +107,11 @@ export function confirm(g: Game) {
     sfx(r ? "ui-error" : "ui-save"); note(r ? r : `Bought ${row.kind === "gear" ? row.it.name : ITEMS[row.id].name}`);
     const st = ki().story; if (!r && st) { st.flags.shopOpen = true; st.save(); }
   } else if (tab === "Options") {
-    sfx(ui.sel === 2 ? "ui-close" : "ui-confirm");
+    sfx(ui.sel >= 3 ? "ui-close" : "ui-confirm");
     if (ui.sel === 0) { const a = ki().audio; if (a) a.setMute(!a.muted); }
     else if (ui.sel === 1) { g.shakeOff = !g.shakeOff; try { localStorage.setItem("kiquest-opt-noshake", g.shakeOff ? "1" : "0"); } catch { /* */ } }
+    else if (ui.sel === 2) note(`Resolution: ${cycleRes()}`); // W17l, per device (localStorage)
+    else if (ui.sel === 3) dispatchEvent(new Event("kq-quit")); // W17l: main.ts autosaves + shows the title
     else g.mode = "play";
   } else if (tab === "Save") {
     if (!ui.sub) { sfx("ui-confirm"); if (ui.sel === SLOT_COUNT) openCode(g, "import"); else { ui.sub = "slot"; ui.subSel = 0; } return; }
@@ -305,7 +308,9 @@ export function drawMenu(c: CanvasRenderingContext2D, g: Game) {
     const a = ki().audio;
     row(c, R.x, R.y, R.w, ui.sel === 0, "Sound", a?.muted ? "Off" : "On");
     row(c, R.x, R.y + R.h, R.w, ui.sel === 1, "Screen shake", g.shakeOff ? "Off" : "On");
-    row(c, R.x, R.y + 2 * R.h, R.w, ui.sel === 2, "Resume");
+    row(c, R.x, R.y + 2 * R.h, R.w, ui.sel === 2, "Resolution", getRes());
+    row(c, R.x, R.y + 3 * R.h, R.w, ui.sel === 3, "Quit to title");
+    row(c, R.x, R.y + 4 * R.h, R.w, ui.sel === 4, "Resume");
     side(c, ["Controls", "Move  WASD / stick", "Melee J · A   Blast K · B", "Block Shift · RB  Tech Q · LB", "Power T/L · Y   Map M · Back", "Pause Esc · Start  Mute N"], "#cfe8ff");
   } else if (tab === "Save") {
     for (let i = 0; i < SLOT_COUNT; i++) {
