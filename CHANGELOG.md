@@ -1,4 +1,9 @@
 # Changelog
+## W17l.2 — 2026-10-27 (executor) — NOT LIVE (preview :4706, GD-steered fix for EB recheck WARNs 1+2)
+- Resolution item only. Auto now steps back up one level after ~5 s at 58+ fps (20 x 250 ms samples). If a level it stepped up to fails again within 3 s, it isn't retried for 30 s. It re-checks from the cap on every area change. Single frames over 250 ms (GC/tab hiccups) are ignored, and it doesn't sample while the tab is hidden. Step-down unchanged (2 samples < 48 fps). Performance/Balanced/Sharp never move. Boss-start hitch untouched.
+- All sampling lives in src/resolution.ts autoTick(); main.ts only swaps the old W17l.1 block for a 1-line hook. New tests/res-recover.mjs (6 checks).
+- Headless: 1920x1080@1 + two 300 ms stalls stays 5x (W17l.1: drops to 2x for good); 1366x768@1.25 stays 4x (W17l.1: 1x). Recovery after a real slowdown: back to the cap in ~5 s. Phones at 4x/6x CPU throttle still settle at 1x (that is all they can hold; one 2x retry per 30 s at 4x). At 2x throttle they recover to 3-4x.
+
 ## W17l.1 — 2026-10-27 (executor) — NOT LIVE (preview :4705, GD-approved tweak after EB Rule 19 WARN)
 - Resolution item only: Auto's step-down can now reach 1x, and it reacts faster: two back-to-back 250 ms samples under 48 fps (was 1 s at 500 ms). It jumps straight to the scale the measured fps can afford (cost ~ r^2), at least one step. Performance/Balanced/Sharp unchanged (never step). No other changes.
 - Headless Pixel 7, Auto (before c5791da -> after): boss6 4x 49 -> 59 fps, boss4 4x 52 -> 59, boss6 6x 38-40 -> 53-57, boss4 6x 31-35 -> 48-52; first-3 s fps 23-41 -> 29-50.

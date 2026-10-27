@@ -7,7 +7,11 @@
 - Main adds the stale "Talk:" target crash fix on top of W17i (CHANGELOG). Preview of W17i.1: http://localhost:4701/ki-quest/ (served from worktree /tmp/kq-w171 dist; :4700 still W17i for Efficiency Bot). Live is still W17h. Deploy only after Rule 19 PASS + GD OK.
 - linnet-letters is rebased on this main (fix not duplicated); not merged.
 
-## RESUME HERE (executor, W17l.1, 2026-10-27 ~10:00 AM ET) — NOT LIVE
+## RESUME HERE (executor, W17l.2, 2026-10-27 ~10:50 AM ET) — NOT LIVE
+- W17l + W17l.1 + W17l.2 on main. Preview :4706 from /tmp/kq-w17l2 (bundle index-8H6LtezM.js). :4705 = W17l.1. Live is still W17k (gh-pages a015c7e); the rollback target is unchanged.
+- W17l.2: Auto steps back up (~5 s at 58+ fps, 30 s ban on a level that failed within 3 s), resets on area change, ignores >250 ms stalls and hidden tabs (resolution.ts autoTick; main.ts 1-line hook). Next: EB recheck, GD OK, Will's yes, then publish-game.sh kq.
+
+## (previous) RESUME HERE (executor, W17l.1, 2026-10-27 ~10:00 AM ET) — NOT LIVE
 - W17l + W17l.1 on main. Preview :4705 from /tmp/kq-w17l1 (bundle index-B8i6xjjh.js). :4704 = W17l (c5791da). Live is still W17k (gh-pages a015c7e); the rollback target is unchanged.
 - W17l.1: Auto steps down to 1x and reacts faster (main.ts loop, resolution.ts autoSlow). Next: GD quick recheck, then Will's yes, then publish-game.sh kq.
 
