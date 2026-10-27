@@ -3,6 +3,7 @@ import type { Game } from "../game";
 import type { Story } from "../story";
 import { TILE, MW, MH, T_FLOOR, T_WALL, T_MOSS, T_PLAZA, T_WATER, T_PATH, T_BOARD, T_WARD, T_HIDDEN, wardOpen } from "../world";
 import { NPCS, INTRO } from "../story/script";
+import { sheet, drawSprite } from "../game/combat/sprites";
 import { groundSet, drawGround, type GroundSet, type Kind } from "./groundgen";
 
 type C2 = CanvasRenderingContext2D;
@@ -123,7 +124,12 @@ export const npcBob = (id: string, t: number) => Math.round(Math.sin(t * 2 + id.
 function npc(c: C2, id: string, area: string, x: number, y: number, t: number) {
   const d = NPCS[area]?.[id]; if (!d) return;
   x = Math.round(x); y = Math.round(y);
-  if (d.float) { c.save(); c.globalAlpha = 0.72; y -= 3 + Math.round(Math.sin(t * 2) * 1.5); } // W17f: Linnet, a half-translucent floating wraith (recoloured NPC art)
+  if (d.float) { c.save(); c.globalAlpha = 0.72; y -= 3 + Math.round(Math.sin(t * 2) * 1.5); } // W17f: Linnet, a half-translucent floating wraith
+  if (d.sprite) { // final NPC sheet (24x32, idle/walk x 4 facings); the drawn placeholder below is only a fallback while it loads
+    const sh = sheet(d.sprite);
+    if (sh) { NPC_BOB[id] = 0; NPC_BOB[id + "@x"] = x; c.fillStyle = "rgba(0,0,0,.35)"; c.beginPath(); c.ellipse(x, y + (d.float ? 3 : 0), 6, 2, 0, 0, 7); c.fill();
+      const ok = drawSprite(c, sh, "idle", "down", t * 4, x, y); if (ok) { if (d.float) c.restore(); return; } }
+  }
   const h = 26 + (d.tall ?? 0), bob = npcBob(id, t); NPC_BOB[id] = bob; NPC_BOB[id + "@x"] = x;
   const top = y - h + bob, leg = Math.round(h * 0.38), torso = Math.round(h * 0.34), head = h - leg - torso;
   c.fillStyle = "rgba(0,0,0,.45)"; c.beginPath(); c.ellipse(x, y, 6, 2, 0, 0, 7); c.fill();

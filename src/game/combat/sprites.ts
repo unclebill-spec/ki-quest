@@ -20,7 +20,11 @@ export function sheet(name: string): Sheet | null {
     const img = new Image();
     img.onload = () => {
       const rects = new Map<string, Rect>();
-      for (const f of j.frames as { anim: string; facing: string; i: number; x: number; y: number; w: number; h: number }[]) rects.set(`${f.anim}_${f.facing}_${f.i}`, f);
+      for (const f of j.frames as { name?: string; anim: string; facing: string; i: number; x: number; y: number; w: number; h: number }[]) {
+        // frames named "<sheet>_<anim>_<facing>_<i>" (e.g. linnet_idle_down_0) are keyed by that name; older sheets by their fields
+        const key = f.name && f.name.startsWith(j.name + "_") ? f.name.slice(j.name.length + 1) : `${f.anim}_${f.facing}_${f.i}`;
+        rects.set(key, f);
+      }
       const anims: Record<string, number> = {};
       for (const k in j.anims) anims[k] = j.anims[k].count;
       sheets.set(name, { name, img, alt: shifted(img), pivot: j.pivot, anims, rects });
