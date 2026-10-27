@@ -167,3 +167,11 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 - EB recheck kq-w17l2-recheck-20261027.md: PASS (abbdbdd, index-8H6LtezM.js). Desktop step-up goal met.
 - Non-blocking WARN: phone Auto scale flaps between levels 2-4x/min in busy scenes. It's still better than W17l.1, so I'm shipping now under Will's standing publish rule.
 - Follow-up W17l.3 (resolution.ts only, part of Will's resolution ask): ban a level for ~10 s after a failed step-up. It gets its own EB recheck before deploy.
+
+## 2026-10-27 12:41 ET | Game Director | W17l.2 LIVE
+- gh-pages ea755d9 (main abbdbdd) live; EB live check PASS (kq-live-w17l2-ea755d9-20261027.md). Rollback a015c7e (N64 to tag). Will told. W17l.3 phone flap fix next (dd78dc8, :4707) -> EB recheck -> my OK.
+
+## 2026-10-27 13:22 ET | Game Director | W17l.3 deploy OK
+- EB recheck kq-w17l3-recheck-20261027.md PASS (dd78dc8, index-Rm9xQPBf.js). Phone flap fixed (<=1 retry/min).
+- Small call: the ~39 s desktop climb back to full sharpness after a real slowdown is acceptable, since stability beats speed. Leave the >10 s failed step-up unbanned for now.
+- Rollback for this deploy: ea755d9 (W17l.2).
