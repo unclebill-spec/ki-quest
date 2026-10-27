@@ -1,5 +1,10 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W17g balance fix, 2026-10-26 ~6:28 PM ET)
+## RESUME HERE (executor, W17h fight.py retune, 2026-10-26 8:47 PM ET)
+- **Live:** main@e355985 deployed at 8:47 PM ET (bundle index-CsK2-jQ_.js). **Rollback:** `git -C /workspace/games/ki-rpg push -f origin 78fda2213e6c:gh-pages` (back to the W17g build).
+- **W17h:** fight.py is the only timing standard (table in BALANCE.md). Ashmaw 55.5 s, Hollowmere 54.2 s (55.6 s live), Morvant 55.2 s, Malachar 51.2 s, all 8 bosses + Malachar 51-81 s. New TUNE fields `inv` (s invulnerable after each phase change) and `dIn` (damage-taken scale). Warden Rune untouched.
+- Malachar warp gear is w5/a5/c5/h6/f6 (no w6/c6). Credits skip opens 8 s in. qa-keys-ending.json = 8 Enters at 2.5 s (all before credits) then 75 s idle; credits play to the end.
+- Linnet: still on branch `linnet-letters`, not merged; waits on final sprite art.
+## (previous) RESUME HERE (executor, W17g balance fix, 2026-10-26 ~6:28 PM ET)
 - **Live:** main@8adc334 deployed at 6:28 PM ET (bundle index-DzEnKzFO.js). **Rollback:** `git -C /workspace/games/ki-rpg push -f origin f253695f7385:gh-pages` (the W17e build that QA checked).
 - **W17g:**
   - Twins: 3 phase holds (75/50/25%, 13 s) and x2.2 damage.

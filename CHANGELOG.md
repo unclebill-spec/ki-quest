@@ -1,4 +1,8 @@
 # Changelog
+## W17h fight.py retune — 2026-10-26 (executor, live 8:47 PM ET)
+- Timed with Game Director's fight.py only. Ashmaw 55.5 s, Hollowmere 54.2 s, Morvant 55.2 s, Twins 61.7 s, Malachar 51.2 s; every boss is 51-81 s with real HP lost.
+- Bosses get a short invulnerable regroup after each phase change, and Ashmaw/Hollowmere/Morvant take less damage. Twins hold 15 s at x2.4.
+- The Malachar warp no longer equips his own rewards (w6/c6). Credits can be skipped only after 8 s; the ending keys stop before the credits.
 ## W17g balance fix — 2026-10-26 (executor)
 - The Cageward Twins now hold at 75/50/25% (13 s each) with x2.2 damage. The no-pause mash went from 33 s to 61–85 s.
 - New `?qa=malachar` warp and per-boss no-Escape keys files. The ending keys now let the credits run to the title.
