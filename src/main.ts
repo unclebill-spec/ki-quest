@@ -10,7 +10,7 @@ preloadSheets();
 import { Audio } from "./audio";
 import { Story } from "./story";
 import { storyOverlay, bindStory } from "./areas/art";
-import { layout } from "./resolution";
+import { layout, autoSlow } from "./resolution";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
@@ -68,7 +68,9 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) { gam
 
 let last = performance.now(), acc = 0;
 const DT = 1 / 60;
+let slowT = 0, fpsT = 0, frames = 0; // W17l: Auto resolution steps down if the game runs under ~48 fps for 1 s
 function loop(now: number) {
+  if (game.mode === "play" && RS > 2) { fpsT += now - last; frames++; if (fpsT >= 500) { slowT = frames / (fpsT / 1000) < 48 ? slowT + fpsT : 0; fpsT = 0; frames = 0; if (slowT >= 1000 && autoSlow()) { slowT = 0; fit(); } } }
   acc += Math.min(0.1, (now - last) / 1000); last = now;
   while (acc >= DT) {
     if (!story.update(DT)) { game.step(DT); story.after(); } acc -= DT;

@@ -12,11 +12,15 @@ export function setRes(m: ResMode) { try { localStorage.setItem(KEY, m); } catch
 export function cycleRes() { const m = RES_MODES[(RES_MODES.indexOf(getRes()) + 1) % RES_MODES.length]; setRes(m); return m; }
 
 /** Layout for a W x H game in a vw x vh window. Returns CSS size and backing scale r (integer). */
+let autoCap = 99; // Auto steps down (never below 2) when frames run slow; per session only
+export function autoSlow(): boolean { if (getRes() !== "Auto" || autoCap <= 2) return false; autoCap = Math.max(2, lastAutoR - 1); return true; }
+let lastAutoR = 1;
 export function layout(W: number, H: number, vw: number, vh: number, dpr: number, coarse: boolean, mode: ResMode = getRes()) {
   const s = Math.min(vw / W, vh / H);
   const full = Math.max(1, Math.floor(s * dpr)); // largest whole device-pixel scale that fits
   if (mode === "Performance") { const k = s >= 2 ? Math.floor(s) : s; return { r: 1, cssW: W * k, cssH: H * k }; } // pre-W17l behaviour
-  const r = mode === "Sharp" ? full : mode === "Balanced" ? Math.max(1, Math.ceil(full / 2)) : Math.min(full, coarse ? 4 : 6); // Auto caps cost on phones / 4K
+  const r = mode === "Sharp" ? full : mode === "Balanced" ? Math.max(1, Math.ceil(full / 2)) : Math.min(full, coarse ? 4 : 6, autoCap); // Auto caps cost on phones / 4K, and steps down if slow
+  if (mode === "Auto") lastAutoR = r;
   if (r === full) return { r, cssW: (W * r) / dpr, cssH: (H * r) / dpr }; // exact device pixels: crisp, even pixel art
   return { r, cssW: W * s, cssH: H * s }; // capped/Balanced: fill the window, browser upscales the rest
 }
