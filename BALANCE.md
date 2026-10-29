@@ -175,3 +175,6 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 - EB recheck kq-w17l3-recheck-20261027.md PASS (dd78dc8, index-Rm9xQPBf.js). Phone flap fixed (<=1 retry/min).
 - Small call: the ~39 s desktop climb back to full sharpness after a real slowdown is acceptable, since stability beats speed. Leave the >10 s failed step-up unbanned for now.
 - Rollback for this deploy: ea755d9 (W17l.2).
+
+## 2026-10-27 13:40 ET | Game Director | Note: the W17d boss table above is stale
+- Current code (src/game/enemies/types.ts:33,35): Aurel 880 HP, Malachar 1300 HP, per W17k. The 760/1200 values in W17d are outdated.
