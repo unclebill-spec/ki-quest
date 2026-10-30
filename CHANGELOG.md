@@ -1,5 +1,5 @@
 # Changelog
-## W19 — 2026-10-30 (executor) — awaiting Rule 19 (NOT LIVE; live is still W18.1)
+## W19 — 2026-10-30 (executor) — LIVE Oct 30 6:41 PM ET (gh-pages 0645addb46e9, bundle index-B9Z_GqwD.js; deploy main@71829b8; GD OK after EB Rule 19 PASS, qa-reports/kq-w19-71829b8-20261030.md)
 - Linnet: soft glow motes (gold/white sparks, existing particles) drift up around her in Lanternmoss. No sound.
 - Letter pickups: each pickup toast now ends with a short Mirela line (script.ts LETTER_QUIPS) and stays 4.5 s (was 3 s). Wrapped by src/textfit.ts: max 347/360 wide, 2-3 lines, fully on screen at Pixel 7 and 1280x720.
 - Compass ping: while hunting letters in Hushwater, a gold chevron beside the hero points to the nearest uncollected letter and pulses every 1.2 s. Hidden within 40 px of it and gone at 4/4.

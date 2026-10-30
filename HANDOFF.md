@@ -1,5 +1,10 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W19, 2026-10-30 ~5:30 PM ET) — NOT LIVE, awaiting Rule 19
+## RESUME HERE (executor, W19 LIVE, 2026-10-30 6:41 PM ET)
+- **LIVE:** W19 from main@71829b8 on gh-pages 0645addb46e959f6a0fdab087edebdb1e041d3b7 (bundle index-B9Z_GqwD.js). GD OK after EB Rule 19 PASS (qa-reports/kq-w19-71829b8-20261030.md). Live check: HTTP 200, game-qa PASS, 0 console errors, title shows "Burning Bush Productions". Shot: /workspace/qa-reports/kq-w19-live-title-20261030.png.
+- **Rollback (to W18.1):** `git -C /workspace/games/ki-rpg push -f origin aa4e1e9:gh-pages` (tagged `rollback-w18_1`; also gh-pages-prev on origin). Older: rollback-w17l3 (8ea6077).
+- **Next:** W20 (3041c77) to EB Rule 19, then GD publish OK.
+
+## (previous) RESUME HERE (executor, W19, 2026-10-30 ~5:30 PM ET) — NOT LIVE, awaiting Rule 19
 - **W19 on main** (see CHANGELOG W19). Live is still W18.1 (gh-pages aa4e1e9); rollback tag rollback-w17l3 (8ea6077).
 - Items: Linnet glow motes (no sound); a Mirela line at each letter pickup (wrapped, fits); compass ping toward the next letter (gone at 4/4); a 1-line toast moves up over a 1-line objective; the title shows "Burning Bush Productions" instead of "Stage 1 · grey-box"; frames.json "Ki Quest" -> "Kindle Quest".
 - **Fun pass: done.** Toast fade-out; a new objective blinks gold briefly. Held for GD (not shipped): see the W19 report (Linnet reacts when you return with the Locket, letter-count stamp on the map, a rare Mirela line on a re-read, a compass "found it" sparkle).
