@@ -8,6 +8,10 @@ import type { Game } from "../game";
 import type { Input } from "../input";
 import { buildArea, setWardOpen, zoneAt, TILE } from "../world";
 import { INTRO, NPCS, Flags, LETTERS } from "./script";
+import { sfx } from "../menu";
+import { CH_INTERACT, K_RING, K_SPARK, C_GOLD, C_WHITE } from "../vendor/particles";
+/** W18 fun pass: a ring of sparkles (interact channel, approved particle palette only). */
+const burst = (g: Game, x: number, y: number, n: number, v: number) => { for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; g.parts.emit(CH_INTERACT, i & 1 ? K_RING : K_SPARK, x, y, Math.cos(a) * v, Math.sin(a) * v * 0.7 - 20, 0.55, i % 3 ? C_GOLD : C_WHITE); } };
 
 const KEY = "kiquest.story.v1";
 type Box = { who: string; lines: string[]; i: number; t: number; then?: () => void };
@@ -193,8 +197,11 @@ export class Story {
     this.lastKills = kills;
     if (g.area.id === "hushwater" && F.lettersQ && !F.lettersRead) LETTERS.forEach((l, i) => { // W17f letter pickups
       const k = `letter_${i + 1}`;
-      if (!F[k] && Math.hypot(l.x * 16 + 8 - g.p.x, l.y * 16 + 8 - g.p.y) < 14) {
+      const lx = l.x * 16 + 8, ly = l.y * 16 + 8, d = Math.hypot(lx - g.p.x, ly - g.p.y);
+      if (!F[k] && d < 160 && (g.frame + i * 13) % 40 === 0) g.parts.emit(CH_INTERACT, K_SPARK, lx + ((g.frame >> 3) % 5) - 2, ly - 4, 0, -14, 0.6, C_GOLD); // W18 fun pass: a lost letter glints when you're close
+      if (!F[k] && d < 14) {
         F[k] = true; F.lettersN = ((F.lettersN as number) || 1) + 1; this.save();
+        burst(g, lx, ly - 4, (F.lettersN as number) >= 4 ? 12 : 8, (F.lettersN as number) >= 4 ? 70 : 45); sfx((F.lettersN as number) >= 4 ? "ui-save" : "ui-confirm"); // W18 fun pass
         g.say(`${l.t} (${F.lettersN}/4)${(F.lettersN as number) >= 4 ? " · bring them to Mirela" : ""}`, 3);
       }
     });
@@ -239,8 +246,8 @@ export class Story {
       if (id === "f" && F.bell && !F.bellDone) { F.bellDone = true; g.gainExp(80); g.say("Ferry Bell returned · +80 EXP", 2.5); }
       if (id === "h") { if (!F.reedQ) F.reedQ = true; else if ((F.reedN as number) >= 8 && !F.reedDone) { F.reedDone = true; g.gainExp(100); g.pts += 2; g.say("Quiet the Meadow complete · +100 EXP, +2 pts", 2.5); } }
       if (id === "r" && g.area.id === "hushwater" && F.metMirela && !F.lettersQ) { F.lettersQ = true; F.lettersN = 1; g.say("Quest: Linnet's Letters (1/4)", 2.5); }
-      if (id === "l" && F.linnetWoke && !F.lettersDone) { F.lettersDone = true; g.gainExp(250); g.say("Linnet's Letters complete · Linnet's Locket · +250 EXP", 3); }
-      if (id === "m" && (F.lettersN as number) >= 4 && !F.lettersRead) { F.lettersRead = true; g.gainExp(100); g.say("Mirela read Linnet's letters · +100 EXP", 2.5); }
+      if (id === "l" && F.linnetWoke && !F.lettersDone) { F.lettersDone = true; g.gainExp(250); g.say("Linnet's Letters complete · Linnet's Locket · +250 EXP", 3); burst(g, g.p.x, g.p.y - 10, 14, 80); sfx("ui-equip"); } // W18 fun pass: Locket sparkle + stinger
+      if (id === "m" && (F.lettersN as number) >= 4 && !F.lettersRead) { F.lettersRead = true; g.gainExp(100); g.say("Mirela read Linnet's letters · +100 EXP", 2.5); sfx("ui-confirm"); }
       else if (id === "m" && F.bellDone && F.reedDone && !F.oath) { F.oath = true; g.gainExp(150); g.say("Lantern Oath · Mirela will join you · +150 EXP", 3); }
       if (id === "k" && !F.metBrann) { F.metBrann = true; F.brannQ = true; g.gainExp(60); g.say("Quest: Brann's Heart-Ember · +60 EXP", 2.5); }
       if (id === "n" && F.sigil && !F.sigilDone) { F.sigilDone = true; g.gainExp(200); g.pts += 2; g.say("Neri reads the sigil · +200 EXP, +2 pts", 3); }
