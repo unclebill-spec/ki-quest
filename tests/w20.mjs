@@ -42,9 +42,18 @@ try {
     ok(`${vn}: Linnet without the Locket on: usual line`, off && off.who === "Linnet Vant" && /Don't fuss over me/.test(off.lines[0]), JSON.stringify(off));
     await E(() => { window.__ki.game.equip("c2"); });
     const on = await talk("l", "linnet-locket");
-    ok(`${vn}: Linnet notices her Locket when it's worn`, on && /wearing it/.test(on.lines[0]) && !/Don't fuss/.test(on.lines.join(" ")), JSON.stringify(on));
+    ok(`${vn}: Linnet notices her Locket when it's worn`, on && /^Oh! My locket\./.test(on.lines[0]) && /lamplighter/.test(on.lines[0]) && /^It sat against my collarbone/.test(on.lines[1]) && on.lines.length === 2 && !/Don't fuss/.test(on.lines.join(" ")), JSON.stringify(on));
     ok(`${vn}: Locket greeting fits the dialogue box`, on && await fitsBox(on.lines));
     ok(`${vn}: Locket greeting gives no reward (EXP same, one Locket)`, (await E(() => window.__ki.game.exp + window.__ki.game.lvl * 1e6)) === exp0 && (await E(() => window.__ki.game.have.filter((x) => x === "c2").length)) === 1);
+    // gate: linnetWoke && lettersDone && !dawn (dawn = the ending flag; there is no endingSeen)
+    const gate = async (patch) => { await E((p) => { const s = window.__ki.story; Object.assign(s.flags, p); }, patch); await go("lanternmoss"); const r = await talk("l"); await E(() => { const s = window.__ki.story; s.flags.linnetWoke = true; s.flags.lettersDone = true; s.flags.dawn = false; }); return r; };
+    const noL = (r) => !r || !r.lines.some((l) => /^Oh! My locket\./.test(l)); // the hand-in line also says "My locket", so match the greeting exactly
+    { const r0 = await gate({ lettersDone: false }); ok(`${vn}: Locket greeting gated on lettersDone`, noL(r0), JSON.stringify(r0)); }
+    ok(`${vn}: Locket greeting gated on linnetWoke`, noL(await gate({ linnetWoke: false })));
+    const after = await gate({ dawn: true });
+    ok(`${vn}: no Locket greeting after the ending (dawn)`, noL(after), JSON.stringify(after));
+    await go("lanternmoss"); const again = await talk("l");
+    ok(`${vn}: greeting returns with the gate restored`, again && /^Oh! My locket\./.test(again.lines[0]), JSON.stringify(again));
 
     // 3. Mirela re-read line: rare, no EXP
     await go("hushwater");
@@ -138,10 +147,10 @@ try {
     ok(`${vn}: all ${fit.n} barks fit a 3-line bubble`, fit.n >= 170 && fit.bad.length === 0, fit.bad.slice(0, 3).join(" | "));
     ok(`${vn}: all ${fit.codex} codex pages fit the Lens panel`, fit.codex === 26 && fit.cbad.length === 0, fit.cbad.join(","));
     // codex in the Lens tab
-    await page.keyboard.press("Escape"); await E(() => { const u = window.__kiMenu.ui; u.tab = 4; u.sub = ""; u.sel = 0; }); await page.waitForTimeout(100);
+    await page.waitForTimeout(150); await E(() => { const g = window.__ki.game; window.__ki.story.box = null; g.mode = "pause"; const u = window.__kiMenu.ui; u.tab = 4; u.sub = ""; u.sel = 0; }); await page.waitForTimeout(100);
     for (let i = 0; i < 12; i++) { await page.keyboard.press("KeyW"); await page.waitForTimeout(60); if (await E(() => window.__kiMenu.ui.sel > 0)) break; } // W wraps to the last row (Codex)
     await page.keyboard.press("KeyJ"); await page.waitForTimeout(150);
-    const cd = await E(() => ({ sub: window.__kiMenu.ui.sub }));
+    const cd = await E(() => ({ sub: window.__kiMenu.ui.sub, sel: window.__kiMenu.ui.sel, tab: window.__kiMenu.ui.tab, mode: window.__ki.game.mode, box: !!window.__ki.story.box }));
     ok(`${vn}: Lens > Codex opens the codex list`, cd.sub === "codex", JSON.stringify(cd));
     await page.keyboard.press("KeyS"); await page.waitForTimeout(80); await page.keyboard.press("KeyS"); await page.waitForTimeout(150);
     await shot("codex");

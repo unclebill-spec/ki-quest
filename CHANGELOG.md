@@ -7,6 +7,7 @@
 - Story's ambient barks + codex wired in verbatim (src/story/ambient.ts): NPC bark bubbles every 14–24 s, a codex unlock toast, and Lens tab > "Codex n/26". visitedAreas() is backfilled from the existing visited_<id> flags plus progress flags; no new save field.
 - LINNET_LOCKET and MIRELA_REREAD are executor drafts, flagged for Story review.
 - No combat, enemy, balance, controls, palette or sound changes. Tests: 30 suites, 592/592 (new tests/w20.mjs 64/64). boss5 failed 1 check once under full-suite load, then passed 17/17 on two reruns (flake). Shots: /workspace/qa-reports/kq-w20-shots/.
+- W20 Story review (Oct 30): LINNET_LOCKET replaced with Story's text ("Oh! My locket… lamplighter." / "It sat against my collarbone…"). Gate is now linnetWoke && lettersDone && !dawn. There is no endingSeen flag; `dawn` is set when the ending plays (story/index.ts, END chain). MIRELA_REREAD approved unchanged. LINNET_BARKS deferred to W21. tests/w20.mjs 72/72 (adds gate checks incl. none after the ending), letters 19/19, locket 11/11.
 
 ## W19 — 2026-10-30 (executor) — LIVE Oct 30 6:41 PM ET (gh-pages 0645addb46e9, bundle index-B9Z_GqwD.js; deploy main@71829b8; GD OK after EB Rule 19 PASS, qa-reports/kq-w19-71829b8-20261030.md)
 - Linnet: soft glow motes (gold/white sparks, existing particles) drift up around her in Lanternmoss. No sound.

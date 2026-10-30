@@ -115,10 +115,10 @@ export const LETTERS = [
   { x: 44, y: 11, t: "A letter, folded in an old boot · \"If I'm not back by the first frost, keep the graves lit.\"" },
 ];
 
-/** W20 (GD-approved, text only): Linnet's greeting when you come back wearing her Locket. No reward change. Draft for Story review. */
+/** W20 (GD-approved, text only): Linnet's greeting when you come back wearing her Locket. No reward change. Story-approved text (Oct 30). Gate: linnetWoke && lettersDone && !dawn (dawn = ending flag). */
 export const LINNET_LOCKET = [
-  "Oh! You're wearing it. Turn round, let me look. Silver suits you, little lamp.",
-  "It used to tick against my collarbone the whole way west. Keep it warm for me.",
+  "Oh! My locket. Turn round, let me see it on you. Silver suits you, lamplighter.",
+  "It sat against my collarbone the whole way west. Keep it warm for me.",
 ];
 /** W20 (GD-approved): a rare extra line when Mirela re-reads the letters after they're read. No EXP. Draft for Story review. */
 export const MIRELA_REREAD = [

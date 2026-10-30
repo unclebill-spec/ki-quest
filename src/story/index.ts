@@ -288,7 +288,7 @@ export class Story {
     g.swing.step = 0; g.swing.t = 0; g.swing.queued = false;
     const st = g.stats as Record<string, number>; st.talks = (st.talks ?? 0) + 1;
     let lines = def.lines(this.flags);
-    if (id === "l" && this.flags.lettersDone && g.gear.c === "c2") { lines = LINNET_LOCKET; this.flags.locketGreet = ((this.flags.locketGreet as number) || 0) + 1; } // W20: she notices her Locket (text only)
+    if (id === "l" && this.flags.linnetWoke && this.flags.lettersDone && !this.flags.dawn && g.gear.c === "c2") { lines = LINNET_LOCKET; this.flags.locketGreet = ((this.flags.locketGreet as number) || 0) + 1; } // W20: she notices her Locket (text only)
     if (id === "m" && this.flags.lettersRead && this.rnd() < 0.2) { lines = [...lines, MIRELA_REREAD[Math.floor(this.rnd() * MIRELA_REREAD.length)]]; this.flags.rereadN = ((this.flags.rereadN as number) || 0) + 1; } // W20: rare re-read line, no EXP
     bark.t = 0;
     this.say(def.name, lines, () => {
