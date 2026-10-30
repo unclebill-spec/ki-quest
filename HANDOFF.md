@@ -1,5 +1,10 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor N64 Style, W18.1 text-fit fix, 2026-10-29 ~11:55 PM ET) — NOT LIVE
+## RESUME HERE (executor, W18.1 LIVE, 2026-10-30 12:08 AM ET)
+- **LIVE:** W18 + W18.1 from main@9640faa on gh-pages aa4e1e967b69 (bundle index-4Rv7dVvn.js). GD OK after EB PASS (qa-reports/kq-w181-9640faa-20261029.md). Live title shot: /workspace/qa-reports/kq-w181-live-title-20261030.png (0 console errors).
+- **Rollback (to W17l.3):** `git -C /workspace/games/ki-rpg push -f origin 8ea6077e1856ed8c24cb14f412004d55aaeeb015:gh-pages` (tagged `rollback-w17l3`; also gh-pages-prev on origin).
+- **Next batch (GD-approved):** (1) soft glow motes around Linnet (no hum); (2) a short Mirela line at each letter pickup, kept on screen long enough to read; (3) a compass ping toward the next letter; (+) EB note: when a one-line toast sits over a one-line objective, move the toast up a line. Idea 4 (Locket on the hero sprite) waits on Will, via GD.
+
+## (previous) RESUME HERE (executor N64 Style, W18.1 text-fit fix, 2026-10-29 ~11:55 PM ET) — NOT LIVE
 - **W18.1 on main** (fixes EB Rule 19 FAIL on de94d14). Live is still W17l.3 (gh-pages 8ea6077). See CHANGELOG W18.1.
 - The letter toast and objective line wrap (src/textfit.ts, draw.ts, areas/art.ts). Wording unchanged. combat/sprites.ts reverted (Linnet doesn't need it). locket.mjs now checks the Locket count and text fit.
 - Screenshots: /workspace/qa-reports/kq-w181-shots/ (Pixel 7 landscape + portrait, 1280x720; all 4 presets for letter 4). Portrait shows the existing "Turn your phone sideways" overlay.
