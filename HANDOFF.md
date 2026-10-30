@@ -3,7 +3,7 @@
 - **W18 on main** (local + origin main; NOT on gh-pages). Live is still W17l.3 (gh-pages 8ea6077). See CHANGELOG W18.
 - Linnet's Letters merged (final Linnet sheet already in repo, Hearthmoor Art, $0); tests/locket.mjs proves a fresh save gets Linnet's Locket (lettersDone chain had no break). Rewards as before: +100 / +250 EXP + Locket (c2).
 - Auto res idea 1: desktop steps up ~5 s/step below cap-2; phones unchanged. qa-reports/kq-w18-res-measure-20261029.md.
-- **Fun pass: done.** Letter glints, pickup sparkle + chime, bigger 4th-letter stinger, Locket sparkle + equip stinger (UI sfx/particles only). Proposals held for GD are listed in the W18 report (not shipped).
+- **Fun pass: done.** Letter glints, pickup sparkle + chime, bigger 4th-letter stinger, Locket sparkle + equip stinger (UI sfx/particles only). Held for GD (not shipped): (a) Linnet idle glow motes / a soft hum when she's near; (b) a short funny reaction line from Mirela at each letter pickup (story text); (c) a faint Lens/compass ping toward the next letter (overrides GD default 7); (d) a Locket visual on the hero sprite (new look).
 - Tests 499/499 over 28 suites. Boss fights not re-timed: no combat, enemy or balance code changed (diff: story/index.ts letter/Locket juice, resolution.ts, tests).
 - Screenshots: qa-reports/kq-w18-title-20261029.png, qa-reports/kq-w18-linnet-ingame-20261029.png.
 - **Left:** EB Rule 19 check of W18, then GD publish OK (tools/publish-game.sh kq). Rollback target if published: gh-pages 8ea6077 (W17l.3).
