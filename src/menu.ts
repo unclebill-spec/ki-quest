@@ -21,6 +21,7 @@ export const TAB_BAR = { x: 8, y: 6, w: 368 / 8, h: 14 };
 export const ROWS = { x: 14, y: 40, h: 16, w: 170 };
 const MB_SLOT = "kiquest-mb-v1", STORY_KEY = "kiquest.story.v1";
 
+const BARK_NAMES = ["Off", "Low", "Normal"]; // W21
 export const ui = { tab: 0, sel: 0, sub: "" as "" | "pick" | "slot" | "codex", subSel: 0, msg: "", msgT: 0, lastX: 0, lastY: 0 };
 type Ki = { story?: { flags: Record<string, unknown>; save(): void; enter(id: string, atStart?: boolean): void; box?: unknown }; audio?: { muted: boolean; setMute(m: boolean): void } };
 const ki = () => ((globalThis as unknown as { __ki?: Ki }).__ki ?? {}) as Ki;
@@ -63,7 +64,7 @@ function rowCount(g: Game) {
     case "Shop": return Math.max(1, shopRows(g).length);
     case "Lens": return ui.sub === "codex" ? Math.max(1, codexList().length) : bios(g).length + 1; // W20: last row opens the Codex
     case "Map": return 1;
-    case "Options": return 6; // W20: + Reduced flash (last row, so existing row indexes stay put)
+    case "Options": return 7; // W20: + Reduced flash; W21: + Barks (appended last, so existing row indexes stay put)
     case "Save": return ui.sub === "slot" ? SLOT_ACTS.length : SLOT_COUNT + 1;
   }
   return 1;
@@ -116,6 +117,7 @@ export function confirm(g: Game) {
     else if (ui.sel === 2) note(`Resolution: ${cycleRes()}`); // W17l, per device (localStorage)
     else if (ui.sel === 3) dispatchEvent(new Event("kq-quit")); // W17l: main.ts autosaves + shows the title
     else if (ui.sel === 5) { g.flashLow = !g.flashLow; try { localStorage.setItem("kiquest-opt-lowflash", g.flashLow ? "1" : "0"); } catch { /* */ } note(g.flashLow ? "Reduced flash on" : "Reduced flash off"); } // W20
+    else if (ui.sel === 6) { g.barkFreq = (g.barkFreq + 2) % 3; try { localStorage.setItem("kiquest-opt-barks", String(g.barkFreq)); } catch { /* */ } note(`Barks: ${BARK_NAMES[g.barkFreq]}`); } // W21: Normal -> Low -> Off -> Normal
     else g.mode = "play";
   } else if (tab === "Save") {
     if (!ui.sub) { sfx("ui-confirm"); if (ui.sel === SLOT_COUNT) openCode(g, "import"); else { ui.sub = "slot"; ui.subSel = 0; } return; }
@@ -312,8 +314,10 @@ export function drawMenu(c: CanvasRenderingContext2D, g: Game) {
     const L = bios(g), CX = codexList();
     if (ui.sub === "codex") { // W20: Story's codex (src/story/ambient.ts); scrolls 10 rows at a time
       const top = Math.max(0, Math.min(CX.length - 10, ui.subSel - 4));
-      CX.slice(top, top + 10).forEach((e, i) => row(c, R.x, R.y + i * 13, 120, ui.subSel === top + i, e.title.length > 19 ? e.title.slice(0, 18) + "…" : e.title));
-      const e = CX[ui.subSel] ?? CX[0];
+      const st = ki().story, F = (st?.flags ?? {}) as Flags, e = CX[ui.subSel] ?? CX[0];
+      if (e && st && !F[`codexRead_${e.id}`]) { F[`codexRead_${e.id}`] = true; st.save(); } // W21: opening (highlighting) an entry reads it; saved in story flags
+      CX.slice(top, top + 10).forEach((x, i) => { row(c, R.x, R.y + i * 13, 120, ui.subSel === top + i, x.title.length > 17 ? x.title.slice(0, 16) + "…" : x.title);
+        if (!F[`codexRead_${x.id}`]) { c.fillStyle = "#ffd76a"; c.fillRect(R.x + 120 - 7, R.y + i * 13 + 4, 3, 3); } }); // W21: "new" dot
       if (e) { c.font = "7px monospace"; side(c, [...wrapFit(c, e.title, W - 152, "bold 8px monospace"), e.kind[0].toUpperCase() + e.kind.slice(1), "", ...wrapFit(c, e.text, W - 152)].slice(0, 13), "#ffd76a", 146); }
       c.textAlign = "left"; c.font = "7px monospace"; c.fillStyle = "#8a84a0"; c.fillText(`Codex ${CX.length}/${CODEX.length}`, R.x, R.y + 10 * 13 + 4);
     } else {
@@ -333,6 +337,7 @@ export function drawMenu(c: CanvasRenderingContext2D, g: Game) {
     row(c, R.x, R.y + 3 * R.h, R.w, ui.sel === 3, "Quit to title");
     row(c, R.x, R.y + 4 * R.h, R.w, ui.sel === 4, "Resume");
     row(c, R.x, R.y + 5 * R.h, R.w, ui.sel === 5, "Reduced flash", g.flashLow ? "On" : "Off"); // W20
+    row(c, R.x, R.y + 6 * R.h, R.w, ui.sel === 6, "Barks", BARK_NAMES[g.barkFreq]); // W21
     side(c, ["Controls", "Move  WASD / stick", "Melee J · A   Blast K · B", "Block Shift · RB  Tech Q · LB", "Power T/L · Y   Map M · Back", "Pause Esc · Start  Mute N"], "#cfe8ff");
   } else if (tab === "Save") {
     for (let i = 0; i < SLOT_COUNT; i++) {

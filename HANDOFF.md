@@ -1,4 +1,8 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
+## RESUME HERE (executor, W21, 2026-10-30 ~7:06 PM ET) — on branch w21 (rebased on w20@d1aa6f8), NOT on main, NOT LIVE
+- **W21 is on branch `w21`.** W19 is LIVE. Merge order: W20 -> W21, each after EB Rule 19. See CHANGELOG W21.
+- Items: a "letters" map legend; codex "new" dots (story flags codexRead_<id>); Linnet's barks (LINNET_BARKS, gated per linnet_w21.md); Options > Barks Off/Low/Normal (kiquest-opt-barks).
+- Tests: tests/w21.mjs (port 4521). Note: Linnet only exists before dawn, and dayK runs on g.time even then, so her night lines play at night in the pre-dawn world.
 ## RESUME HERE (executor) — W20 LIVE — 2026-10-30 ~8:20 PM ET (executor)
 - main fast-forwarded ebc90cb -> d1aa6f8 (GD OK after EB Rule 19 PASS with notes, qa-reports/kq-w20-d1aa6f8-20261030.md). Published with tools/publish-game.sh kq: gh-pages 0645add (W19) -> ce405aa, bundle assets/index-CDia8cvN.js (was index-B9Z_GqwD.js). Live HTTP 200. Secret scan clean (gitleaks git+dir, extra_secret_patterns).
 - Rollback: `git push -f origin 0645add:gh-pages` (tag rollback-w19; also branch gh-pages-prev = 0645add).

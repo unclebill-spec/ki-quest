@@ -1,4 +1,12 @@
 # Changelog
+## W21 — 2026-10-30 (executor) — on branch w21, awaiting W20 ship + Rule 19 (W19 LIVE; W21 NOT on main, NOT LIVE)
+- Map legend: in Hushwater, while letters are left to find, a small gold dot icon + "letters" (normal UI colour #cfe8ff) sits bottom-left of the map. Gold is only the icon.
+- Codex "new" dots: unread codex entries show a small gold dot in Lens > Codex; highlighting/opening an entry clears it. Saved as story flags `codexRead_<id>` in the existing story save (kiquest.story.v1); no new top-level save field. Titles trimmed to 16 chars + … to make room.
+- Linnet's ambient barks: LINNET_BARKS (13 lines) copied verbatim from staging/story/linnet_w21.md into src/story/ambient.ts, via linnetBark(). Only at the Lanternmoss spring after linnetWoke and never after dawn; lines 9-11 need lettersDone; 12-13 only at night (dayK(g.time) <= 0.35, the existing day/night value). Linnet's exclusion from the bark system is removed.
+- Options > Barks (new last row): Normal (14-24 s gap, as before) -> Low (2x gap) -> Off (none). localStorage kiquest-opt-barks, survives a reload.
+- Fun pass (invisible): Linnet never repeats her last line; other NPCs get one redraw when the same bark comes up twice running.
+- No combat, enemy, balance, controls, palette or sound changes. Tests: full suite 651/654 in one pass under box load ~13-15 (8 cores). The 3 misses were boss2 and boss5 fps-under-4x-throttle (40 and 38 vs 45; no combat code touched) and the known w20 codex-toast flake ("Mirela joins you!" toast first). All three passed on rerun (11/11, 17/17, 72/72), so 654/654. New tests/w21.mjs 54/54. Shots: /workspace/qa-reports/kq-w21-shots/.
+
 ## W20 LIVE — 2026-10-30 ~8:20 PM ET (executor)
 - main fast-forwarded ebc90cb -> d1aa6f8 (GD OK after EB Rule 19 PASS with notes, qa-reports/kq-w20-d1aa6f8-20261030.md). Published with tools/publish-game.sh kq: gh-pages 0645add (W19) -> ce405aa, bundle assets/index-CDia8cvN.js (was index-B9Z_GqwD.js). Live HTTP 200. Secret scan clean (gitleaks git+dir, extra_secret_patterns).
 - Rollback: `git push -f origin 0645add:gh-pages` (tag rollback-w19; also branch gh-pages-prev = 0645add).

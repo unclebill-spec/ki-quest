@@ -353,4 +353,32 @@ export function backfillVisited(f: Flags): number {
   return n;
 }
 
-(globalThis as unknown as { __kiAmbient?: unknown }).__kiAmbient = { AMBIENT, CODEX, visitedAreas, codexUnlocked, backfillVisited }; // W20 test hook
+
+// ---- W21: Linnet's barks, verbatim from staging/story/linnet_w21.md (Hearthmoor Story) ----
+/** W21: Linnet Vant's ambient barks at the hidden spring. */
+export const LINNET_BARKS: { line: string; needs?: "lettersDone"; night?: true }[] = [
+  { line: "Is it morning yet? No? I'll keep waiting. I'm good at it." },
+  { line: "The water hums if you're quiet. Shh. There. Hear it?" },
+  { line: "I walked all this way and then fell asleep. Typical." },
+  { line: "The orbs visit me. Terrible gossips, the lot of them." },
+  { line: "Mind the moss, dear. It's older than I am, and I'm old." },
+  { line: "A spring that never goes dark. I told them I'd find it." },
+  { line: "I meant to bring some home in a jar. Silly old woman." },
+  { line: "My boots went home without me. Mirela wears them better." },
+  { line: "Read my own letters back. My spelling's worse than I recalled.", needs: "lettersDone" },
+  { line: "Look after my girl. She keeps the dead. Someone must keep her.", needs: "lettersDone" },
+  { line: "Go on, lamplighter. Make me a sunrise. I'll be right here.", needs: "lettersDone" },
+  { line: "The stars are out. They never did frighten me.", night: true },
+  { line: "Night again. That's all right. Dawn always comes back.", night: true },
+];
+
+/** W21: one Linnet line. Only after linnetWoke and before dawn (she fades at the ending). needs = flag; night = dayK(t) <= 0.35 (Story's rule). */
+export function linnetBark(f: Flags, t: number, rnd: () => number = Math.random, avoid = ""): string | undefined {
+  if (!f.linnetWoke || f.dawn) return undefined;
+  const night = dayK(t) <= 0.35;
+  const L = LINNET_BARKS.filter((b) => (!b.needs || !!f[b.needs]) && (!b.night || night)).map((b) => b.line);
+  const M = L.length > 1 ? L.filter((l) => l.slice(0, 80) !== avoid) : L; // fun pass: never the same line twice running
+  return M.length ? M[Math.floor(rnd() * M.length)] : undefined;
+}
+
+(globalThis as unknown as { __kiAmbient?: unknown }).__kiAmbient = { AMBIENT, CODEX, visitedAreas, codexUnlocked, backfillVisited, LINNET_BARKS, linnetBark }; // W20/W21 test hook
