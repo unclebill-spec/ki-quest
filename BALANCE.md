@@ -178,3 +178,8 @@ Format: fight_s / hp_lost / berry heals (0 console errors, 0 fails on every run)
 
 ## 2026-10-27 13:40 ET | Game Director | Note: the W17d boss table above is stale
 - Current code (src/game/enemies/types.ts:33,35): Aurel 880 HP, Malachar 1300 HP, per W17k. The 760/1200 values in W17d are outdated.
+
+## 2026-10-29 22:10 ET | Game Director | Auto resolution parked ideas (Kindle Quest Page item 2)
+- Ship idea 1: step up faster while below cap-2 (about 5 s per step), so a desktop gets back to full sharpness in well under 39 s. resolution.ts only, owner N64 Style, in the next small build, with its own EB recheck before deploy.
+- Keep idea 2 parked: don't ban step-ups that fail after more than 10 s (stability beats speed, as on Oct 27). Revisit only if QA sees flapping.
+- Players barely notice either change, so this is a GD call, not a Will question.
