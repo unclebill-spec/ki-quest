@@ -12,7 +12,7 @@ export function setRes(m: ResMode) { try { localStorage.setItem(KEY, m); } catch
 export function cycleRes() { const m = RES_MODES[(RES_MODES.indexOf(getRes()) + 1) % RES_MODES.length]; setRes(m); return m; }
 
 let autoCap = 99; // Auto's current cap (99 = natural cap). Manual presets never step.
-let autoMax = 1, upAt = -1e9, upLevel = 0; const ban = new Map<number, number>(), strikes = new Map<number, number>(); // W17l.2/.3 step-up hysteresis
+let autoCoarse = false, autoMax = 1, upAt = -1e9, upLevel = 0; const ban = new Map<number, number>(), strikes = new Map<number, number>(); // W17l.2/.3 step-up hysteresis
 export const isAuto = () => getRes() === "Auto";
 /** W17l.1: jump straight to the scale the measured fps can afford (cost ~ r^2), at least one step, floor 1x.
  *  W17l.3: if this undoes a step-up from the last 10 s, that level is banned: 30 s, doubling on each repeat failure (cap 8 min).
@@ -37,14 +37,14 @@ export function layout(W: number, H: number, vw: number, vh: number, dpr: number
   const full = Math.max(1, Math.floor(s * dpr)); // largest whole device-pixel scale that fits
   if (mode === "Performance") { const k = s >= 2 ? Math.floor(s) : s; return { r: 1, cssW: W * k, cssH: H * k }; } // pre-W17l behaviour
   const r = mode === "Sharp" ? full : mode === "Balanced" ? Math.max(1, Math.ceil(full / 2)) : Math.min(full, coarse ? 4 : 6, autoCap); // Auto caps cost on phones / 4K, and steps down if slow
-  if (mode === "Auto") { lastAutoR = r; autoMax = Math.min(full, coarse ? 4 : 6); }
+  if (mode === "Auto") { lastAutoR = r; autoMax = Math.min(full, coarse ? 4 : 6); autoCoarse = coarse; }
   if (r === full) return { r, cssW: (W * r) / dpr, cssH: (H * r) / dpr }; // exact device pixels: crisp, even pixel art
   return { r, cssW: W * s, cssH: H * s }; // capped/Balanced: fill the window, browser upscales the rest
 }
 
 // W17l.1/.2 Auto sampling, called once per frame from main.ts. 250 ms samples; single frames >250 ms are one-off
 // hitches and are skipped, as is anything while the tab is hidden. 2 slow samples (<48 fps) in a row step down;
-// 40 fast samples (58+ fps, ~10 s; W17l.3, was 20) step up one level; an area change resets to the natural cap. Returns true to refit.
+// 40 fast samples (58+ fps, ~10 s; W17l.3, was 20) step up one level (W18: 20 samples, ~5 s, while below cap-2); an area change resets to the natural cap. Returns true to refit.
 let slowN = 0, fastN = 0, fpsT = 0, frames = 0, resArea = "";
 export function autoTick(dt: number, playing: boolean, area: string, now = performance.now()): boolean {
   if (!playing || !isAuto() || (typeof document !== "undefined" && document.hidden)) return false;
@@ -55,6 +55,6 @@ export function autoTick(dt: number, playing: boolean, area: string, now = perfo
   const f = frames / (fpsT / 1000); fpsT = 0; frames = 0;
   slowN = f < 48 ? slowN + 1 : 0; fastN = f >= 58 ? fastN + 1 : 0;
   if (slowN >= 2) { slowN = fastN = 0; return autoSlow(f, now); }
-  if (fastN >= 40) { fastN = 0; return autoUp(now); }
+  if (fastN >= (!autoCoarse && lastAutoR < autoMax - 2 ? 20 : 40)) { fastN = 0; return autoUp(now); } // W18: desktop (fine pointer) ~5 s per step while below cap-2, ~10 s near the top; phones keep W17l.3 (a 5 s step at 4x CPU flapped in QA)
   return false;
 }
