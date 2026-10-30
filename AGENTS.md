@@ -48,3 +48,7 @@ Publishing needs Bill's approval.
   `game-qa "https://unclebill-spec.github.io/ki-quest/?qa=ashmaw" --keys games/ki-rpg/qa-keys-ashmaw.json --name kq-ashmaw` (same for hollowmere, warden). ~40 s each; J starts (Continue), Enter clears dialog, then J/K/Shift fight loop.
 - Test: tests/qa-warps.mjs (each warp wakes its boss; sentinel real save keys unchanged).
 - W17d (2026-10-26): boss tuning lives in `Game.TUNE` / `finaleGuard` (src/game.ts). Hits with kx=ky=0 (tests) skip it. Record changes in BALANCE.md. Deploy with /workspace/tools/publish-game.sh (rule 34).
+
+## Project Page (trial through Nov 8, 2026)
+- https://cursor.com/canvas/store-e7d5fd51-5604-4561-8cbf-84d9e2a47985/17096aab-b52a-4f67-b210-3a9fe11e0585
+- Read it before work, update it after (log line + next steps).
