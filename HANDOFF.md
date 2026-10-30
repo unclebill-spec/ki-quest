@@ -1,5 +1,10 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W20, 2026-10-30 ~6:55 PM ET) — on branch w20 (rebased on main@ebc90cb), awaiting EB Rule 19. W19 is LIVE. NOT on main, NOT LIVE
+## RESUME HERE (executor, W21, 2026-10-30 ~7:06 PM ET) — on branch w21 (rebased on w20@d1aa6f8), NOT on main, NOT LIVE
+- **W21 is on branch `w21`.** W19 is LIVE. Merge order: W20 -> W21, each after EB Rule 19. See CHANGELOG W21.
+- Items: a "letters" map legend; codex "new" dots (story flags codexRead_<id>); Linnet's barks (LINNET_BARKS, gated per linnet_w21.md); Options > Barks Off/Low/Normal (kiquest-opt-barks).
+- Tests: tests/w21.mjs (port 4521). Note: Linnet only exists before dawn, and dayK runs on g.time even then, so her night lines play at night in the pre-dawn world.
+
+## (previous) RESUME HERE (executor, W20, 2026-10-30 ~6:55 PM ET) — on branch w20 (rebased on main@ebc90cb), awaiting EB Rule 19. W19 is LIVE. NOT on main, NOT LIVE
 - Rule 19 prep done: toast gap fix, barks/ground/w20 test fixes (see CHANGELOG W20). ground.mjs: `node tests/ground.mjs after midquest` for the motes+compass fps run.
 - **W20 is on branch `w20`** (cut from main@71829b8). Merge only after W19 ships + EB Rule 19. See CHANGELOG W20.
 - Items: a Linnet Locket greeting; a Letters n/4 map marker; a rare Mirela re-read line; a compass sparkle + Reduced flash option; Story barks + codex (Lens > Codex).

@@ -310,9 +310,12 @@ export function areaMap(c: C2, g: Game, ox: number, oy: number, s: number) {
   for (const n of a.npcs) { c.fillStyle = "#6aff8a"; c.fillRect(ox + (n.x / TILE) * s - 1.5, oy + (n.y / TILE) * s - 1.5, 3, 3); }
   for (const e of g.enemies) if (!e.dead) { c.fillStyle = "#ff4a4a"; c.fillRect(ox + (e.x / TILE) * s - 1, oy + (e.y / TILE) * s - 1, 2, 2); }
   c.fillStyle = g.frame & 16 ? "#fff" : "#ffd04a"; c.fillRect(ox + (g.p.x / TILE) * s - 2, oy + (g.p.y / TILE) * s - 2, 4, 4);
-  hudText.mapLetters = ""; const F = st?.flags; // W20: Linnet's Letters count on the map while the hunt is on (n/4)
+  hudText.mapLetters = ""; hudText.mapLegend = ""; const F = st?.flags; // W20: Linnet's Letters count on the map while the hunt is on (n/4)
   if (F?.lettersQ && !F.lettersDone) { const n = Math.min(4, (F.lettersN as number) || 1), t = F.lettersRead ? "Letters 4/4 · read" : `Letters ${n}/4`;
     if (a.id === "hushwater" && !F.lettersRead) LETTERS.forEach((l, i) => { if (!F[`letter_${i + 1}`]) { c.fillStyle = "#ffd04a"; c.fillRect(ox + (l.x + 0.5) * s - 1.5, oy + (l.y + 0.5) * s - 1.5, 3, 3); } });
+    if (a.id === "hushwater" && !F.lettersRead && LETTERS.some((_, i) => !F[`letter_${i + 1}`])) { // W21 legend: gold only as the small icon, text in the normal UI colour
+      const yb = oy + 34 * s + 2, lt = "letters"; c.font = "7px monospace"; c.textAlign = "left"; const lw = c.measureText(lt).width + 13;
+      c.fillStyle = "rgba(10,8,20,.8)"; c.fillRect(ox, yb, lw, 10); c.fillStyle = "#ffd04a"; c.fillRect(ox + 3, yb + 3.5, 3, 3); c.fillStyle = "#cfe8ff"; c.fillText(lt, ox + 9, yb + 8); hudText.mapLegend = lt; }
     c.font = "bold 7px monospace"; c.textAlign = "right"; const w = c.measureText(t).width + 8, x = ox + M * s;
     c.fillStyle = "rgba(10,8,20,.8)"; const yb = oy + 34 * s + 2; c.fillRect(x - w, yb, w, 10); c.fillStyle = "#ffd76a"; c.fillText(t, x - 4, yb + 8); c.textAlign = "left"; hudText.mapLetters = t; }
 }

@@ -8,7 +8,7 @@ import type { Game } from "../game";
 import type { Input } from "../input";
 import { buildArea, setWardOpen, zoneAt, TILE } from "../world";
 import { INTRO, NPCS, Flags, LETTERS, LETTER_QUIPS, LINNET_LOCKET, MIRELA_REREAD } from "./script";
-import { ambientBark, backfillVisited, CODEX, codexUnlocked } from "./ambient"; // W20
+import { ambientBark, linnetBark, backfillVisited, CODEX, codexUnlocked } from "./ambient"; // W20
 import { sfx } from "../menu";
 import { hud as hudText } from "../textfit";
 import { CH_INTERACT, K_RING, K_SPARK, C_GOLD, C_WHITE } from "../vendor/particles";
@@ -226,7 +226,7 @@ export class Story {
     }
     if ((this.codexT -= 1 / 60) <= 0) { this.codexT = 0.5; this.codexCheck(); } // W20: visited_ backfill + codex unlocks, twice a second
     if (bark.t > 0) bark.t -= 1 / 60;
-    if ((this.barkT -= 1 / 60) <= 0) { this.barkT = 14 + this.rnd() * 10; this.bark(); } // W20 ambient barks
+    if (g.barkFreq > 0 && (this.barkT -= 1 / 60) <= 0) { this.barkT = (14 + this.rnd() * 10) * (g.barkFreq === 1 ? 2 : 1); this.bark(); } // W20 ambient barks; W21 Options: Off / Low (2x gap) / Normal
     if (g.area.id === "lanternmoss") { const n = g.area.npcs.find((q) => q.id === "l"); // W19: soft glow motes drift up around Linnet (particles only, no sound)
       if (n && g.frame % 9 === 0) { const a = (g.frame * 0.37) % (Math.PI * 2); g.parts.emit(CH_INTERACT, K_SPARK, n.x + Math.cos(a) * 9, n.y - 10 + Math.sin(a) * 6, Math.cos(a) * 3, -9, 1.1, (g.frame / 9) & 1 ? C_WHITE : C_GOLD); motes.n++; } }
     for (const s of g.area.springs) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 14) {
@@ -266,14 +266,18 @@ export class Story {
   bark(force = false) {
     const g = this.g, F = this.flags;
     if (!force && (this.box || g.mode !== "play" || g.toastT > 0 || g.bannerT > 0)) return false;
-    const text = ambientBark(g.area.id, F, g.time, this.rnd); if (!text) return false;
+    if (!force && g.barkFreq === 0) return false; // W21: Options > Barks Off
     let npc = "", who = "";
     if (g.area.id !== "husk") {
       let best = 1e9;
-      for (const n of g.area.npcs) { const d = Math.hypot(n.x - g.p.x, n.y - g.p.y); if (d < 150 && d < best && n.id !== "l") { best = d; npc = n.id; } }
+      for (const n of g.area.npcs) { const d = Math.hypot(n.x - g.p.x, n.y - g.p.y); if (d < 150 && d < best) { best = d; npc = n.id; } } // W21: Linnet included
       if (!npc) return false;
       who = NPCS[g.area.id]?.[npc]?.name ?? "";
     }
+    const prev = (F.lastBark as string) || "";
+    const one = () => (npc === "l" ? (g.area.id === "lanternmoss" ? linnetBark(F, g.time, this.rnd, prev) : undefined) : ambientBark(g.area.id, F, g.time, this.rnd));
+    let text = one(); if (text && npc !== "l" && text.slice(0, 80) === prev) text = one() ?? text; // W21 fun pass: a second draw so the same line rarely plays twice running
+    if (!text) return false;
     bark.text = text; bark.who = who; bark.npc = npc; bark.t = 4.5;
     F.barksHeard = ((F.barksHeard as number) || 0) + 1; F.lastBark = text.slice(0, 80); this.save();
     return true;
