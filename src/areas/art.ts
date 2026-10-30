@@ -238,6 +238,7 @@ export function worldGlow(c: C2, g: Game, cx: number, cy: number, glow: (c: C2, 
   }
 }
 
+const objPrev = { s: "", t: -9 }; // W19
 function wrap(c: C2, s: string, w: number) {
   const out: string[] = []; let line = "";
   for (const word of s.split(" ")) { const t = line ? line + " " + word : word; if (c.measureText(t).width > w && line) { out.push(line); line = word; } else line = t; }
@@ -254,9 +255,12 @@ export function storyOverlay(c: C2, g: Game, s: Story, W: number, H: number) {
     CREDITS.forEach((l, i) => { const y = H + 10 + i * 14 - t * 16; if (y < -12 || y > H + 12) return; c.fillStyle = l.startsWith("#") ? "#fff6dc" : "#3a2440"; c.font = l.startsWith("#") ? "bold 10px monospace" : "8px monospace"; c.fillText(l.replace(/^#/, ""), W / 2, y); });
     c.font = "8px monospace"; c.fillStyle = "rgba(58,36,64,.8)"; c.fillText("(J / Start to skip)", W / 2, H - 10); c.restore(); return;
   }
+  hudText.objBox = null; // W19
   if (g.mode === "play" && !s.active) {
     const L = wrapText(c, s.objective(), W - 12); c.textAlign = "right"; hudText.objLines = L.length; // W18.1: wraps instead of running off the left edge
-    L.forEach((o, i) => { const y = H - 10 - (L.length - 1 - i) * 10, w = c.measureText(o).width + 8; c.fillStyle = "rgba(10,8,20,.55)"; c.fillRect(W - w, y - 2, w, 10 + (i === L.length - 1 ? 2 : 0)); c.fillStyle = "#ffe9a8"; c.fillText(o, W - 4, y); });
+    const oj = L.join(" "); if (oj !== objPrev.s) { objPrev.s = oj; objPrev.t = g.time; } const fl = g.time - objPrev.t < 0.6 && g.frame & 8; // W19 fun pass: a new objective blinks gold for 0.6 s
+    hudText.objBox = L.length ? { x: W - Math.max(...L.map((o) => c.measureText(o).width + 8)), y: H - 12 - (L.length - 1) * 10, w: Math.max(...L.map((o) => c.measureText(o).width + 8)), h: 12 + (L.length - 1) * 10 } : null;
+    L.forEach((o, i) => { const y = H - 10 - (L.length - 1 - i) * 10, w = c.measureText(o).width + 8; c.fillStyle = "rgba(10,8,20,.55)"; c.fillRect(W - w, y - 2, w, 10 + (i === L.length - 1 ? 2 : 0)); c.fillStyle = fl ? "#ffd04a" : "#ffe9a8"; c.fillText(o, W - 4, y); });
     const n = s.near ? g.area.npcs.find((q) => q.id === s.near) : undefined; /* guard: near can be stale for one frame after an area change or a hide-until-flag NPC leaving */
     if (n) { const d = NPCS[g.area.id]?.[n.id]; const X = n.x - Math.round(Math.max(0, Math.min(48 * 16 - W, g.p.x - W / 2))), Y = n.y - Math.round(Math.max(0, Math.min(34 * 16 - H, g.p.y - 16 - H / 2))) - 36;
       if (d) { c.textAlign = "center"; c.fillStyle = "rgba(10,8,20,.75)"; const t = "Talk: " + d.name.split(" ")[0]; const w = c.measureText(t).width + 6; c.fillRect(X - w / 2, Y - 1, w, 10); c.fillStyle = "#9fe8ff"; c.fillText(t, X, Y); } }

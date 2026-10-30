@@ -1,5 +1,5 @@
 {
- "note": "Ki Quest character sheets. Each <name>.json lists every frame (x,y,w,h). Layout: one row per anim x facing (facings down,up,left,right), column = frame index. right = left mirrored. pivot = feet.",
+ "note": "Kindle Quest character sheets. Each <name>.json lists every frame (x,y,w,h). Layout: one row per anim x facing (facings down,up,left,right), column = frame index. right = left mirrored. pivot = feet.",
  "sheets": {
   "brann": {
    "png": "art/chars/brann.png",

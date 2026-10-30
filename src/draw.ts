@@ -191,8 +191,16 @@ function hud(c: CanvasRenderingContext2D, g: Game) {
     c.globalAlpha = Math.min(1, g.bannerT); c.fillStyle = "#000a"; c.fillRect(W / 2 - 80, 40, 160, 18);
     c.font = "bold 10px monospace"; c.fillStyle = "#e8dcff"; c.fillText(g.banner, W / 2, 53); c.globalAlpha = 1;
   }
-  if (g.toastT > 0 && !talk) { c.font = "8px monospace"; const L = wrapText(c, g.toast, W - 24), w = Math.max(...L.map((l) => c.measureText(l).width)) + 12, up = (L.length - 1) * 10 + (L.length > 1 || hudText.objLines > 1 ? (hudText.objLines - 1) * 10 + 2 : 0); // W18.1: wrapped, above a wrapped objective
-    c.fillStyle = "#000c"; c.fillRect(W / 2 - w / 2, H - 22 - up, w, 13 + (L.length - 1) * 10); c.fillStyle = "#fff"; L.forEach((l, i) => c.fillText(l, W / 2, H - 12 - up + i * 10)); }
+  { const cp = hudText.compass, T = cp.target; cp.shown = false; // W19 compass ping: a gold chevron beside the hero, pointing at the next letter; pulses every 1.2 s
+    if (T && g.mode === "play" && !talk) { const cx = Math.round(Math.max(0, Math.min(MW * TILE - W, g.p.x - W / 2))), cy = Math.round(Math.max(0, Math.min(MH * TILE - H, g.p.y - 16 - H / 2)));
+      const ph = (g.time % 1.2) / 1.2, r = 20 + ph * 6, x = g.p.x - cx + Math.cos(T.a) * r, y = g.p.y - 8 - cy + Math.sin(T.a) * r;
+      c.save(); c.globalAlpha = 0.9 - ph * 0.6; c.translate(x, y); c.rotate(T.a); c.fillStyle = "#ffd04a"; c.beginPath(); c.moveTo(5, 0); c.lineTo(-3, -4); c.lineTo(-1, 0); c.lineTo(-3, 4); c.closePath(); c.fill(); c.restore();
+      cp.shown = true; cp.x = x; cp.y = y; } }
+  hudText.toastBox = null;
+  if (g.toastT > 0 && !talk) { c.font = "8px monospace"; const L = wrapText(c, g.toast, W - 24), w = Math.max(...L.map((l) => c.measureText(l).width)) + 12, up = (L.length - 1) * 10 + (L.length === 1 && hudText.objLines === 1 && hudText.objBox ? 10 : L.length > 1 || hudText.objLines > 1 ? (hudText.objLines - 1) * 10 + 2 : 0); // W18.1: wrapped, above a wrapped objective; W19: a 1-line toast over a 1-line objective moves up one line
+    const a = Math.min(1, g.toastT * 3); // W19 fun pass: toast fades out instead of vanishing
+    c.globalAlpha = a; c.fillStyle = "#000c"; c.fillRect(W / 2 - w / 2, H - 22 - up, w, 13 + (L.length - 1) * 10); c.fillStyle = "#fff"; L.forEach((l, i) => c.fillText(l, W / 2, H - 12 - up + i * 10)); c.globalAlpha = 1;
+    hudText.toastBox = { x: W / 2 - w / 2, y: H - 22 - up, w, h: 13 + (L.length - 1) * 10 }; }
   if (g.levelT > 0) { c.font = "bold 14px monospace"; c.fillStyle = "#ffe14a"; c.fillText("LEVEL UP!", W / 2, 80); }
 }
 /** Legacy status rows. Moved off-canvas in HD2D W14 so main.ts's old tap handler never fires; menu.ts handles taps. */

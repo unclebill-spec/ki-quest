@@ -7,13 +7,15 @@ import { CREDITS_T } from "../areas/art";
 import type { Game } from "../game";
 import type { Input } from "../input";
 import { buildArea, setWardOpen, zoneAt, TILE } from "../world";
-import { INTRO, NPCS, Flags, LETTERS } from "./script";
+import { INTRO, NPCS, Flags, LETTERS, LETTER_QUIPS } from "./script";
 import { sfx } from "../menu";
+import { hud as hudText } from "../textfit";
 import { CH_INTERACT, K_RING, K_SPARK, C_GOLD, C_WHITE } from "../vendor/particles";
 /** W18 fun pass: a ring of sparkles (interact channel, approved particle palette only). */
 const burst = (g: Game, x: number, y: number, n: number, v: number) => { for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; g.parts.emit(CH_INTERACT, i & 1 ? K_RING : K_SPARK, x, y, Math.cos(a) * v, Math.sin(a) * v * 0.7 - 20, 0.55, i % 3 ? C_GOLD : C_WHITE); } };
 
 const KEY = "kiquest.story.v1";
+const { compass, motes } = hudText; // W19 (state lives in textfit.ts so draw.ts needs no story import)
 type Box = { who: string; lines: string[]; i: number; t: number; then?: () => void };
 
 const F0 = (f: Record<string, unknown>) => !!f.dawn;
@@ -202,9 +204,20 @@ export class Story {
       if (!F[k] && d < 14) {
         F[k] = true; F.lettersN = ((F.lettersN as number) || 1) + 1; this.save();
         burst(g, lx, ly - 4, (F.lettersN as number) >= 4 ? 12 : 8, (F.lettersN as number) >= 4 ? 70 : 45); sfx((F.lettersN as number) >= 4 ? "ui-save" : "ui-confirm"); // W18 fun pass
-        g.say(`${l.t} (${F.lettersN}/4)${(F.lettersN as number) >= 4 ? " · bring them to Mirela" : ""}`, 3);
+        g.say(`${l.t} (${F.lettersN}/4)${(F.lettersN as number) >= 4 ? " · bring them to Mirela" : ""} · ${LETTER_QUIPS[Math.min(2, (F.lettersN as number) - 2)]}`, 4.5); // W19: Mirela line, longer so it can be read
       }
     });
+    { // W19 compass ping: points to the nearest uncollected letter while the hunt is on; gone at 4/4
+      let best: { x: number; y: number; d: number } | null = null;
+      if (g.area.id === "hushwater" && F.lettersQ && !F.lettersRead && ((F.lettersN as number) || 1) < 4) LETTERS.forEach((l, i) => {
+        if (F[`letter_${i + 1}`]) return; const x = l.x * 16 + 8, y = l.y * 16 + 8, d = Math.hypot(x - g.p.x, y - g.p.y);
+        if (!best || d < best.d) best = { x, y, d };
+      });
+      const b = best as { x: number; y: number; d: number } | null;
+      compass.target = b && b.d > 40 ? { x: b.x, y: b.y, a: Math.atan2(b.y - g.p.y, b.x - g.p.x) } : null;
+    }
+    if (g.area.id === "lanternmoss") { const n = g.area.npcs.find((q) => q.id === "l"); // W19: soft glow motes drift up around Linnet (particles only, no sound)
+      if (n && g.frame % 9 === 0) { const a = (g.frame * 0.37) % (Math.PI * 2); g.parts.emit(CH_INTERACT, K_SPARK, n.x + Math.cos(a) * 9, n.y - 10 + Math.sin(a) * 6, Math.cos(a) * 3, -9, 1.1, (g.frame / 9) & 1 ? C_WHITE : C_GOLD); motes.n++; } }
     for (const s of g.area.springs) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 14) {
       if (!this.flags.spring) { this.flags.spring = true; g.pts += 3; this.save(); g.say("Hidden Wellspring found · +3 stat points", 3); }
       else if (g.hp < g.maxHp || g.ep < g.maxEp) g.say("The spring restores you", 1.2);

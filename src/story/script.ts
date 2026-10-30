@@ -95,6 +95,12 @@ export const NPCS: Record<string, Record<string, NpcDef>> = {
 };
 
 /** W17f Linnet's Letters: Mirela reads her grandmother's letters (needs lettersN >= 4). */
+/** W19: a short Mirela line at each letter pickup (index = letters held - 2). Shown in the toast, wrapped to fit (src/textfit.ts). */
+export const LETTER_QUIPS = [
+  'Mirela: "Wet, but readable. Keep going."',
+  'Mirela: "Same small hand. Who writes this small?"',
+  'Mirela: "That\'s all of them. Bring them. Now. Please."',
+];
 export const LETTERS_READ = [
   "Where did you get these? ...That's my grandmother's hand. She crossed her sevens. Nobody else crosses their sevens.",
   "'Little lamp.' She called me that. I was six. She said she'd find a spring that never went dark and bring some back in a jar.",

@@ -1,4 +1,14 @@
 # Changelog
+## W19 — 2026-10-30 (executor) — awaiting Rule 19 (NOT LIVE; live is still W18.1)
+- Linnet: soft glow motes (gold/white sparks, existing particles) drift up around her in Lanternmoss. No sound.
+- Letter pickups: each pickup toast now ends with a short Mirela line (script.ts LETTER_QUIPS) and stays 4.5 s (was 3 s). Wrapped by src/textfit.ts: max 347/360 wide, 2-3 lines, fully on screen at Pixel 7 and 1280x720.
+- Compass ping: while hunting letters in Hushwater, a gold chevron beside the hero points to the nearest uncollected letter and pulses every 1.2 s. Hidden within 40 px of it and gone at 4/4.
+- Overlap fix: a 1-line toast over a 1-line objective moves up one line (draw.ts). Multi-line layout is unchanged from W18.1.
+- Title: "Stage 1 · grey-box" replaced with "Burning Bush Productions".
+- Names (NAMES.md): frames.json note "Ki Quest" -> "Kindle Quest". The other files NAMES.md lists already had no "Ki Quest". Ids, the /ki-quest/ path, save/localStorage keys and file names are unchanged.
+- Fun pass: toasts fade out instead of vanishing; a new objective blinks gold for 0.6 s. (The motes and compass ping are GD items.) Existing palette only; no rules, numbers, controls or sounds changed.
+- No combat, enemy, balance or combat/sprites.ts changes. Tests: 29 suites, 528/528 (was 501 + new tests/w19.mjs 27/27; letters 19/19, locket 11/11). live.mjs 0 errors; ground.mjs 46.3 fps @4x with 0 errors under box load 15 (W18.1 base measured 52.7 in the same window). Shots: /workspace/qa-reports/kq-w19-shots/.
+
 ## W18.1 — 2026-10-29 (executor) — LIVE Oct 30 12:08 AM ET (gh-pages aa4e1e9, bundle index-4Rv7dVvn.js; GD OK after EB PASS; includes W18)
 - Text layout only: new src/textfit.ts word-wrap. The toast renderer (draw.ts) wraps at 360 of the 384 base width and stacks lines upward, above a wrapped objective. The objective line (areas/art.ts) wraps at 372, right-aligned. Wording unchanged. Letter 4 toast (583 wide) and objective (458-549 wide) now take 2 lines each, at every resolution preset on Pixel 7 and 1280x720.
 - combat/sprites.ts: reverted to main@33f97ae. Linnet commit f7608bb had changed frame keys from `${anim}_${facing}_${i}` to the frame name minus the "<sheet>_" prefix. linnet.json carries anim/facing/i, and those give the same keys, so W18 did not need it.
