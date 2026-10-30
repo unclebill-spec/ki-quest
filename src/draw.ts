@@ -197,7 +197,7 @@ function hud(c: CanvasRenderingContext2D, g: Game) {
       c.save(); c.globalAlpha = 0.9 - ph * 0.6; c.translate(x, y); c.rotate(T.a); c.fillStyle = "#ffd04a"; c.beginPath(); c.moveTo(5, 0); c.lineTo(-3, -4); c.lineTo(-1, 0); c.lineTo(-3, 4); c.closePath(); c.fill(); c.restore();
       cp.shown = true; cp.x = x; cp.y = y; } }
   hudText.toastBox = null;
-  if (g.toastT > 0 && !talk) { c.font = "8px monospace"; const L = wrapText(c, g.toast, W - 24), w = Math.max(...L.map((l) => c.measureText(l).width)) + 12, up = (L.length - 1) * 10 + (L.length === 1 && hudText.objLines === 1 && hudText.objBox ? 10 : L.length > 1 || hudText.objLines > 1 ? (hudText.objLines - 1) * 10 + 2 : 0); // W18.1: wrapped, above a wrapped objective; W19: a 1-line toast over a 1-line objective moves up one line
+  if (g.toastT > 0 && !talk) { c.font = "8px monospace"; const L = wrapText(c, g.toast, W - 24), w = Math.max(...L.map((l) => c.measureText(l).width)) + 12, up = (L.length - 1) * 10 + (L.length === 1 && hudText.objLines === 1 && hudText.objBox ? 10 : L.length > 1 || hudText.objLines > 1 ? (hudText.objLines - 1) * 10 + 4 : 0); // W20 (EB W19 note): +4 not +2, so a wrapped toast clears a wrapped objective by 1 base px; W18.1: wrapped, above a wrapped objective; W19: a 1-line toast over a 1-line objective moves up one line
     const a = Math.min(1, g.toastT * 3); // W19 fun pass: toast fades out instead of vanishing
     c.globalAlpha = a; c.fillStyle = "#000c"; c.fillRect(W / 2 - w / 2, H - 22 - up, w, 13 + (L.length - 1) * 10); c.fillStyle = "#fff"; L.forEach((l, i) => c.fillText(l, W / 2, H - 12 - up + i * 10)); c.globalAlpha = 1;
     hudText.toastBox = { x: W / 2 - w / 2, y: H - 22 - up, w, h: 13 + (L.length - 1) * 10 }; }

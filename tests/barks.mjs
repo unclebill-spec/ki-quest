@@ -50,7 +50,8 @@ try {
   await page.waitForTimeout(400);
   const tf = await E(async () => { const g = window.__ki.game, M = globalThis.__kiMB, A = window.__ki.audio; M.resetBarks(); g.time += 10; A.setMute(false); A.setMusic(""); A.setMusic("area1-theme");
     g.tf = 100; const did = M.transform(g); g.p.inv = 0; g.hurtHero(1, g.p.x + 10, g.p.y); const busy = M.barkLog.skippedBusy;
-    await new Promise((r) => setTimeout(r, 150)); const gain = A.music.gain.value, until = A.duckUntil - A.ctx.currentTime;
+    // W20: wait for the audio clock to move past the duck start (under load it can sit at ~0.01 s for >150 ms, and gain.value only shows the automation once the audio thread renders)
+    const t0 = A.ctx.currentTime; await new Promise((r) => setTimeout(r, 150)); for (let i = 0; i < 40 && A.ctx.currentTime < t0 + 0.1; i++) await new Promise((r) => setTimeout(r, 50)); const gain = A.music.gain.value, until = A.duckUntil - A.ctx.currentTime;
     return { did, tfs: M.barkLog.played.filter((n) => n.endsWith("-transform")).sort().join(), busy, hurtAfter: M.barkLog.played.filter((n) => n === "bark-rook-hurt").length, gain: +gain.toFixed(3), until: +until.toFixed(2), played: A.played.filter((n) => n.startsWith("bark-") && n.endsWith("transform")).length }; });
   ok("transform barks for the party", tf.did && tf.tfs === "bark-brann-transform,bark-mirela-transform,bark-rook-transform,bark-sable-transform" && tf.played === 4, JSON.stringify(tf));
   ok("transform bark ducks the music 6 dB while it plays", Math.abs(tf.gain - 0.225) < 0.01 && tf.until > 1, JSON.stringify(tf));

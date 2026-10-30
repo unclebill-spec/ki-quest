@@ -1,5 +1,6 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W20, 2026-10-30 ~5:45 PM ET) — on branch w20, NOT on main, NOT LIVE
+## RESUME HERE (executor, W20, 2026-10-30 ~6:55 PM ET) — on branch w20 (rebased on main@ebc90cb), awaiting EB Rule 19. W19 is LIVE. NOT on main, NOT LIVE
+- Rule 19 prep done: toast gap fix, barks/ground/w20 test fixes (see CHANGELOG W20). ground.mjs: `node tests/ground.mjs after midquest` for the motes+compass fps run.
 - **W20 is on branch `w20`** (cut from main@71829b8). Merge only after W19 ships + EB Rule 19. See CHANGELOG W20.
 - Items: a Linnet Locket greeting; a Letters n/4 map marker; a rare Mirela re-read line; a compass sparkle + Reduced flash option; Story barks + codex (Lens > Codex).
 - Story review needed: LINNET_LOCKET and MIRELA_REREAD in script.ts are executor drafts.

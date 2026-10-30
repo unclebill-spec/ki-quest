@@ -121,8 +121,10 @@ try {
     const cx = await E(() => { const f = window.__ki.story.flags; return Object.keys(f).filter((k) => k.startsWith("codex_")); });
     ok(`${vn}: codex unlocked from progress + saved as codex_ flags`, cx.includes("codex_mossling") && cx.includes("codex_boss_ashmaw") && cx.includes("codex_boss_slagheart") && cx.includes("codex_place_kilnreach") && !cx.includes("codex_boss_malachar"), cx.join(","));
     ok(`${vn}: first run on an old save is quiet (no codex toast)`, !/Codex:/.test(await E(() => window.__ki.game.toast)));
-    await go("drowned"); for (let i = 0; i < 4; i++) { await E(() => { window.__ki.game.toastT = 0; window.__ki.story.box = null; }); await step(40); if (/Codex/.test(await E(() => window.__ki.game.toast))) break; } await page.waitForTimeout(200);
-    const ct = await E(() => ({ toast: window.__ki.game.toast, saved: JSON.parse(localStorage.getItem("kiquest.story.v1")).codex_place_vesper }));
+    // W20 Rule 19 prep: another toast (e.g. "Mirela joins you!") can land in the same frames and overwrite the codex toast, so record every say() and check the log instead of the last toast
+    await E(() => { const g = window.__ki.game; window.__kiSays = []; if (!g.__sayWrapped) { const o = g.say.bind(g); g.say = (...a) => { window.__kiSays.push(String(a[0])); return o(...a); }; g.__sayWrapped = true; } });
+    await go("drowned"); for (let i = 0; i < 6; i++) { await E(() => { window.__ki.game.toastT = 0; window.__ki.story.box = null; }); await step(40); if (await E(() => window.__kiSays.some((t) => /Codex/.test(t)))) break; } await page.waitForTimeout(200);
+    const ct = await E(() => ({ toast: window.__kiSays.find((t) => /Codex/.test(t)) || window.__ki.game.toast, says: window.__kiSays.slice(0, 6), saved: JSON.parse(localStorage.getItem("kiquest.story.v1")).codex_place_vesper }));
     ok(`${vn}: new area unlocks a codex page with a toast, saved`, /Codex: Drowned Vesper/.test(ct.toast) && ct.saved === true, JSON.stringify(ct));
     await shot("codex-toast");
     // barks

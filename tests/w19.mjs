@@ -50,7 +50,7 @@ try {
       if (fits.at(-1).n < 4) { const rem = L.filter(([a, b]) => !(a === x && b === y)); ok(`${vn}: compass moves on after letter ${fits.at(-1).n}`, nx && !(nx && Math.hypot(nx.x - (x * 16 + 8), nx.y - (y * 16 + 8)) < 1)); }
     }
     await shot("letter4-mirela");
-    for (const f of fits) ok(`${vn}: pickup ${f.n}/4 has Mirela's line and fits (${f.lines} lines, ${f.max.toFixed(0)}/360 wide)`, /Mirela: "/.test(f.toast) && f.max <= 360 && f.box && f.box.y >= 0 && f.box.x >= 0 && f.box.x + f.box.w <= 384 && (!f.obj || f.box.y + f.box.h <= f.obj.y + 1), JSON.stringify(f));
+    for (const f of fits) ok(`${vn}: pickup ${f.n}/4 has Mirela's line and fits (${f.lines} lines, ${f.max.toFixed(0)}/360 wide)`, /Mirela: "/.test(f.toast) && f.max <= 360 && f.box && f.box.y >= 0 && f.box.x >= 0 && f.box.x + f.box.w <= 384 && (!f.obj || f.obj.y - (f.box.y + f.box.h) >= 1), JSON.stringify(f));
     ok(`${vn}: 4/4 reached`, fits.at(-1).n === 4);
     ok(`${vn}: compass gone once all 4 letters are collected`, await E(() => window.__kiText.hud.compass.target === null && !window.__kiText.hud.compass.shown));
     // overlap: one-line toast over one-line objective

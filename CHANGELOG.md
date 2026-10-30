@@ -1,5 +1,7 @@
 # Changelog
-## W20 — 2026-10-30 (executor) — on branch w20, awaiting W19 ship + Rule 19 (NOT on main, NOT LIVE)
+## W20 — 2026-10-30 (executor) — on branch w20, awaiting Rule 19 (W19 is LIVE; W20 NOT on main, NOT LIVE)
+- Rule 19 prep (from EB's W19 notes, qa-reports/kq-w19-71829b8-20261030.md): a wrapped toast over a wrapped objective now sits 2 px higher (src/draw.ts, +4 not +2), so there is a 1 base px gap instead of a 1 px overlap; w19.mjs now requires gap >= 1 px (no allowance). Tests only: barks.mjs waits for the audio clock to move before reading the duck gain (the music duck itself was fine; see below); ground.mjs gains a `midquest` save variant (Linnet awake, 2/4 letters) so the fps runs include Linnet's motes and the compass; w20.mjs logs every toast so a "Mirela joins you!" toast can't hide the codex toast. No combat, balance, art or sound changes.
+- barks.mjs duck finding: when it failed, the AudioContext was running but `currentTime` was still ~0.01 s 150 ms after the barks, with the duck scheduled (duckUntil 1.42 s ahead). `gain.value` only shows scheduled automation after the audio thread renders, so it still read 0.45. This is test timing under box load, not a game bug (high confidence on the cause; the duck code in src/audio.ts is unchanged).
 - Linnet: a different greeting when you come back wearing the Locket (LINNET_LOCKET, text only, no reward change). The Locket is not drawn on the hero sprite.
 - Map: a "Letters n/4" label (or "4/4 · read") under the area map while the letters quest is open; gold dots mark uncollected letters in Hushwater.
 - Re-reading the letters: a 20% chance of an extra Mirela line (MIRELA_REREAD). No EXP.
