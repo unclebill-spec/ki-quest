@@ -2,7 +2,7 @@
 import type { Game } from "../game";
 import type { Story } from "../story";
 import { TILE, MW, MH, T_FLOOR, T_WALL, T_MOSS, T_PLAZA, T_WATER, T_PATH, T_BOARD, T_WARD, T_HIDDEN, wardOpen } from "../world";
-import { NPCS, INTRO } from "../story/script";
+import { NPCS, INTRO, LETTERS } from "../story/script";
 import { wrap as wrapText, hud as hudText } from "../textfit";
 import { sheet, drawSprite } from "../game/combat/sprites";
 import { groundSet, drawGround, type GroundSet, type Kind } from "./groundgen";
@@ -258,10 +258,20 @@ export function storyOverlay(c: C2, g: Game, s: Story, W: number, H: number) {
   hudText.objBox = null; // W19
   if (g.mode === "play" && !s.active) {
     const L = wrapText(c, s.objective(), W - 12); c.textAlign = "right"; hudText.objLines = L.length; // W18.1: wraps instead of running off the left edge
-    const oj = L.join(" "); if (oj !== objPrev.s) { objPrev.s = oj; objPrev.t = g.time; } const fl = g.time - objPrev.t < 0.6 && g.frame & 8; // W19 fun pass: a new objective blinks gold for 0.6 s
+    const oj = L.join(" "); if (oj !== objPrev.s) { objPrev.s = oj; objPrev.t = g.time; } const fl = g.time - objPrev.t < 0.6 && (g.flashLow ? g.time - objPrev.t < 0.3 : g.frame & 8); // W20: reduced flash = one steady gold beat, no blinking // W19 fun pass: a new objective blinks gold for 0.6 s
     hudText.objBox = L.length ? { x: W - Math.max(...L.map((o) => c.measureText(o).width + 8)), y: H - 12 - (L.length - 1) * 10, w: Math.max(...L.map((o) => c.measureText(o).width + 8)), h: 12 + (L.length - 1) * 10 } : null;
     L.forEach((o, i) => { const y = H - 10 - (L.length - 1 - i) * 10, w = c.measureText(o).width + 8; c.fillStyle = "rgba(10,8,20,.55)"; c.fillRect(W - w, y - 2, w, 10 + (i === L.length - 1 ? 2 : 0)); c.fillStyle = fl ? "#ffd04a" : "#ffe9a8"; c.fillText(o, W - 4, y); });
     const n = s.near ? g.area.npcs.find((q) => q.id === s.near) : undefined; /* guard: near can be stale for one frame after an area change or a hide-until-flag NPC leaving */
+    { const b = hudText.bark; b.box = null; // W20 ambient bark: a speech bubble over the NPC (husk: narration over the hero), wrapped to fit
+      const bn = b.npc ? g.area.npcs.find((q) => q.id === b.npc) : undefined;
+      if (b.t > 0 && (bn || !b.npc)) { const cx = Math.round(Math.max(0, Math.min(48 * 16 - W, g.p.x - W / 2))), cy = Math.round(Math.max(0, Math.min(34 * 16 - H, g.p.y - 16 - H / 2)));
+        c.font = "7px monospace"; const L = wrapText(c, b.text, Math.min(220, W - 24)), w = Math.max(...L.map((l) => c.measureText(l).width)) + 10, h = L.length * 9 + 5 + (b.who ? 9 : 0);
+        const px = (bn ? bn.x : g.p.x) - cx, py = (bn ? bn.y : g.p.y) - cy - (bn ? 30 : 34);
+        const x = Math.round(Math.max(4, Math.min(W - 4 - w, px - w / 2))), y = Math.round(Math.max(24, py - h));
+        c.globalAlpha = Math.min(1, b.t * 2); c.fillStyle = "rgba(14,10,28,.86)"; c.fillRect(x, y, w, h); c.strokeStyle = b.who ? "#9fe8ff" : "#8a84a0"; c.lineWidth = 1; c.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+        c.textAlign = "left"; let ty = y + 8; if (b.who) { c.font = "bold 7px monospace"; c.fillStyle = "#9fe8ff"; c.fillText(b.who.split(" ")[0], x + 5, ty); ty += 9; c.font = "7px monospace"; }
+        c.fillStyle = b.who ? "#f0e8ff" : "#c8c0dc"; L.forEach((l, i) => c.fillText(l, x + 5, ty + i * 9)); c.globalAlpha = 1;
+        b.box = { x, y, w, h }; } }
     if (n) { const d = NPCS[g.area.id]?.[n.id]; const X = n.x - Math.round(Math.max(0, Math.min(48 * 16 - W, g.p.x - W / 2))), Y = n.y - Math.round(Math.max(0, Math.min(34 * 16 - H, g.p.y - 16 - H / 2))) - 36;
       if (d) { c.textAlign = "center"; c.fillStyle = "rgba(10,8,20,.75)"; const t = "Talk: " + d.name.split(" ")[0]; const w = c.measureText(t).width + 6; c.fillRect(X - w / 2, Y - 1, w, 10); c.fillStyle = "#9fe8ff"; c.fillText(t, X, Y); } }
   }
@@ -300,6 +310,11 @@ export function areaMap(c: C2, g: Game, ox: number, oy: number, s: number) {
   for (const n of a.npcs) { c.fillStyle = "#6aff8a"; c.fillRect(ox + (n.x / TILE) * s - 1.5, oy + (n.y / TILE) * s - 1.5, 3, 3); }
   for (const e of g.enemies) if (!e.dead) { c.fillStyle = "#ff4a4a"; c.fillRect(ox + (e.x / TILE) * s - 1, oy + (e.y / TILE) * s - 1, 2, 2); }
   c.fillStyle = g.frame & 16 ? "#fff" : "#ffd04a"; c.fillRect(ox + (g.p.x / TILE) * s - 2, oy + (g.p.y / TILE) * s - 2, 4, 4);
+  hudText.mapLetters = ""; const F = st?.flags; // W20: Linnet's Letters count on the map while the hunt is on (n/4)
+  if (F?.lettersQ && !F.lettersDone) { const n = Math.min(4, (F.lettersN as number) || 1), t = F.lettersRead ? "Letters 4/4 · read" : `Letters ${n}/4`;
+    if (a.id === "hushwater" && !F.lettersRead) LETTERS.forEach((l, i) => { if (!F[`letter_${i + 1}`]) { c.fillStyle = "#ffd04a"; c.fillRect(ox + (l.x + 0.5) * s - 1.5, oy + (l.y + 0.5) * s - 1.5, 3, 3); } });
+    c.font = "bold 7px monospace"; c.textAlign = "right"; const w = c.measureText(t).width + 8, x = ox + M * s;
+    c.fillStyle = "rgba(10,8,20,.8)"; const yb = oy + 34 * s + 2; c.fillRect(x - w, yb, w, 10); c.fillStyle = "#ffd76a"; c.fillText(t, x - 4, yb + 8); c.textAlign = "left"; hudText.mapLetters = t; }
 }
 
 /** World-map flight screen: the Mirrorfen Reaches, a dotted route and the hero's glow riding the updraft. */

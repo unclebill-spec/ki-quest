@@ -11,6 +11,9 @@ import { ITEMS, ITEM_IDS, useItem, drawItemIcon, reviveTap, type ItemId } from "
 import { SLOT_COUNT, readSlot, writeSlot, exportCode, importCode, SaveRecord, slotKey } from "./save";
 import { areaMap } from "./areas/art";
 import { getRes, cycleRes } from "./resolution";
+import { CODEX, codexUnlocked, type CodexEntry } from "./story/ambient"; // W20
+import type { Flags } from "./story/script";
+import { wrap as fitWrap } from "./textfit";
 
 export const TABS = ["Status", "Gear", "Items", "Shop", "Lens", "Map", "Options", "Save"] as const;
 export const W = 384, H = 216;
@@ -18,7 +21,7 @@ export const TAB_BAR = { x: 8, y: 6, w: 368 / 8, h: 14 };
 export const ROWS = { x: 14, y: 40, h: 16, w: 170 };
 const MB_SLOT = "kiquest-mb-v1", STORY_KEY = "kiquest.story.v1";
 
-export const ui = { tab: 0, sel: 0, sub: "" as "" | "pick" | "slot", subSel: 0, msg: "", msgT: 0, lastX: 0, lastY: 0 };
+export const ui = { tab: 0, sel: 0, sub: "" as "" | "pick" | "slot" | "codex", subSel: 0, msg: "", msgT: 0, lastX: 0, lastY: 0 };
 type Ki = { story?: { flags: Record<string, unknown>; save(): void; enter(id: string, atStart?: boolean): void; box?: unknown }; audio?: { muted: boolean; setMute(m: boolean): void } };
 const ki = () => ((globalThis as unknown as { __ki?: Ki }).__ki ?? {}) as Ki;
 /** UI sounds (staging/sound ui-*.ogg, CC0) through the existing Audio sfx bus; ui-move rate-limited to 1 per 50 ms. */
@@ -58,9 +61,9 @@ function rowCount(g: Game) {
     case "Gear": return ui.sub === "pick" ? owned(g.have, SLOTS[ui.sel]).length : SLOTS.length;
     case "Items": return ITEM_IDS.length;
     case "Shop": return Math.max(1, shopRows(g).length);
-    case "Lens": return Math.max(1, bios(g).length);
+    case "Lens": return ui.sub === "codex" ? Math.max(1, codexList().length) : bios(g).length + 1; // W20: last row opens the Codex
     case "Map": return 1;
-    case "Options": return 5;
+    case "Options": return 6; // W20: + Reduced flash (last row, so existing row indexes stay put)
     case "Save": return ui.sub === "slot" ? SLOT_ACTS.length : SLOT_COUNT + 1;
   }
   return 1;
@@ -107,11 +110,12 @@ export function confirm(g: Game) {
     sfx(r ? "ui-error" : "ui-save"); note(r ? r : `Bought ${row.kind === "gear" ? row.it.name : ITEMS[row.id].name}`);
     const st = ki().story; if (!r && st) { st.flags.shopOpen = true; st.save(); }
   } else if (tab === "Options") {
-    sfx(ui.sel >= 3 ? "ui-close" : "ui-confirm");
+    sfx(ui.sel === 3 || ui.sel === 4 ? "ui-close" : "ui-confirm");
     if (ui.sel === 0) { const a = ki().audio; if (a) a.setMute(!a.muted); }
     else if (ui.sel === 1) { g.shakeOff = !g.shakeOff; try { localStorage.setItem("kiquest-opt-noshake", g.shakeOff ? "1" : "0"); } catch { /* */ } }
     else if (ui.sel === 2) note(`Resolution: ${cycleRes()}`); // W17l, per device (localStorage)
     else if (ui.sel === 3) dispatchEvent(new Event("kq-quit")); // W17l: main.ts autosaves + shows the title
+    else if (ui.sel === 5) { g.flashLow = !g.flashLow; try { localStorage.setItem("kiquest-opt-lowflash", g.flashLow ? "1" : "0"); } catch { /* */ } note(g.flashLow ? "Reduced flash on" : "Reduced flash off"); } // W20
     else g.mode = "play";
   } else if (tab === "Save") {
     if (!ui.sub) { sfx("ui-confirm"); if (ui.sel === SLOT_COUNT) openCode(g, "import"); else { ui.sub = "slot"; ui.subSel = 0; } return; }
@@ -121,6 +125,7 @@ export function confirm(g: Game) {
     else if (act === "Export code") { const r = readSlot(i); if (r) { sfx("ui-confirm"); openCode(g, "export", r); } else { sfx("ui-error"); note(`Slot ${i + 1} is empty`); } }
     else sfx("ui-cancel");
   } else if (tab === "Map") { g.mode = "play"; sfx("ui-close"); }
+  else if (tab === "Lens") { if (ui.sub === "codex") { ui.sub = ""; sfx("ui-cancel"); } else if (ui.sel === bios(g).length) { ui.sub = "codex"; ui.subSel = 0; sfx("ui-confirm"); } } // W20 Codex
 }
 
 /** Full snapshot: game record + story flags + boss-done map (so a slot restores the whole run). */
@@ -207,6 +212,11 @@ export function menuTap(g: Game, x: number, y: number) {
   if (y >= T.y && y < T.y + T.h && x >= T.x) { const t = Math.floor((x - T.x) / T.w); if (t >= 0 && t < TABS.length) { if (t !== ui.tab) sfx("ui-tab"); ui.tab = t; ui.sel = 0; ui.sub = ""; } return; }
   if (x >= W - 40 && y >= H - 16) { back(g); return; }
   const R = ROWS, i = Math.floor((y - R.y) / (["Lens", "Gear", "Shop"].includes(TABS[ui.tab]) ? 13 : R.h));
+  if (TABS[ui.tab] === "Lens" && ui.sub === "codex") { // W20: codex list sits on the left and scrolls
+    const N = codexList().length, top = Math.max(0, Math.min(N - 10, ui.subSel - 4)), k = top + i;
+    if (x >= R.x && x <= R.x + 120 && i >= 0 && i < 10 && k < N) { if (k !== ui.subSel) { ui.subSel = k; sfx("ui-move"); } } else if (x > 140) back(g);
+    return;
+  }
   const n = rowCount(g), sx = ui.sub ? R.x + R.w + 8 : R.x;
   if (x < sx || x > sx + R.w || i < 0 || i >= n) return;
   if (ui.sub) { if (ui.subSel === i) confirm(g); else { ui.subSel = i; sfx("ui-move"); } }
@@ -299,10 +309,20 @@ export function drawMenu(c: CanvasRenderingContext2D, g: Game) {
       side(c, [...lines, "", `${k.name}:`, ...wrap(`"${k.hi}"`, 28).slice(0, 3), `Coins ${g.coins}`], "#ffd76a", R.x + R.w + 34);
     }
   } else if (tab === "Lens") {
-    const L = bios(g);
-    L.forEach((b, i) => row(c, R.x, R.y + i * 13, 110, ui.sel === i, b.name));
-    const b = L[ui.sel] ?? L[0];
-    side(c, [b.name, b.tag, "", ...b.text], "#cfe8ff", 140);
+    const L = bios(g), CX = codexList();
+    if (ui.sub === "codex") { // W20: Story's codex (src/story/ambient.ts); scrolls 10 rows at a time
+      const top = Math.max(0, Math.min(CX.length - 10, ui.subSel - 4));
+      CX.slice(top, top + 10).forEach((e, i) => row(c, R.x, R.y + i * 13, 120, ui.subSel === top + i, e.title.length > 19 ? e.title.slice(0, 18) + "…" : e.title));
+      const e = CX[ui.subSel] ?? CX[0];
+      if (e) { c.font = "7px monospace"; side(c, [...wrapFit(c, e.title, W - 152, "bold 8px monospace"), e.kind[0].toUpperCase() + e.kind.slice(1), "", ...wrapFit(c, e.text, W - 152)].slice(0, 13), "#ffd76a", 146); }
+      c.textAlign = "left"; c.font = "7px monospace"; c.fillStyle = "#8a84a0"; c.fillText(`Codex ${CX.length}/${CODEX.length}`, R.x, R.y + 10 * 13 + 4);
+    } else {
+      L.forEach((b, i) => row(c, R.x, R.y + i * 13, 110, ui.sel === i, b.name));
+      row(c, R.x, R.y + L.length * 13, 110, ui.sel === L.length, `Codex ${CX.length}/${CODEX.length}`);
+      const b = L[ui.sel];
+      if (b) side(c, [b.name, b.tag, "", ...b.text], "#cfe8ff", 140);
+      else side(c, ["Codex", "Things the Lens remembers.", "", "Choose to read. New pages", "unlock as you travel."], "#ffd76a", 140);
+    }
   } else if (tab === "Map") {
     const s = 3.2; areaMap(c, g, Math.round(W / 2 - (48 * s) / 2), 38, s);
   } else if (tab === "Options") {
@@ -312,6 +332,7 @@ export function drawMenu(c: CanvasRenderingContext2D, g: Game) {
     row(c, R.x, R.y + 2 * R.h, R.w, ui.sel === 2, "Resolution", getRes());
     row(c, R.x, R.y + 3 * R.h, R.w, ui.sel === 3, "Quit to title");
     row(c, R.x, R.y + 4 * R.h, R.w, ui.sel === 4, "Resume");
+    row(c, R.x, R.y + 5 * R.h, R.w, ui.sel === 5, "Reduced flash", g.flashLow ? "On" : "Off"); // W20
     side(c, ["Controls", "Move  WASD / stick", "Melee J · A   Blast K · B", "Block Shift · RB  Tech Q · LB", "Power T/L · Y   Map M · Back", "Pause Esc · Start  Mute N"], "#cfe8ff");
   } else if (tab === "Save") {
     for (let i = 0; i < SLOT_COUNT; i++) {
@@ -333,6 +354,9 @@ function side(c: CanvasRenderingContext2D, lines: string[], col: string, x = ROW
   c.textAlign = "left"; lines.forEach((l, i) => { c.font = i === 0 ? "bold 8px monospace" : "7px monospace"; c.fillStyle = i === 0 ? col : "#b8b0d0"; c.fillText(l, x, ROWS.y + 9 + i * 11); });
 }
 const statLine = (it: Gear) => (["str", "pow", "end", "spd"] as const).filter((k) => it[k]).map((k) => `${k.toUpperCase()}${delta(it[k])}`).join(" ") || "no stats";
+/** W20: codex entries unlocked on this save (story flags codex_<id>, set by story.update). */
+function codexList(): CodexEntry[] { const F = (ki().story?.flags ?? {}) as Flags; return CODEX.filter((e) => !!F[`codex_${e.id}`] || codexUnlocked(e, F)); }
+function wrapFit(c: CanvasRenderingContext2D, t: string, max: number, font = "7px monospace") { const f = c.font; c.font = font; const L = fitWrap(c, t, max); c.font = f; return L; }
 function wrap(t: string, n: number) { const out: string[] = []; let l = ""; for (const w of t.split(" ")) { if ((l + " " + w).trim().length > n) { out.push(l); l = w; } else l = (l + " " + w).trim(); } if (l) out.push(l); return out; }
 function compare(c: CanvasRenderingContext2D, g: Game, it: Gear, cur: Gear, x: number, y: number) {
   c.fillStyle = "#120e22"; c.fillRect(x, y, 356, 44);

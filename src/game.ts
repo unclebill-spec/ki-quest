@@ -56,6 +56,8 @@ export class Game {
   gear: Equip = { ...DEFAULT_GEAR }; play = 0;
   /** Gear v2 + loot: owned gear ids (L/B/Q are re-synced from level/flags), coins, consumables, world drops, use cooldown, hit-stun. */
   have: string[] = GEAR.filter((x) => x.src === "L" && x.lvl <= 1).map((x) => x.id); coins = 0; items = newItems(); drops: Drop[] = []; useCd = 0; stunT = 0; syncT = 0; shakeOff = (() => { try { return localStorage.getItem("kiquest-opt-noshake") === "1"; } catch { return false; } })();
+  /** W20: reduced-flash option (softens the objective blink, pickup sparkle rings and compass pulse). Per device, like screen shake. */
+  flashLow = (() => { try { return localStorage.getItem("kiquest-opt-lowflash") === "1"; } catch { return false; } })();
   parts = new ParticlePool();
   stats = { crits: 0, normals: 0, blasts: 0, kills: 0, saves: 0, levelUps: 0, shieldBlocks: 0, hurt: 0, transforms: 0, guarded: 0, guardBreaks: 0, bossKills: 0, foeShots: 0 };
   mb = makeMB();

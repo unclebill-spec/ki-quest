@@ -1,5 +1,11 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W19 LIVE, 2026-10-30 6:41 PM ET)
+## RESUME HERE (executor, W20, 2026-10-30 ~5:45 PM ET) — on branch w20, NOT on main, NOT LIVE
+- **W20 is on branch `w20`** (cut from main@71829b8). Merge only after W19 ships + EB Rule 19. See CHANGELOG W20.
+- Items: a Linnet Locket greeting; a Letters n/4 map marker; a rare Mirela re-read line; a compass sparkle + Reduced flash option; Story barks + codex (Lens > Codex).
+- Story review needed: LINNET_LOCKET and MIRELA_REREAD in script.ts are executor drafts.
+- Tests 592/592 (30 suites, tests/w20.mjs 64/64). Test hook: window.__kiAmbient.
+
+## (previous) RESUME HERE (executor, W19 LIVE, 2026-10-30 6:41 PM ET)
 - **LIVE:** W19 from main@71829b8 on gh-pages 0645addb46e959f6a0fdab087edebdb1e041d3b7 (bundle index-B9Z_GqwD.js). GD OK after EB Rule 19 PASS (qa-reports/kq-w19-71829b8-20261030.md). Live check: HTTP 200, game-qa PASS, 0 console errors, title shows "Burning Bush Productions". Shot: /workspace/qa-reports/kq-w19-live-title-20261030.png.
 - **Rollback (to W18.1):** `git -C /workspace/games/ki-rpg push -f origin aa4e1e9:gh-pages` (tagged `rollback-w18_1`; also gh-pages-prev on origin). Older: rollback-w17l3 (8ea6077).
 - **Next:** W20 (3041c77) to EB Rule 19, then GD publish OK.

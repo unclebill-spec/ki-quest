@@ -7,15 +7,18 @@ import { CREDITS_T } from "../areas/art";
 import type { Game } from "../game";
 import type { Input } from "../input";
 import { buildArea, setWardOpen, zoneAt, TILE } from "../world";
-import { INTRO, NPCS, Flags, LETTERS, LETTER_QUIPS } from "./script";
+import { INTRO, NPCS, Flags, LETTERS, LETTER_QUIPS, LINNET_LOCKET, MIRELA_REREAD } from "./script";
+import { ambientBark, backfillVisited, CODEX, codexUnlocked } from "./ambient"; // W20
 import { sfx } from "../menu";
 import { hud as hudText } from "../textfit";
 import { CH_INTERACT, K_RING, K_SPARK, C_GOLD, C_WHITE } from "../vendor/particles";
 /** W18 fun pass: a ring of sparkles (interact channel, approved particle palette only). */
-const burst = (g: Game, x: number, y: number, n: number, v: number) => { for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; g.parts.emit(CH_INTERACT, i & 1 ? K_RING : K_SPARK, x, y, Math.cos(a) * v, Math.sin(a) * v * 0.7 - 20, 0.55, i % 3 ? C_GOLD : C_WHITE); } };
+const burst = (g: Game, x: number, y: number, n: number, v: number) => { // W20: reduced flash = half as many, no rings, slower, gold only
+  const low = g.flashLow; if (low) { n = Math.ceil(n / 2); v *= 0.6; }
+  for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2, ring = !low && !!(i & 1); g.parts.emit(CH_INTERACT, ring ? K_RING : K_SPARK, x, y, Math.cos(a) * v, Math.sin(a) * v * 0.7 - 20, 0.55, low || i % 3 ? C_GOLD : C_WHITE); if (ring) hudText.fx.rings++; else hudText.fx.sparks++; } };
 
 const KEY = "kiquest.story.v1";
-const { compass, motes } = hudText; // W19 (state lives in textfit.ts so draw.ts needs no story import)
+const { compass, motes, bark } = hudText; // W19 (state lives in textfit.ts so draw.ts needs no story import)
 type Box = { who: string; lines: string[]; i: number; t: number; then?: () => void };
 
 const F0 = (f: Record<string, unknown>) => !!f.dawn;
@@ -25,6 +28,8 @@ export class Story {
   box: Box | null = null;
   intro = -1; introT = 0;
   credits = 0;
+  /** W20: random source for barks / the rare Mirela line (tests swap it). barkT = seconds until the next ambient bark. */
+  rnd: () => number = Math.random; barkT = 12; codexT = 0; codexQ: string[] = []; compassNear = false;
   fly = 0; flyTo = ""; flyFrom = ""; near: string | null = null; zone = ""; zoneT = 0;
   constructor(public g: Game, public input: Input) {
     try { this.flags = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch { this.flags = {}; }
@@ -41,7 +46,7 @@ export class Story {
   }
   enter(id: string, atStart = true) {
     const g = this.g, hp = g.hp, ep = g.ep, keep = { x: g.p.x, y: g.p.y };
-    g.area = buildArea(id); g.reset(); g.hp = hp; g.ep = ep; this.near = null; // never point the Talk prompt at an NPC from the previous area
+    g.area = buildArea(id); g.reset(); g.hp = hp; g.ep = ep; bark.t = 0; this.near = null; // never point the Talk prompt at an NPC from the previous area
     if (!atStart) { g.p.x = keep.x; g.p.y = keep.y; }
     g.shots = []; g.banner = g.area.name; g.bannerT = 3;
     this.flags.area = id; this.flags["visited_" + id] = true; this.save();
@@ -215,7 +220,13 @@ export class Story {
       });
       const b = best as { x: number; y: number; d: number } | null;
       compass.target = b && b.d > 40 ? { x: b.x, y: b.y, a: Math.atan2(b.y - g.p.y, b.x - g.p.x) } : null;
+      const near = !!b && b.d <= 40; // W20: a small sparkle when you reach a letter (once per approach)
+      if (near && !this.compassNear && b) { const k = g.flashLow ? 3 : 6; for (let i = 0; i < k; i++) { const a = (i / k) * Math.PI * 2; g.parts.emit(CH_INTERACT, K_SPARK, b.x + Math.cos(a) * 6, b.y - 4 + Math.sin(a) * 4, Math.cos(a) * 12, -10, 0.5, i & 1 ? C_WHITE : C_GOLD); } hudText.fx.compassSpark++; }
+      this.compassNear = near;
     }
+    if ((this.codexT -= 1 / 60) <= 0) { this.codexT = 0.5; this.codexCheck(); } // W20: visited_ backfill + codex unlocks, twice a second
+    if (bark.t > 0) bark.t -= 1 / 60;
+    if ((this.barkT -= 1 / 60) <= 0) { this.barkT = 14 + this.rnd() * 10; this.bark(); } // W20 ambient barks
     if (g.area.id === "lanternmoss") { const n = g.area.npcs.find((q) => q.id === "l"); // W19: soft glow motes drift up around Linnet (particles only, no sound)
       if (n && g.frame % 9 === 0) { const a = (g.frame * 0.37) % (Math.PI * 2); g.parts.emit(CH_INTERACT, K_SPARK, n.x + Math.cos(a) * 9, n.y - 10 + Math.sin(a) * 6, Math.cos(a) * 3, -9, 1.1, (g.frame / 9) & 1 ? C_WHITE : C_GOLD); motes.n++; } }
     for (const s of g.area.springs) if (Math.hypot(s.x - g.p.x, s.y - g.p.y) < 14) {
@@ -241,6 +252,32 @@ export class Story {
     if (!g.area.travel.some((s) => Math.hypot(s.x - g.p.x, s.y - g.p.y) < 18)) this.flags.stoneT = false;
     return false;
   }
+  /** W20: migrate old saves (visited_<id> from progress), then unlock codex pages. "always" pages and a first run on an old save unlock quietly; later ones toast. */
+  codexCheck() {
+    const F = this.flags, g = this.g; let dirty = backfillVisited(F) > 0;
+    const quiet = !F.codexInit; const fresh: string[] = [];
+    for (const e of CODEX) { const k = `codex_${e.id}`; if (!F[k] && codexUnlocked(e, F)) { F[k] = true; dirty = true; if (!quiet && e.unlock !== "always") fresh.push(e.title); } }
+    if (quiet) { F.codexInit = true; dirty = true; }
+    this.codexQ.push(...fresh); // shown when nothing else is talking (never steps on a quest toast)
+    if (this.codexQ.length && !this.box && g.toastT <= 0 && g.bannerT <= 0) { const q = this.codexQ; g.say(q.length > 1 ? `Codex: ${q[0]} +${q.length - 1} more` : `Codex: ${q[0]}`, 2.5); sfx("ui-confirm"); this.codexQ = []; }
+    if (dirty) this.save();
+  }
+  /** W20: one ambient line over the nearest on-screen NPC (husk: speakerless, over the hero). Skipped during dialogue, toasts and banners. */
+  bark(force = false) {
+    const g = this.g, F = this.flags;
+    if (!force && (this.box || g.mode !== "play" || g.toastT > 0 || g.bannerT > 0)) return false;
+    const text = ambientBark(g.area.id, F, g.time, this.rnd); if (!text) return false;
+    let npc = "", who = "";
+    if (g.area.id !== "husk") {
+      let best = 1e9;
+      for (const n of g.area.npcs) { const d = Math.hypot(n.x - g.p.x, n.y - g.p.y); if (d < 150 && d < best && n.id !== "l") { best = d; npc = n.id; } }
+      if (!npc) return false;
+      who = NPCS[g.area.id]?.[npc]?.name ?? "";
+    }
+    bark.text = text; bark.who = who; bark.npc = npc; bark.t = 4.5;
+    F.barksHeard = ((F.barksHeard as number) || 0) + 1; F.lastBark = text.slice(0, 80); this.save();
+    return true;
+  }
   /** After the sim stepped: talk if the melee press happened next to an NPC. */
   after() {
     const g = this.g;
@@ -250,7 +287,11 @@ export class Story {
     if (!def) return;
     g.swing.step = 0; g.swing.t = 0; g.swing.queued = false;
     const st = g.stats as Record<string, number>; st.talks = (st.talks ?? 0) + 1;
-    this.say(def.name, def.lines(this.flags), () => {
+    let lines = def.lines(this.flags);
+    if (id === "l" && this.flags.lettersDone && g.gear.c === "c2") { lines = LINNET_LOCKET; this.flags.locketGreet = ((this.flags.locketGreet as number) || 0) + 1; } // W20: she notices her Locket (text only)
+    if (id === "m" && this.flags.lettersRead && this.rnd() < 0.2) { lines = [...lines, MIRELA_REREAD[Math.floor(this.rnd() * MIRELA_REREAD.length)]]; this.flags.rereadN = ((this.flags.rereadN as number) || 0) + 1; } // W20: rare re-read line, no EXP
+    bark.t = 0;
+    this.say(def.name, lines, () => {
       if (id === "a") this.flags.metAma = true;
       if (id === "o" && g.area.id === "lanternmoss" && this.flags.metAma && !this.flags.capQ) { this.flags.capQ = true; g.say("Quest: The Capmother's Ring", 2.5); }
       if (id === "m") this.flags.metMirela = true;

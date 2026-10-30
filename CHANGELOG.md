@@ -1,4 +1,13 @@
 # Changelog
+## W20 — 2026-10-30 (executor) — on branch w20, awaiting W19 ship + Rule 19 (NOT on main, NOT LIVE)
+- Linnet: a different greeting when you come back wearing the Locket (LINNET_LOCKET, text only, no reward change). The Locket is not drawn on the hero sprite.
+- Map: a "Letters n/4" label (or "4/4 · read") under the area map while the letters quest is open; gold dots mark uncollected letters in Hushwater.
+- Re-reading the letters: a 20% chance of an extra Mirela line (MIRELA_REREAD). No EXP.
+- Compass: a one-time sparkle when you reach a letter (≤40 px). New Options row "Reduced flash" (localStorage kiquest-opt-lowflash, survives a reload) softens the objective blink, the pickup rings/sparks and the compass pulse.
+- Story's ambient barks + codex wired in verbatim (src/story/ambient.ts): NPC bark bubbles every 14–24 s, a codex unlock toast, and Lens tab > "Codex n/26". visitedAreas() is backfilled from the existing visited_<id> flags plus progress flags; no new save field.
+- LINNET_LOCKET and MIRELA_REREAD are executor drafts, flagged for Story review.
+- No combat, enemy, balance, controls, palette or sound changes. Tests: 30 suites, 592/592 (new tests/w20.mjs 64/64). boss5 failed 1 check once under full-suite load, then passed 17/17 on two reruns (flake). Shots: /workspace/qa-reports/kq-w20-shots/.
+
 ## W19 — 2026-10-30 (executor) — LIVE Oct 30 6:41 PM ET (gh-pages 0645addb46e9, bundle index-B9Z_GqwD.js; deploy main@71829b8; GD OK after EB Rule 19 PASS, qa-reports/kq-w19-71829b8-20261030.md)
 - Linnet: soft glow motes (gold/white sparks, existing particles) drift up around her in Lanternmoss. No sound.
 - Letter pickups: each pickup toast now ends with a short Mirela line (script.ts LETTER_QUIPS) and stays 4.5 s (was 3 s). Wrapped by src/textfit.ts: max 347/360 wide, 2-3 lines, fully on screen at Pixel 7 and 1280x720.

@@ -114,3 +114,15 @@ export const LETTERS = [
   { x: 33, y: 24, t: "A letter, pinned under a stone · \"I heard a spring singing west of the mountains.\"" },
   { x: 44, y: 11, t: "A letter, folded in an old boot · \"If I'm not back by the first frost, keep the graves lit.\"" },
 ];
+
+/** W20 (GD-approved, text only): Linnet's greeting when you come back wearing her Locket. No reward change. Draft for Story review. */
+export const LINNET_LOCKET = [
+  "Oh! You're wearing it. Turn round, let me look. Silver suits you, little lamp.",
+  "It used to tick against my collarbone the whole way west. Keep it warm for me.",
+];
+/** W20 (GD-approved): a rare extra line when Mirela re-reads the letters after they're read. No EXP. Draft for Story review. */
+export const MIRELA_REREAD = [
+  "(Mirela has the letters out again.) I keep finding new things. She dots her i's with little suns.",
+  "(She folds a letter back along its old crease.) Third time through. It still sounds like her voice.",
+  "(Mirela smooths a page flat.) Grandmother spelled 'Hushwater' three different ways. I love her for it.",
+];

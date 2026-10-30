@@ -16,5 +16,9 @@ export const hud = { objLines: 1,
   /** W19: Linnet glow motes emitted (test hook). */
   motes: { n: 0 },
   /** W19: last-drawn toast / objective boxes in base units (test hook for the overlap check). */
+  /** W20: ambient bark currently shown (story.update sets it; art.ts draws it and fills box). who "" = speakerless (husk). */
+  bark: { text: "", who: "", npc: "", t: 0, box: null as null | { x: number; y: number; w: number; h: number } },
+  /** W20 test hooks: pickup-burst rings/sparks emitted, compass sparkles, map letter label last drawn. */
+  fx: { rings: 0, sparks: 0, compassSpark: 0 }, mapLetters: "",
   toastBox: null as null | { x: number; y: number; w: number; h: number }, objBox: null as null | { x: number; y: number; w: number; h: number } };
 (globalThis as unknown as { __kiText?: unknown }).__kiText = { wrap, hud };

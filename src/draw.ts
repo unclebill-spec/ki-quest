@@ -193,7 +193,7 @@ function hud(c: CanvasRenderingContext2D, g: Game) {
   }
   { const cp = hudText.compass, T = cp.target; cp.shown = false; // W19 compass ping: a gold chevron beside the hero, pointing at the next letter; pulses every 1.2 s
     if (T && g.mode === "play" && !talk) { const cx = Math.round(Math.max(0, Math.min(MW * TILE - W, g.p.x - W / 2))), cy = Math.round(Math.max(0, Math.min(MH * TILE - H, g.p.y - 16 - H / 2)));
-      const ph = (g.time % 1.2) / 1.2, r = 20 + ph * 6, x = g.p.x - cx + Math.cos(T.a) * r, y = g.p.y - 8 - cy + Math.sin(T.a) * r;
+      const ph = g.flashLow ? 0.35 /* W20 reduced flash: steady, no pulse */ : (g.time % 1.2) / 1.2, r = 20 + ph * 6, x = g.p.x - cx + Math.cos(T.a) * r, y = g.p.y - 8 - cy + Math.sin(T.a) * r;
       c.save(); c.globalAlpha = 0.9 - ph * 0.6; c.translate(x, y); c.rotate(T.a); c.fillStyle = "#ffd04a"; c.beginPath(); c.moveTo(5, 0); c.lineTo(-3, -4); c.lineTo(-1, 0); c.lineTo(-3, 4); c.closePath(); c.fill(); c.restore();
       cp.shown = true; cp.x = x; cp.y = y; } }
   hudText.toastBox = null;
