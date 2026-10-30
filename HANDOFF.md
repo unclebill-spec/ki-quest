@@ -1,4 +1,14 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
+## RESUME HERE (executor N64 Style, W18 Linnet's Letters, 2026-10-29 ~10:55 PM ET) — NOT LIVE
+- **W18 on main** (local + origin main; NOT on gh-pages). Live is still W17l.3 (gh-pages 8ea6077). See CHANGELOG W18.
+- Linnet's Letters merged (final Linnet sheet already in repo, Hearthmoor Art, $0); tests/locket.mjs proves a fresh save gets Linnet's Locket (lettersDone chain had no break). Rewards as before: +100 / +250 EXP + Locket (c2).
+- Auto res idea 1: desktop steps up ~5 s/step below cap-2; phones unchanged. qa-reports/kq-w18-res-measure-20261029.md.
+- **Fun pass: done.** Letter glints, pickup sparkle + chime, bigger 4th-letter stinger, Locket sparkle + equip stinger (UI sfx/particles only). Proposals held for GD are listed in the W18 report (not shipped).
+- Tests 499/499 over 28 suites. Boss fights not re-timed: no combat, enemy or balance code changed (diff: story/index.ts letter/Locket juice, resolution.ts, tests).
+- Screenshots: qa-reports/kq-w18-title-20261029.png, qa-reports/kq-w18-linnet-ingame-20261029.png.
+- **Left:** EB Rule 19 check of W18, then GD publish OK (tools/publish-game.sh kq). Rollback target if published: gh-pages 8ea6077 (W17l.3).
+- Note: KQ has no APPROVED.md (none in repo or masters/kindle-quest); the sprite was checked against the brief (real top + bottom, visible waist, flat torso).
+
 ## 2026-10-27 1:25 PM ET: W17l.3 LIVE
 - gh-pages 8ea6077e1856ed8c24cb14f412004d55aaeeb015 (deploy main@dd78dc8, bundle index-Rm9xQPBf.js). GD OK after EB PASS (qa-reports/kq-w17l3-recheck-20261027.md).
 - **Rollback (to W17l.2 build):** `git -C /workspace/games/ki-rpg push -f origin ea755d90638c89299a76c223baf2bb6f2f5e5493:gh-pages`. Tagged `rollback-w17l2`; older W17k rollback is tagged `rollback-w17k` (a015c7e).

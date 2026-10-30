@@ -1,4 +1,11 @@
 # Changelog
+## W18 — 2026-10-29 (executor, N64 Style) — NOT LIVE (Linnet's Letters; waits on EB Rule 19, then GD publish OK)
+- Linnet's Letters side quest merged (branch linnet-letters rebased cleanly on main@33f97ae, so all W17l.x resolution work is kept). Final Linnet sheet: public/art/chars/linnet.json/.png (Hearthmoor Art 24x32, existing asset, $0). Rewards unchanged: Mirela +100 EXP, Linnet +250 EXP + Linnet's Locket (c2).
+- `lettersDone` traced end to end (set on talking to Linnet after linnetWoke, saved in kiquest.story.v1, read by gear.ts earned() via syncGear every 0.5 s and on load). No break found. New tests/locket.mjs (9 checks): fresh save -> letters -> Locket, no double reward, kept after reload + Continue.
+- Auto resolution idea 1 (resolution.ts only): on desktop, steps up every ~5 s while below cap-2 (was ~10 s). 1920x1080 climb 1->5: ~31-35 s (was ~41-77 s). Phones unchanged (a phone version flapped at 4x CPU). qa-reports/kq-w18-res-measure-20261029.md.
+- Fun pass: lost letters glint with a gold spark when you're near; pickups pop a sparkle ring + chime, the 4th letter gets a bigger burst and stinger; Mirela reading chimes; the Locket gives a sparkle ring + equip stinger. Existing UI sfx and particle palette only; no rules, numbers, controls or palette changed.
+- Tests: 28 suites, 499/499 (incl. letters 19/19, locket 9/9, smoke 20/20, res-recover 7/7); ground.mjs fps 54.3 @4x, 0 errors; live.mjs on local preview 0 errors.
+
 ## W17l.3 — 2026-10-27 (executor) — LIVE 1:25 PM ET (gh-pages 8ea6077, bundle index-Rm9xQPBf.js; GD OK after EB PASS)
 - Auto resolution: a level whose step-up fails within 10 s is banned (30 s, doubling per repeat, cap 8 min; cleared on area change); step-up needs ~10 s at 58+ fps. Fixes the busy-phone sharp/blurry flapping. resolution.ts only; tests/res-recover.mjs flap check.
 
