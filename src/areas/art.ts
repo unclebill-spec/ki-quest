@@ -3,6 +3,7 @@ import type { Game } from "../game";
 import type { Story } from "../story";
 import { TILE, MW, MH, T_FLOOR, T_WALL, T_MOSS, T_PLAZA, T_WATER, T_PATH, T_BOARD, T_WARD, T_HIDDEN, wardOpen } from "../world";
 import { NPCS, INTRO } from "../story/script";
+import { wrap as wrapText, hud as hudText } from "../textfit";
 import { sheet, drawSprite } from "../game/combat/sprites";
 import { groundSet, drawGround, type GroundSet, type Kind } from "./groundgen";
 
@@ -254,9 +255,8 @@ export function storyOverlay(c: C2, g: Game, s: Story, W: number, H: number) {
     c.font = "8px monospace"; c.fillStyle = "rgba(58,36,64,.8)"; c.fillText("(J / Start to skip)", W / 2, H - 10); c.restore(); return;
   }
   if (g.mode === "play" && !s.active) {
-    const o = s.objective(); c.textAlign = "right";
-    c.fillStyle = "rgba(10,8,20,.55)"; c.fillRect(W - c.measureText(o).width - 8, H - 12, c.measureText(o).width + 8, 12);
-    c.fillStyle = "#ffe9a8"; c.fillText(o, W - 4, H - 10);
+    const L = wrapText(c, s.objective(), W - 12); c.textAlign = "right"; hudText.objLines = L.length; // W18.1: wraps instead of running off the left edge
+    L.forEach((o, i) => { const y = H - 10 - (L.length - 1 - i) * 10, w = c.measureText(o).width + 8; c.fillStyle = "rgba(10,8,20,.55)"; c.fillRect(W - w, y - 2, w, 10 + (i === L.length - 1 ? 2 : 0)); c.fillStyle = "#ffe9a8"; c.fillText(o, W - 4, y); });
     const n = s.near ? g.area.npcs.find((q) => q.id === s.near) : undefined; /* guard: near can be stale for one frame after an area change or a hide-until-flag NPC leaving */
     if (n) { const d = NPCS[g.area.id]?.[n.id]; const X = n.x - Math.round(Math.max(0, Math.min(48 * 16 - W, g.p.x - W / 2))), Y = n.y - Math.round(Math.max(0, Math.min(34 * 16 - H, g.p.y - 16 - H / 2))) - 36;
       if (d) { c.textAlign = "center"; c.fillStyle = "rgba(10,8,20,.75)"; const t = "Talk: " + d.name.split(" ")[0]; const w = c.measureText(t).width + 6; c.fillRect(X - w / 2, Y - 1, w, 10); c.fillStyle = "#9fe8ff"; c.fillText(t, X, Y); } }

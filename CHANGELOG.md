@@ -1,4 +1,10 @@
 # Changelog
+## W18.1 — 2026-10-29 (executor) — NOT LIVE (fixes EB Rule 19 FAIL on W18 de94d14)
+- Text layout only: new src/textfit.ts word-wrap. The toast renderer (draw.ts) wraps at 360 of the 384 base width and stacks lines upward, above a wrapped objective. The objective line (areas/art.ts) wraps at 372, right-aligned. Wording unchanged. Letter 4 toast (583 wide) and objective (458-549 wide) now take 2 lines each, at every resolution preset on Pixel 7 and 1280x720.
+- combat/sprites.ts: reverted to main@33f97ae. Linnet commit f7608bb had changed frame keys from `${anim}_${facing}_${i}` to the frame name minus the "<sheet>_" prefix. linnet.json carries anim/facing/i, and those give the same keys, so W18 did not need it.
+- tests/locket.mjs 11 checks (was 9): the no-double-reward check now also needs exactly one Locket (c2). New text-fit check measures every letter toast (4) and every objective line against the base width with the in-game wrap.
+- Tests: 501/501 on the counted suites (barks failed 1 audio-duck timing check under suite load, then passed 10/10 when rerun on its own). ground.mjs 57.0 fps @4x, 0 errors; live.mjs 0 errors. Screenshots: /workspace/qa-reports/kq-w181-shots/.
+
 ## W18 — 2026-10-29 (executor, N64 Style) — NOT LIVE (Linnet's Letters; waits on EB Rule 19, then GD publish OK)
 - Linnet's Letters side quest merged (branch linnet-letters rebased cleanly on main@33f97ae, so all W17l.x resolution work is kept). Final Linnet sheet: public/art/chars/linnet.json/.png (Hearthmoor Art 24x32, existing asset, $0). Rewards unchanged: Mirela +100 EXP, Linnet +250 EXP + Linnet's Locket (c2).
 - `lettersDone` traced end to end (set on talking to Linnet after linnetWoke, saved in kiquest.story.v1, read by gear.ts earned() via syncGear every 0.5 s and on load). No break found. New tests/locket.mjs (9 checks): fresh save -> letters -> Locket, no double reward, kept after reload + Continue.

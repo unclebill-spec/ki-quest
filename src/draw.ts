@@ -5,6 +5,7 @@ import { tile, worldSprites, worldLights, worldGlow, areaMap } from "./areas/art
 import { lightSprite, flickerStep, rgbCss, RGB } from "./vendor/light";
 import * as MB from "./game/combat/draw"; // MB hook
 import { roleOf } from "./game/enemies/types"; // MB hook: Area 2 foes share brute/wisp/warden roles
+import { wrap as wrapText, hud as hudText } from "./textfit"; // W18.1
 import { drawMenu } from "./menu"; // HD2D W14
 import { drawDrops, drawLootHud, drawRevive } from "./loot"; // HD2D W14
 import { buildAtlas, ATLAS_CELL, maskSize } from "./vendor/particles";
@@ -190,7 +191,8 @@ function hud(c: CanvasRenderingContext2D, g: Game) {
     c.globalAlpha = Math.min(1, g.bannerT); c.fillStyle = "#000a"; c.fillRect(W / 2 - 80, 40, 160, 18);
     c.font = "bold 10px monospace"; c.fillStyle = "#e8dcff"; c.fillText(g.banner, W / 2, 53); c.globalAlpha = 1;
   }
-  if (g.toastT > 0 && !talk) { c.font = "8px monospace"; const w = c.measureText(g.toast).width + 12; c.fillStyle = "#000c"; c.fillRect(W / 2 - w / 2, H - 22, w, 13); c.fillStyle = "#fff"; c.fillText(g.toast, W / 2, H - 12); }
+  if (g.toastT > 0 && !talk) { c.font = "8px monospace"; const L = wrapText(c, g.toast, W - 24), w = Math.max(...L.map((l) => c.measureText(l).width)) + 12, up = (L.length - 1) * 10 + (L.length > 1 || hudText.objLines > 1 ? (hudText.objLines - 1) * 10 + 2 : 0); // W18.1: wrapped, above a wrapped objective
+    c.fillStyle = "#000c"; c.fillRect(W / 2 - w / 2, H - 22 - up, w, 13 + (L.length - 1) * 10); c.fillStyle = "#fff"; L.forEach((l, i) => c.fillText(l, W / 2, H - 12 - up + i * 10)); }
   if (g.levelT > 0) { c.font = "bold 14px monospace"; c.fillStyle = "#ffe14a"; c.fillText("LEVEL UP!", W / 2, 80); }
 }
 /** Legacy status rows. Moved off-canvas in HD2D W14 so main.ts's old tap handler never fires; menu.ts handles taps. */

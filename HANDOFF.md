@@ -1,5 +1,11 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor N64 Style, W18 Linnet's Letters, 2026-10-29 ~10:55 PM ET) — NOT LIVE
+## RESUME HERE (executor N64 Style, W18.1 text-fit fix, 2026-10-29 ~11:55 PM ET) — NOT LIVE
+- **W18.1 on main** (fixes EB Rule 19 FAIL on de94d14). Live is still W17l.3 (gh-pages 8ea6077). See CHANGELOG W18.1.
+- The letter toast and objective line wrap (src/textfit.ts, draw.ts, areas/art.ts). Wording unchanged. combat/sprites.ts reverted (Linnet doesn't need it). locket.mjs now checks the Locket count and text fit.
+- Screenshots: /workspace/qa-reports/kq-w181-shots/ (Pixel 7 landscape + portrait, 1280x720; all 4 presets for letter 4). Portrait shows the existing "Turn your phone sideways" overlay.
+- **Left:** EB Rule 19 recheck, then GD publish OK. Remote branch linnet-letters left alone (non-fast-forward vs rebased local; per GD).
+
+## (previous) RESUME HERE (executor N64 Style, W18 Linnet's Letters, 2026-10-29 ~10:55 PM ET) — NOT LIVE
 - **W18 on main** (local + origin main; NOT on gh-pages). Live is still W17l.3 (gh-pages 8ea6077). See CHANGELOG W18.
 - Linnet's Letters merged (final Linnet sheet already in repo, Hearthmoor Art, $0); tests/locket.mjs proves a fresh save gets Linnet's Locket (lettersDone chain had no break). Rewards as before: +100 / +250 EXP + Locket (c2).
 - Auto res idea 1: desktop steps up ~5 s/step below cap-2; phones unchanged. qa-reports/kq-w18-res-measure-20261029.md.
