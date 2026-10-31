@@ -1,4 +1,17 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
+## RESUME HERE — KINDLE QUEST PAUSED per Will (Oct 30, 2026, 10:47 PM ET)
+- Hearthmoor is the only active game. No new KQ work starts until Game Director says so.
+- LIVE: W21. main afd8dcf (+ docs commits), gh-pages 84d71fb, bundle assets/index--ptYRbay.js.
+- Real rollback (to W20): `git push --force origin rollback-w20^{commit}:refs/heads/gh-pages` (tag rollback-w20 = ce405aa; gh-pages-prev = ce405aa). Ignore the rollback line publish-game.sh prints.
+- W22: ON HOLD (GD-approved, not started on main). Scope:
+  - non-Linnet NPCs never repeat the same bark back to back (track the last bark per NPC and exclude it)
+  - move linnet_w21.md from /workspace/game-ideas/anime-fighter/staging/story/ into the repo
+  - map key 'gold: letters'
+  - Codex 'n new' count
+  - Linnet first-hello and sleepy 'zzz' barks, with Story-written lines (none exist yet as of Oct 30)
+  - bark preview in Options
+- An unreviewed local-only draft is on branch w22-wip in /workspace/games/ki-rpg (not pushed). Treat it as a starting point only.
+
 ## RESUME HERE (executor) — W21 LIVE — 2026-10-30 ~10:40 PM ET
 - main afd8dcf -> gh-pages 84d71fb (index--ptYRbay.js). Rollback: `git push --force origin rollback-w20^{commit}:refs/heads/gh-pages`. W22 in progress on branch w22 (not live).
 
