@@ -1,5 +1,10 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
-## RESUME HERE (executor, W20, 2026-10-30 ~6:55 PM ET) — on branch w20 (rebased on main@ebc90cb), awaiting EB Rule 19. W19 is LIVE. NOT on main, NOT LIVE
+## RESUME HERE (executor) — W20 LIVE — 2026-10-30 ~8:20 PM ET (executor)
+- main fast-forwarded ebc90cb -> d1aa6f8 (GD OK after EB Rule 19 PASS with notes, qa-reports/kq-w20-d1aa6f8-20261030.md). Published with tools/publish-game.sh kq: gh-pages 0645add (W19) -> ce405aa, bundle assets/index-CDia8cvN.js (was index-B9Z_GqwD.js). Live HTTP 200. Secret scan clean (gitleaks git+dir, extra_secret_patterns).
+- Rollback: `git push -f origin 0645add:gh-pages` (tag rollback-w19; also branch gh-pages-prev = 0645add).
+- W21 work continues on branch w21 (not live).
+
+## (previous) RESUME HERE (executor, W20, 2026-10-30 ~6:55 PM ET) — on branch w20 (rebased on main@ebc90cb), awaiting EB Rule 19. W19 is LIVE. NOT on main, NOT LIVE
 - Rule 19 prep done: toast gap fix, barks/ground/w20 test fixes (see CHANGELOG W20). ground.mjs: `node tests/ground.mjs after midquest` for the motes+compass fps run.
 - **W20 is on branch `w20`** (cut from main@71829b8). Merge only after W19 ships + EB Rule 19. See CHANGELOG W20.
 - Items: a Linnet Locket greeting; a Letters n/4 map marker; a rare Mirela re-read line; a compass sparkle + Reduced flash option; Story barks + codex (Lens > Codex).
