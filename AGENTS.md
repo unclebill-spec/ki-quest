@@ -49,6 +49,7 @@ Publishing needs Bill's approval.
 - Test: tests/qa-warps.mjs (each warp wakes its boss; sentinel real save keys unchanged).
 - W17d (2026-10-26): boss tuning lives in `Game.TUNE` / `finaleGuard` (src/game.ts). Hits with kx=ky=0 (tests) skip it. Record changes in BALANCE.md. Deploy with /workspace/tools/publish-game.sh (rule 34).
 - W20 LIVE (2026-10-30): main d1aa6f8 -> gh-pages ce405aa (index-CDia8cvN.js). Rollback: `git push -f origin 0645add:gh-pages` (tag rollback-w19, gh-pages-prev).
+- W21 LIVE (2026-10-30): main afd8dcf -> gh-pages 84d71fb (index--ptYRbay.js). Rollback: `git push --force origin rollback-w20^{commit}:refs/heads/gh-pages` (tag rollback-w20, gh-pages-prev = ce405aa). publish-game.sh's printed rollback line is wrong.
 
 ## Project Page (trial through Nov 8, 2026)
 - https://cursor.com/canvas/store-e7d5fd51-5604-4561-8cbf-84d9e2a47985/17096aab-b52a-4f67-b210-3a9fe11e0585
