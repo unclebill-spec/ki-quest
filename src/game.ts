@@ -85,11 +85,11 @@ export class Game {
     return true;
   }
 
-  /** Add every gear item earned by level / boss flag / quest flag. */
-  syncGear() {
+  /** Add every gear item earned by level / boss flag / quest flag. quiet (save load/migration): add silently, no "New gear" toast. */
+  syncGear(quiet = false) {
     const st = (globalThis as unknown as { __ki?: { story?: { flags: Record<string, unknown> } } }).__ki?.story;
     for (const it of GEAR) if (!this.have.includes(it.id) && earned(it, this.lvl, st?.flags ?? {}, this.mb as unknown as Record<string, unknown>)) {
-      this.have.push(it.id); if (this.mode === "play" && it.src !== "L") this.say(`New gear: ${it.name}`, 2);
+      this.have.push(it.id); if (!quiet && this.mode === "play" && it.src !== "L") this.say(`New gear: ${it.name}`, 2);
     }
   }
   buy(id: string) {
@@ -137,7 +137,7 @@ export class Game {
     for (const s of SLOT_ORDER) { const id = r.gear?.[s] && map(r.gear[s]!); if (id && gearById(id)?.slot === s) { if (old && !this.have.includes(id)) this.have.push(id); this.gear[s] = id; } }
     this.coins = typeof r.coins === "number" && r.coins >= 0 ? Math.floor(r.coins) : 0;
     this.items = newItems(); for (const k of ITEM_IDS) { const n = r.items?.[k]; if (typeof n === "number" && n > 0) this.items[k] = Math.min(ITEMS[k].max, Math.floor(n)); }
-    this.syncGear();
+    this.syncGear(true); // W21: gear already earned in an old save is backfilled silently (loadSlot can run while mode is "play")
     for (const s of SLOT_ORDER) if (!this.have.includes(this.gear[s])) this.gear[s] = DEFAULT_GEAR[s];
     this.hp = Math.min(this.maxHp, r.hp); this.ep = Math.min(this.maxEp, r.ep);
     if (!solidAt(this.area, r.x, r.y)) { this.p.x = r.x; this.p.y = r.y; }

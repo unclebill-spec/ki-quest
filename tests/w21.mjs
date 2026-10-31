@@ -1,4 +1,4 @@
-// W21: map 'letters' legend, codex "new" dots (story flags codexRead_<id>), Linnet's ambient barks + gating, Options > Barks (Off/Low/Normal).
+// W21: old-save load gear toast suppressed, map 'letters' legend, codex "new" dots (story flags codexRead_<id>), Linnet's ambient barks + gating, Options > Barks (Off/Low/Normal).
 // node tests/w21.mjs (after npm run build).
 // SHOTS=dir also saves Pixel 7 + 1280x720 screenshots there. KI_PORT to change port.
 import { createRequire } from "node:module";
@@ -127,6 +127,21 @@ try {
     await page.reload(); await page.waitForTimeout(500);
     ok(`${vn}: Off survives a reload`, (await E(() => [window.__ki.game.barkFreq, localStorage.getItem("kiquest-opt-barks")])).join() === "0,0");
     await E(() => { localStorage.setItem("kiquest-opt-barks", "2"); });
+    // 5. Old-save load: earned-but-missing gear (Stillwater Charm, c7) is backfilled silently; a real pickup still toasts
+    { const W19 = { introSeen: true, oath: true, metMirela: true, linnetWoke: true, lettersQ: true, lettersN: 4, lettersRead: true, lettersDone: true, ashmawDown: true, hollowmereDown: true, hollowmereBeat: true, reedQ: true, area: "hushwater", visited_hushwater: true };
+      const slot = JSON.stringify({ v: 2, at: 1, area: "Hushwater", areaId: "hushwater", play: 0, gear: { h: "h0", a: "a0", w: "w0", f: "f0", c: "c0" }, gv: 2, have: ["h0", "a0", "w0", "f0", "c0"], coins: 0, items: {}, x: 40, y: 40, lvl: 1, exp: 37, pts: 0, str: 3, pow: 3, end: 3, hp: 84, ep: 52, tf: 0, mirela: false, brann: false, story: W19, bosses: {} });
+      for (const how of ["play", "pause"]) {
+        await boot({ introSeen: true }, { "kiquest-slot1-v1": slot });
+        const r = await E((how) => { const g = window.__ki.game; g.mode = how; g.toast = ""; g.toastT = 0; const said = []; const o = g.say.bind(g); g.say = (t, d) => { said.push(t); o(t, d); };
+          const ok = window.__kiMenu.loadSlot(g, 0); for (let i = 0; i < 120; i++) { g.p.inv = 1; g.step(1 / 60); } g.say = o; return { ok, said, toast: g.toastT > 0 ? g.toast : "", c7: g.have.includes("c7"), c2: g.have.includes("c2") }; }, how);
+        ok(`${vn}: old save loads (from ${how})`, r.ok);
+        ok(`${vn}: old-save load backfills Stillwater Charm (from ${how})`, r.c7 && r.c2, JSON.stringify(r));
+        ok(`${vn}: no "New gear" toast on old-save load (from ${how})`, !r.said.some((t) => t.startsWith("New gear")), r.said.join(" | "));
+      }
+      const pick = await E(() => { const g = window.__ki.game, s = window.__ki.story; g.mode = "play"; g.have = g.have.filter((x) => x !== "c7"); s.flags.hollowmereDown = true; const said = []; const o = g.say.bind(g); g.say = (t, d) => { said.push(t); o(t, d); };
+        g.syncGear(); g.say = o; return said; });
+      ok(`${vn}: real pickup still toasts "New gear: Stillwater Charm"`, pick.includes("New gear: Stillwater Charm"), pick.join(" | "));
+    }
     ok(`${vn}: no page errors`, errs.length === 0, errs.slice(0, 3).join(" | "));
     await ctx.close();
   }
