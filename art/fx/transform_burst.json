@@ -1,0 +1,75 @@
+{
+ "name": "transform_burst",
+ "palette": "gloom-glow",
+ "frame": [
+  48,
+  48
+ ],
+ "count": 8,
+ "fps": 12,
+ "loop": true,
+ "pivot": [
+  24,
+  47
+ ],
+ "note": "anchor bottom centre at the feet; draw behind the character, loop frames 4-7",
+ "blend": "normal (glow is drawn as hard pixels; no additive needed)",
+ "frames": [
+  {
+   "i": 0,
+   "x": 0,
+   "y": 0,
+   "w": 48,
+   "h": 48
+  },
+  {
+   "i": 1,
+   "x": 48,
+   "y": 0,
+   "w": 48,
+   "h": 48
+  },
+  {
+   "i": 2,
+   "x": 96,
+   "y": 0,
+   "w": 48,
+   "h": 48
+  },
+  {
+   "i": 3,
+   "x": 144,
+   "y": 0,
+   "w": 48,
+   "h": 48
+  },
+  {
+   "i": 4,
+   "x": 192,
+   "y": 0,
+   "w": 48,
+   "h": 48
+  },
+  {
+   "i": 5,
+   "x": 240,
+   "y": 0,
+   "w": 48,
+   "h": 48
+  },
+  {
+   "i": 6,
+   "x": 288,
+   "y": 0,
+   "w": 48,
+   "h": 48
+  },
+  {
+   "i": 7,
+   "x": 336,
+   "y": 0,
+   "w": 48,
+   "h": 48
+  }
+ ]
+}
