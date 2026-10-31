@@ -1,0 +1,61 @@
+{
+ "name": "flight_takeoff_dust",
+ "palette": "gloom-glow",
+ "frame": [
+  32,
+  16
+ ],
+ "count": 6,
+ "fps": 14,
+ "loop": false,
+ "pivot": [
+  16,
+  15
+ ],
+ "note": "anchor bottom centre at the feet (12,31)",
+ "blend": "normal (glow is drawn as hard pixels; no additive needed)",
+ "frames": [
+  {
+   "i": 0,
+   "x": 0,
+   "y": 0,
+   "w": 32,
+   "h": 16
+  },
+  {
+   "i": 1,
+   "x": 32,
+   "y": 0,
+   "w": 32,
+   "h": 16
+  },
+  {
+   "i": 2,
+   "x": 64,
+   "y": 0,
+   "w": 32,
+   "h": 16
+  },
+  {
+   "i": 3,
+   "x": 96,
+   "y": 0,
+   "w": 32,
+   "h": 16
+  },
+  {
+   "i": 4,
+   "x": 128,
+   "y": 0,
+   "w": 32,
+   "h": 16
+  },
+  {
+   "i": 5,
+   "x": 160,
+   "y": 0,
+   "w": 32,
+   "h": 16
+  }
+ ]
+}

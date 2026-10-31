@@ -1,0 +1,436 @@
+{
+ "name": "bog_sprout",
+ "role": "lurker",
+ "palette": "gloom-glow",
+ "frame": [
+  24,
+  32
+ ],
+ "pivot": [
+  12,
+  31
+ ],
+ "facings": [
+  "down",
+  "up",
+  "left",
+  "right"
+ ],
+ "anims": {
+  "stand": {
+   "count": 1
+  },
+  "walk": {
+   "count": 4
+  },
+  "attack": {
+   "count": 3
+  },
+  "hurt": {
+   "count": 2
+  }
+ },
+ "layout": "row = anim x facing (anim order as listed, facings down,up,left,right), col = frame index; right = explicit rows, left part map mirrored then re-shaded (light stays top-left)",
+ "frames": [
+  {
+   "name": "bog_sprout_stand_down_0",
+   "anim": "stand",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 0,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_stand_up_0",
+   "anim": "stand",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 32,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_stand_left_0",
+   "anim": "stand",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 64,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_stand_right_0",
+   "anim": "stand",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 96,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_down_0",
+   "anim": "walk",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 128,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_down_1",
+   "anim": "walk",
+   "facing": "down",
+   "i": 1,
+   "x": 24,
+   "y": 128,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_down_2",
+   "anim": "walk",
+   "facing": "down",
+   "i": 2,
+   "x": 48,
+   "y": 128,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_down_3",
+   "anim": "walk",
+   "facing": "down",
+   "i": 3,
+   "x": 72,
+   "y": 128,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_up_0",
+   "anim": "walk",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 160,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_up_1",
+   "anim": "walk",
+   "facing": "up",
+   "i": 1,
+   "x": 24,
+   "y": 160,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_up_2",
+   "anim": "walk",
+   "facing": "up",
+   "i": 2,
+   "x": 48,
+   "y": 160,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_up_3",
+   "anim": "walk",
+   "facing": "up",
+   "i": 3,
+   "x": 72,
+   "y": 160,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_left_0",
+   "anim": "walk",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 192,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_left_1",
+   "anim": "walk",
+   "facing": "left",
+   "i": 1,
+   "x": 24,
+   "y": 192,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_left_2",
+   "anim": "walk",
+   "facing": "left",
+   "i": 2,
+   "x": 48,
+   "y": 192,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_left_3",
+   "anim": "walk",
+   "facing": "left",
+   "i": 3,
+   "x": 72,
+   "y": 192,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_right_0",
+   "anim": "walk",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 224,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_right_1",
+   "anim": "walk",
+   "facing": "right",
+   "i": 1,
+   "x": 24,
+   "y": 224,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_right_2",
+   "anim": "walk",
+   "facing": "right",
+   "i": 2,
+   "x": 48,
+   "y": 224,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_walk_right_3",
+   "anim": "walk",
+   "facing": "right",
+   "i": 3,
+   "x": 72,
+   "y": 224,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_down_0",
+   "anim": "attack",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 256,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_down_1",
+   "anim": "attack",
+   "facing": "down",
+   "i": 1,
+   "x": 24,
+   "y": 256,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_down_2",
+   "anim": "attack",
+   "facing": "down",
+   "i": 2,
+   "x": 48,
+   "y": 256,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_up_0",
+   "anim": "attack",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 288,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_up_1",
+   "anim": "attack",
+   "facing": "up",
+   "i": 1,
+   "x": 24,
+   "y": 288,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_up_2",
+   "anim": "attack",
+   "facing": "up",
+   "i": 2,
+   "x": 48,
+   "y": 288,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_left_0",
+   "anim": "attack",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 320,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_left_1",
+   "anim": "attack",
+   "facing": "left",
+   "i": 1,
+   "x": 24,
+   "y": 320,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_left_2",
+   "anim": "attack",
+   "facing": "left",
+   "i": 2,
+   "x": 48,
+   "y": 320,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_right_0",
+   "anim": "attack",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 352,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_right_1",
+   "anim": "attack",
+   "facing": "right",
+   "i": 1,
+   "x": 24,
+   "y": 352,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_attack_right_2",
+   "anim": "attack",
+   "facing": "right",
+   "i": 2,
+   "x": 48,
+   "y": 352,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_hurt_down_0",
+   "anim": "hurt",
+   "facing": "down",
+   "i": 0,
+   "x": 0,
+   "y": 384,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_hurt_down_1",
+   "anim": "hurt",
+   "facing": "down",
+   "i": 1,
+   "x": 24,
+   "y": 384,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_hurt_up_0",
+   "anim": "hurt",
+   "facing": "up",
+   "i": 0,
+   "x": 0,
+   "y": 416,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_hurt_up_1",
+   "anim": "hurt",
+   "facing": "up",
+   "i": 1,
+   "x": 24,
+   "y": 416,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_hurt_left_0",
+   "anim": "hurt",
+   "facing": "left",
+   "i": 0,
+   "x": 0,
+   "y": 448,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_hurt_left_1",
+   "anim": "hurt",
+   "facing": "left",
+   "i": 1,
+   "x": 24,
+   "y": 448,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_hurt_right_0",
+   "anim": "hurt",
+   "facing": "right",
+   "i": 0,
+   "x": 0,
+   "y": 480,
+   "w": 24,
+   "h": 32
+  },
+  {
+   "name": "bog_sprout_hurt_right_1",
+   "anim": "hurt",
+   "facing": "right",
+   "i": 1,
+   "x": 24,
+   "y": 480,
+   "w": 24,
+   "h": 32
+  }
+ ]
+}
