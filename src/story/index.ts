@@ -8,7 +8,7 @@ import type { Game } from "../game";
 import type { Input } from "../input";
 import { buildArea, setWardOpen, zoneAt, TILE } from "../world";
 import { INTRO, NPCS, Flags, LETTERS, LETTER_QUIPS, LINNET_LOCKET, MIRELA_REREAD } from "./script";
-import { ambientBark, linnetBark, backfillVisited, CODEX, codexUnlocked } from "./ambient"; // W20
+import { ambientBark, linnetBark, linnetExtraBark, backfillVisited, CODEX, codexUnlocked } from "./ambient"; // W20, W22
 import { sfx } from "../menu";
 import { hud as hudText } from "../textfit";
 import { CH_INTERACT, K_RING, K_SPARK, C_GOLD, C_WHITE } from "../vendor/particles";
@@ -274,13 +274,19 @@ export class Story {
       if (!npc) return false;
       who = NPCS[g.area.id]?.[npc]?.name ?? "";
     }
-    const prev = (F.lastBark as string) || "";
-    const one = () => (npc === "l" ? (g.area.id === "lanternmoss" ? linnetBark(F, g.time, this.rnd, prev) : undefined) : ambientBark(g.area.id, F, g.time, this.rnd));
-    let text = one(); if (text && npc !== "l" && text.slice(0, 80) === prev) text = one() ?? text; // W21 fun pass: a second draw so the same line rarely plays twice running
+    const key = `lastBark_${g.area.id}_${npc || "hero"}`; // W22 (a): last bark per NPC (story flags, so it survives a reload)
+    const prev = npc === "l" ? (F.lastBark as string) || "" : (F[key] as string) || "";
+    const text = npc === "l" ? (g.area.id === "lanternmoss" ? linnetExtraBark(F, this.rnd) ?? linnetBark(F, g.time, this.rnd, prev) : undefined) : ambientBark(g.area.id, F, g.time, this.rnd, prev); // W22: prev is excluded from the pool, not redrawn
     if (!text) return false;
     bark.text = text; bark.who = who; bark.npc = npc; bark.t = 4.5;
-    F.barksHeard = ((F.barksHeard as number) || 0) + 1; F.lastBark = text.slice(0, 80); this.save();
+    F.barksHeard = ((F.barksHeard as number) || 0) + 1; F.lastBark = text.slice(0, 80); F[key] = text.slice(0, 80); this.save();
     return true;
+  }
+  /** W22 (f): a sample line for Options > Barks (no save, no lastBark change). */
+  sampleBark(): { who: string; text: string } {
+    const g = this.g, n = g.area.npcs.find((x) => x.id !== "l"), who = n ? NPCS[g.area.id]?.[n.id]?.name ?? "" : "";
+    const text = ambientBark(g.area.id, this.flags, g.time, this.rnd) ?? ambientBark("wickhaven", this.flags, g.time, this.rnd) ?? "";
+    return { who, text };
   }
   /** After the sim stepped: talk if the melee press happened next to an NPC. */
   after() {

@@ -55,6 +55,14 @@ const SLOT_ACTS = ["Save here", "Load", "Export code", "Cancel"];
 
 export function openMenu() { ui.tab = 0; ui.sel = 0; ui.sub = ""; sfx("ui-open"); }
 function note(s: string) { ui.msg = s; ui.msgT = 2.5; }
+/** W22 (f): sample bark shown under Options when the Barks setting changes (Off shows a quiet note instead). */
+export const codexLabel = { text: "" }; // W22 test hook
+export const preview = { who: "", text: "", t: 0 };
+function barkPreview(g: Game) {
+  const st = ki().story as unknown as { sampleBark?(): { who: string; text: string } } | undefined;
+  const s = g.barkFreq > 0 && st?.sampleBark ? st.sampleBark() : { who: "", text: "(No barks. NPCs stay quiet.)" };
+  preview.who = s.who; preview.text = s.text || "(No sample here.)"; preview.t = 3.5; sfx("ui-confirm");
+}
 
 function rowCount(g: Game) {
   switch (TABS[ui.tab]) {
@@ -117,7 +125,7 @@ export function confirm(g: Game) {
     else if (ui.sel === 2) note(`Resolution: ${cycleRes()}`); // W17l, per device (localStorage)
     else if (ui.sel === 3) dispatchEvent(new Event("kq-quit")); // W17l: main.ts autosaves + shows the title
     else if (ui.sel === 5) { g.flashLow = !g.flashLow; try { localStorage.setItem("kiquest-opt-lowflash", g.flashLow ? "1" : "0"); } catch { /* */ } note(g.flashLow ? "Reduced flash on" : "Reduced flash off"); } // W20
-    else if (ui.sel === 6) { g.barkFreq = (g.barkFreq + 2) % 3; try { localStorage.setItem("kiquest-opt-barks", String(g.barkFreq)); } catch { /* */ } note(`Barks: ${BARK_NAMES[g.barkFreq]}`); } // W21: Normal -> Low -> Off -> Normal
+    else if (ui.sel === 6) { g.barkFreq = (g.barkFreq + 2) % 3; try { localStorage.setItem("kiquest-opt-barks", String(g.barkFreq)); } catch { /* */ } note(`Barks: ${BARK_NAMES[g.barkFreq]}`); barkPreview(g); } // W21: Normal -> Low -> Off -> Normal; W22: sample bark
     else g.mode = "play";
   } else if (tab === "Save") {
     if (!ui.sub) { sfx("ui-confirm"); if (ui.sel === SLOT_COUNT) openCode(g, "import"); else { ui.sub = "slot"; ui.subSel = 0; } return; }
@@ -322,7 +330,9 @@ export function drawMenu(c: CanvasRenderingContext2D, g: Game) {
       c.textAlign = "left"; c.font = "7px monospace"; c.fillStyle = "#8a84a0"; c.fillText(`Codex ${CX.length}/${CODEX.length}`, R.x, R.y + 10 * 13 + 4);
     } else {
       L.forEach((b, i) => row(c, R.x, R.y + i * 13, 110, ui.sel === i, b.name));
-      row(c, R.x, R.y + L.length * 13, 110, ui.sel === L.length, `Codex ${CX.length}/${CODEX.length}`);
+      const F2 = (ki().story?.flags ?? {}) as Flags, nNew = CX.filter((x) => !F2[`codexRead_${x.id}`]).length; c.font = "7px monospace"; // W22 (d): "n new"
+      const full = `Codex ${CX.length}/${CODEX.length} · ${nNew} new`, lab = !nNew ? `Codex ${CX.length}/${CODEX.length}` : c.measureText(full).width <= 104 ? full : `Codex ${nNew} new`;
+      row(c, R.x, R.y + L.length * 13, 110, ui.sel === L.length, lab); codexLabel.text = lab;
       const b = L[ui.sel];
       if (b) side(c, [b.name, b.tag, "", ...b.text], "#cfe8ff", 140);
       else side(c, ["Codex", "Things the Lens remembers.", "", "Choose to read. New pages", "unlock as you travel."], "#ffd76a", 140);
@@ -338,6 +348,9 @@ export function drawMenu(c: CanvasRenderingContext2D, g: Game) {
     row(c, R.x, R.y + 4 * R.h, R.w, ui.sel === 4, "Resume");
     row(c, R.x, R.y + 5 * R.h, R.w, ui.sel === 5, "Reduced flash", g.flashLow ? "On" : "Off"); // W20
     row(c, R.x, R.y + 6 * R.h, R.w, ui.sel === 6, "Barks", BARK_NAMES[g.barkFreq]); // W21
+    if (preview.t > 0) { preview.t -= 1 / 60; c.font = "7px monospace"; // W22 (f): sample bark, wrapped to the side panel (textfit)
+      const L = [preview.who ? `${preview.who}:` : "Sample bark:", ...fitWrap(c, `“${preview.text}”`, W - (ROWS.x + ROWS.w + 14) - 6)].slice(0, 6);
+      side(c, ["Bark sample", ...L], "#ffd76a"); } else
     side(c, ["Controls", "Move  WASD / stick", "Melee J · A   Blast K · B", "Block Shift · RB  Tech Q · LB", "Power T/L · Y   Map M · Back", "Pause Esc · Start  Mute N"], "#cfe8ff");
   } else if (tab === "Save") {
     for (let i = 0; i < SLOT_COUNT; i++) {
@@ -378,4 +391,4 @@ function compare(c: CanvasRenderingContext2D, g: Game, it: Gear, cur: Gear, x: n
   void g;
 }
 // Test hook (read-only use in tests/menus.mjs).
-if (typeof window !== "undefined") (window as unknown as { __kiMenu: unknown }).__kiMenu = { ui, TABS, shopRows, KEEPERS, exportCode, importCode, readSlot, saveToSlot, loadSlot, menuTap, codeOpen, closeCode };
+if (typeof window !== "undefined") (window as unknown as { __kiMenu: unknown }).__kiMenu = { ui, TABS, shopRows, KEEPERS, exportCode, importCode, readSlot, saveToSlot, loadSlot, menuTap, codeOpen, closeCode, preview, codexLabel };

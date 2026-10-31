@@ -285,11 +285,12 @@ export const AMBIENT: Record<string, BarkPool> = {
 };
 
 /** Pick one ambient line: time pool (dark before dawn; day/night after), with a 1-in-3 chance of an active weather line. */
-export function ambientBark(area: string, f: Flags, t: number, rnd: () => number = Math.random): string | undefined {
+/** W22: `avoid` = this NPC's last bark (first 80 chars); it is removed from the pool before the pick whenever another line is left. */
+export function ambientBark(area: string, f: Flags, t: number, rnd: () => number = Math.random, avoid = ""): string | undefined {
   const p = AMBIENT[area]; if (!p) return undefined;
-  const pick = <T,>(xs: T[]): T => xs[Math.floor(rnd() * xs.length)];
+  const pick = (xs: string[]): string => { const ys = avoid && xs.length > 1 ? xs.filter((x) => x.slice(0, 80) !== avoid) : xs; const zs = ys.length ? ys : xs; return zs[Math.floor(rnd() * zs.length)]; };
   const w = p.weather.filter((x) => x.when(f));
-  if (w.length && rnd() < 1 / 3) return pick(pick(w).lines);
+  if (w.length && rnd() < 1 / 3) return pick(w[Math.floor(rnd() * w.length)].lines);
   return pick(!f.dawn ? p.dark : dayK(t) > 0.35 ? p.day : p.night);
 }
 
@@ -381,4 +382,19 @@ export function linnetBark(f: Flags, t: number, rnd: () => number = Math.random,
   return M.length ? M[Math.floor(rnd() * M.length)] : undefined;
 }
 
-(globalThis as unknown as { __kiAmbient?: unknown }).__kiAmbient = { AMBIENT, CODEX, visitedAreas, codexUnlocked, backfillVisited, LINNET_BARKS, linnetBark }; // W20/W21 test hook
+/** Source text for LINNET_BARKS: docs/story/linnet_w21.md (copied from staging/story/linnet_w21.md, W22).
+ *  W22 (e): Linnet's first-hello and sleepy "zzz" barks. NO Story-written lines exist yet (searched staging/story/ 2026-10-30),
+ *  so these are placeholder KEYS, not text, and the hooks stay off until Story supplies lines and this flag is turned on. */
+export const LINNET_EXTRA_BARKS = false;
+export const LINNET_EXTRA: Record<"hello" | "zzz", string[]> = { hello: [], zzz: [] }; // keys: story.linnet.hello, story.linnet.zzz (Story to fill)
+/** hello: first bark after she wakes (once, flag linnetHelloBark). zzz: while she still sleeps (oath && !linnetWoke). Off -> undefined. */
+export function linnetExtraBark(f: Flags, rnd: () => number = Math.random): string | undefined {
+  if (!LINNET_EXTRA_BARKS || f.dawn) return undefined;
+  const k = f.linnetWoke ? (f.linnetHelloBark ? "" : "hello") : f.oath ? "zzz" : "";
+  const xs = k ? LINNET_EXTRA[k as "hello" | "zzz"] : [];
+  if (!xs.length) return undefined;
+  if (k === "hello") f.linnetHelloBark = true;
+  return xs[Math.floor(rnd() * xs.length)];
+}
+
+(globalThis as unknown as { __kiAmbient?: unknown }).__kiAmbient = { AMBIENT, CODEX, visitedAreas, codexUnlocked, backfillVisited, LINNET_BARKS, linnetBark, LINNET_EXTRA_BARKS, LINNET_EXTRA, linnetExtraBark }; // W20-W22 test hook // W20/W21 test hook

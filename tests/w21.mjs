@@ -45,7 +45,7 @@ try {
     await go("hushwater");
     await page.keyboard.press("KeyM"); await page.waitForTimeout(250);
     let mp = await E(() => ({ mode: window.__ki.game.mode, lg: window.__kiText.hud.mapLegend, n: window.__kiText.hud.mapLetters }));
-    ok(`${vn}: map legend reads 'letters' beside the gold dots`, mp.mode === "map" && mp.lg === "letters" && mp.n === "Letters 2/4", JSON.stringify(mp));
+    ok(`${vn}: map legend reads 'gold: letters' (W22 key text) beside the gold dots`, mp.mode === "map" && mp.lg === "gold: letters" && mp.n === "Letters 2/4", JSON.stringify(mp));
     await shot("map-legend");
     await page.keyboard.press("KeyM"); await page.waitForTimeout(200);
     await E(() => { const f = window.__ki.story.flags; f.letter_1 = f.letter_2 = f.letter_3 = f.letter_4 = true; f.lettersN = 4; });

@@ -1,4 +1,12 @@
 # Changelog
+## W22 — 2026-10-30 (executor) — on branch w22 (W21 LIVE; W22 NOT on main, NOT LIVE)
+- (a) Bark no-repeat: each non-Linnet NPC's last bark is stored in story flags `lastBark_<area>_<npc>` and removed from the pool before the pick (ambientBark `avoid`), replacing W21's single redraw. 300-bark test: 0 back-to-back repeats.
+- (b) Story source copied to docs/story/linnet_w21.md (original left in staging); referenced from src/story/ambient.ts.
+- (c) Map key text is now "gold: letters".
+- (d) Lens row reads "Codex n/m · k new" (falls back to "Codex k new" if it would not fit; plain "Codex n/m" when nothing is new).
+- (e) Linnet first-hello and sleepy "zzz" barks: NO Story lines exist (searched staging/story/ and other KQ story files). Hooks only: LINNET_EXTRA_BARKS = false, empty LINNET_EXTRA.hello / .zzz (keys story.linnet.hello / story.linnet.zzz), linnetExtraBark(). Needs Story lines before turning on.
+- (f) Options > Barks: changing the setting shows a sample bark (speaker + wrapped line) in the side panel for 3.5 s; Off shows "(No barks. NPCs stay quiet.)". The preview isn't counted as a heard bark and doesn't change lastBark.
+- No combat, enemy, balance, controls or palette changes. tests/w22.mjs (port 4522) 36/36; full suite 704/704 across 33 files (meadow fps 53.0 @4x); tests/w21.mjs legend check updated to 'gold: letters'. Shots: /workspace/qa-reports/kq-w22-shots/.
 ## W21 LIVE — 2026-10-30 ~10:40 PM ET (executor)
 - main fast-forwarded eee2a01 -> afd8dcf (GD OK 10:33 PM ET after EB Rule 19, qa-reports/kq-w21-afd8dcf-20261030.md). Published with tools/publish-game.sh kq: gh-pages ce405aa (W20) -> 84d71fb, bundle assets/index--ptYRbay.js (was index-CDia8cvN.js). Live HTTP 200. Secret scan clean (gitleaks git+dir, extra_secret_patterns).
 - REAL rollback: `git push --force origin rollback-w20^{commit}:refs/heads/gh-pages` (tag rollback-w20 = ce405aa; gh-pages-prev = ce405aa). Ignore the rollback line publish-game.sh prints.
