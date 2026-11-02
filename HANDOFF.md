@@ -1,6 +1,7 @@
 # HANDOFF: Kindle Quest (team build, updated 2026-10-26)
 ## RESUME HERE — KINDLE QUEST PAUSED per Will (Oct 30, 2026, 10:47 PM ET)
 - Hearthmoor is the only active game. No new KQ work starts until Game Director says so.
+- Music (Music Bot, 2026-10-30): the six KQ boss theme masters (ashmaw, count-aurel, hollowmere, slagheart, stair, warden-rune) are ready in /workspace/music/themes/kindle-quest/master/ and stay unwired until KQ resumes.
 - LIVE: W21. main afd8dcf (+ docs commits), gh-pages 84d71fb, bundle assets/index--ptYRbay.js.
 - Real rollback (to W20): `git push --force origin rollback-w20^{commit}:refs/heads/gh-pages` (tag rollback-w20 = ce405aa; gh-pages-prev = ce405aa). Ignore the rollback line publish-game.sh prints.
 - W22: ON HOLD (GD-approved, not started on main). Scope:
