@@ -397,4 +397,4 @@ export function linnetExtraBark(f: Flags, rnd: () => number = Math.random): stri
   return xs[Math.floor(rnd() * xs.length)];
 }
 
-(globalThis as unknown as { __kiAmbient?: unknown }).__kiAmbient = { AMBIENT, CODEX, visitedAreas, codexUnlocked, backfillVisited, LINNET_BARKS, linnetBark, LINNET_EXTRA_BARKS, LINNET_EXTRA, linnetExtraBark }; // W20-W22 test hook // W20/W21 test hook
+(globalThis as unknown as { __kiAmbient?: unknown }).__kiAmbient = { AMBIENT, CODEX, visitedAreas, codexUnlocked, backfillVisited, LINNET_BARKS, linnetBark, LINNET_EXTRA_BARKS, LINNET_EXTRA, linnetExtraBark }; // W20-W22 test hook

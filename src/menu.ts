@@ -57,11 +57,18 @@ export function openMenu() { ui.tab = 0; ui.sel = 0; ui.sub = ""; sfx("ui-open")
 function note(s: string) { ui.msg = s; ui.msgT = 2.5; }
 /** W22 (f): sample bark shown under Options when the Barks setting changes (Off shows a quiet note instead). */
 export const codexLabel = { text: "" }; // W22 test hook
-export const preview = { who: "", text: "", t: 0 };
+const PREVIEW_MS = 3500;
+/** `t` is seconds left. It is derived from `until` (performance.now()) so a 120 Hz display does not burn the preview in half the time. */
+export const preview = {
+  who: "",
+  text: "",
+  until: 0,
+  get t(): number { return Math.max(0, (this.until - performance.now()) / 1000); },
+};
 function barkPreview(g: Game) {
   const st = ki().story as unknown as { sampleBark?(): { who: string; text: string } } | undefined;
   const s = g.barkFreq > 0 && st?.sampleBark ? st.sampleBark() : { who: "", text: "(No barks. NPCs stay quiet.)" };
-  preview.who = s.who; preview.text = s.text || "(No sample here.)"; preview.t = 3.5; sfx("ui-confirm");
+  preview.who = s.who; preview.text = s.text || "(No sample here.)"; preview.until = performance.now() + PREVIEW_MS; sfx("ui-confirm");
 }
 
 function rowCount(g: Game) {
@@ -348,7 +355,7 @@ export function drawMenu(c: CanvasRenderingContext2D, g: Game) {
     row(c, R.x, R.y + 4 * R.h, R.w, ui.sel === 4, "Resume");
     row(c, R.x, R.y + 5 * R.h, R.w, ui.sel === 5, "Reduced flash", g.flashLow ? "On" : "Off"); // W20
     row(c, R.x, R.y + 6 * R.h, R.w, ui.sel === 6, "Barks", BARK_NAMES[g.barkFreq]); // W21
-    if (preview.t > 0) { preview.t -= 1 / 60; c.font = "7px monospace"; // W22 (f): sample bark, wrapped to the side panel (textfit)
+    if (preview.t > 0) { c.font = "7px monospace"; // W22 (f): sample bark, wrapped to the side panel (textfit). Timer is preview.until, not frames.
       const L = [preview.who ? `${preview.who}:` : "Sample bark:", ...fitWrap(c, `“${preview.text}”`, W - (ROWS.x + ROWS.w + 14) - 6)].slice(0, 6);
       side(c, ["Bark sample", ...L], "#ffd76a"); } else
     side(c, ["Controls", "Move  WASD / stick", "Melee J · A   Blast K · B", "Block Shift · RB  Tech Q · LB", "Power T/L · Y   Map M · Back", "Pause Esc · Start  Mute N"], "#cfe8ff");
